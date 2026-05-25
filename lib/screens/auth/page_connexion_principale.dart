@@ -1,4 +1,4 @@
-﻿import 'dart:ui'; // Obligatoire pour le flou (ImageFilter)
+﻿import 'dart:ui';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -84,21 +84,43 @@ class _PageConnexionPrincipaleState extends State<PageConnexionPrincipale> {
     }
   }
 
+  static const _webRedirectUrl = 'https://formelpro-app.vercel.app';
+  static const _mobileRedirectUrl = 'formelpro://login-callback/';
+
   Future<void> _signInWithGoogle() async {
     setState(() {
       _isLoadingGoogle = true;
       _errorMessage = null;
     });
+
+    const redirectTo = kIsWeb ? _webRedirectUrl : _mobileRedirectUrl;
+    debugPrint('[OAuth] Démarrage — plateforme: ${kIsWeb ? "web" : "mobile"} — redirect: $redirectTo');
+
     try {
       await supabase.auth.signInWithOAuth(
         OAuthProvider.google,
-        redirectTo: kIsWeb ? null : 'formelpro://login-callback/',
-        authScreenLaunchMode: LaunchMode.externalApplication,
+        redirectTo: redirectTo,
+        // Web : navigation dans l'onglet courant (platformDefault)
+        // Mobile : navigateur externe (externalApplication)
+        authScreenLaunchMode: kIsWeb
+            ? LaunchMode.platformDefault
+            : LaunchMode.externalApplication,
       );
-      // AuthGate gère la navigation via onAuthStateChange
+      debugPrint('[OAuth] OAuth initié avec succès');
+      // Sur web : le navigateur redirige — AuthGate reprend via onAuthStateChange
+      // Sur mobile : le deep link revient ici — même mécanisme
+    } on AuthException catch (e) {
+      debugPrint('[OAuth] AuthException: ${e.message}');
+      if (mounted) {
+        setState(() => _errorMessage = _translateError(e.message));
+      }
     } catch (e) {
-      if (mounted) setState(() => _errorMessage = 'Connexion Google impossible.');
+      debugPrint('[OAuth] Erreur inattendue: $e');
+      if (mounted) {
+        setState(() => _errorMessage = 'Connexion Google impossible. Vérifiez votre connexion.');
+      }
     } finally {
+      // Sur web le finally s'exécute avant la redirection — ne pas logguer comme erreur
       if (mounted) setState(() => _isLoadingGoogle = false);
     }
   }
