@@ -44,6 +44,18 @@ class ChoixProfilPage extends StatelessWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
+                        Image.asset(
+                          'assets/images/logo.png',
+                          width: 60,
+                          height: 60,
+                          fit: BoxFit.contain,
+                          errorBuilder: (_, __, ___) => const Icon(
+                            Icons.handyman_rounded,
+                            size: 60,
+                            color: Color(0xFFE67E22),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
                         Text(
                           "FormelPro",
                           style: GoogleFonts.poppins(

@@ -307,4 +307,4 @@ Lancement app
 
 ---
 
-*Dernière mise à jour : 2026-05-25 — Session 6 : withOpacity→withValues (130 fichiers), mission_detail_page bugs corrigés (statut 'accepte', isAlreadyTaken, limite 3 missions, dialog vérification), triggers SQL §15 notifications docs*
+*Dernière mise à jour : 2026-05-25 — Session 7 : Stabilisation visuelle/UX — logo AppBar + ChoixProfil + LoadingState, suppression code mort OngletAccueil (-180 lignes), bouton notification vide supprimé, état vide amélioré, flutter analyze 0 issues (était 14), seed SQL 10 techniciens demo créé (docs/seeds/techniciens_demo.sql)*

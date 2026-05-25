@@ -76,10 +76,10 @@ class _DemandesTabState extends State<DemandesTab> {
                             color: Colors.white.withValues(alpha: 0.9),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: Text(
+                          child: const Text(
                             "Erreur de connexion aux données",
                             textAlign: TextAlign.center,
-                            style: const TextStyle(color: Colors.redAccent, fontSize: 13),
+                            style: TextStyle(color: Colors.redAccent, fontSize: 13),
                           ),
                         ),
                       );
@@ -121,7 +121,7 @@ class _DemandesTabState extends State<DemandesTab> {
               color: Colors.white.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.assignment_late_outlined, size: 80, color: Colors.white30),
+            child: const Icon(Icons.assignment_late_outlined, size: 80, color: Colors.white30),
           ),
           const SizedBox(height: 24),
           Text(

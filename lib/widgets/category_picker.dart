@@ -30,7 +30,7 @@ class _CategoryPickerState extends State<CategoryPicker> {
     return Column(
       children: [
         DropdownButtonFormField<String>(
-          value: _selectedCategory,
+          initialValue: _selectedCategory,
           decoration: InputDecoration(
             labelText: 'Métier principal',
             prefixIcon: const Icon(Icons.work_outline),

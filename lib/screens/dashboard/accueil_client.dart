@@ -248,43 +248,35 @@ class _AccueilClientState extends State<AccueilClient>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              "Bonjour $userDisplayName",
-                              style: GoogleFonts.inter(
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                  shadows: _textShadows),
-                            ),
-                            const SizedBox(width: 8),
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(4),
-                              child: Image.asset(flagPath,
-                                  width: 24, height: 16, fit: BoxFit.cover),
-                            ),
-                          ],
-                        ),
-                        Text(
-                          "Besoin d'un pro ?",
-                          style: GoogleFonts.poppins(
-                            fontSize: 26,
-                            fontWeight: FontWeight.bold,
+                  Row(
+                    children: [
+                      Text(
+                        "Bonjour $userDisplayName",
+                        style: GoogleFonts.inter(
+                            fontSize: 16,
                             color: Colors.white,
-                            shadows: _textShadows,
-                          ),
-                        ),
-                      ],
+                            shadows: _textShadows),
+                      ),
+                      const SizedBox(width: 8),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: Image.asset(flagPath,
+                            width: 24, height: 16, fit: BoxFit.cover),
+                      ),
+                    ],
+                  ),
+                  Text(
+                    "Besoin d'un pro ?",
+                    style: GoogleFonts.poppins(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      shadows: _textShadows,
                     ),
                   ),
-                  _buildNotificationIcon(),
                 ],
               ),
               const SizedBox(height: 25),
@@ -395,12 +387,35 @@ class _AccueilClientState extends State<AccueilClient>
       return Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 32),
-          child: Text(
-            _filtres.actif
-                ? "Aucun technicien pour ces critères.\nEssayez d'élargir vos filtres."
-                : "Aucun technicien trouvé.",
-            style: GoogleFonts.inter(color: Colors.white70, height: 1.6),
-            textAlign: TextAlign.center,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                _filtres.actif ? Icons.filter_list_off_rounded : Icons.search_off_rounded,
+                size: 48,
+                color: Colors.white24,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                _filtres.actif
+                    ? "Aucun technicien pour ces critères."
+                    : "Aucun technicien disponible.",
+                style: GoogleFonts.poppins(
+                  color: Colors.white70,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              if (_filtres.actif) ...[
+                const SizedBox(height: 6),
+                Text(
+                  "Essayez d'élargir vos filtres.",
+                  style: GoogleFonts.inter(color: Colors.white38, fontSize: 13),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ],
           ),
         ),
       );
@@ -440,21 +455,6 @@ class _AccueilClientState extends State<AccueilClient>
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildNotificationIcon() {
-    return InkWell(
-      onTap: () {},
-      child: Container(
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.2),
-          shape: BoxShape.circle,
-        ),
-        child: const Icon(Icons.notifications_none_rounded,
-            color: Colors.white, size: 26),
-      ),
     );
   }
 

@@ -119,8 +119,8 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void _showAgreementDialog() {
-    final TextEditingController _priceController = TextEditingController();
-    final TextEditingController _detailController = TextEditingController();
+    final TextEditingController priceController = TextEditingController();
+    final TextEditingController detailController = TextEditingController();
 
     showModalBottomSheet(
       context: context,
@@ -145,7 +145,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 Text("Fixer l'intervention", style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 20),
                 TextField(
-                  controller: _priceController,
+                  controller: priceController,
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     labelText: "Prix convenu (FCFA)",
@@ -167,7 +167,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     );
                     if (result != null && mounted) {
                       setModalState(() {
-                        _detailController.text = "${result.latitude.toStringAsFixed(4)}, ${result.longitude.toStringAsFixed(4)}";
+                        detailController.text = "${result.latitude.toStringAsFixed(4)}, ${result.longitude.toStringAsFixed(4)}";
                       });
                     }
                   },
@@ -183,12 +183,12 @@ class _ChatScreenState extends State<ChatScreen> {
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
-                            _detailController.text.isEmpty 
+                            detailController.text.isEmpty 
                                 ? "Pointer le lieu sur la carte" 
-                                : "Lieu : ${_detailController.text}",
+                                : "Lieu : ${detailController.text}",
                             style: GoogleFonts.inter(
                               fontSize: 13, 
-                              color: _detailController.text.isEmpty ? Colors.grey[600] : Colors.black87
+                              color: detailController.text.isEmpty ? Colors.grey[600] : Colors.black87
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -202,7 +202,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: () => _sendAgreement(_priceController.text, _detailController.text),
+                    onPressed: () => _sendAgreement(priceController.text, detailController.text),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: widget.accentColor,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

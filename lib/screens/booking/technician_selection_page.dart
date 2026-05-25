@@ -163,11 +163,11 @@ class _TechnicianSelectionPageState extends State<TechnicianSelectionPage> {
 
   void _startConversation(Map<String, dynamic> tech) {
     // Prochaine étape : Logique pour créer la conversation et ouvrir le ChatScreen
-    print("Démarrer chat avec ${tech['id']}");
+    debugPrint("Démarrer chat avec ${tech['id']}");
   }
 
   Widget _buildEmptyState() {
-    return Center(
+    return const Center(
       child: Text("Aucun technicien disponible pour ce métier."),
     );
   }

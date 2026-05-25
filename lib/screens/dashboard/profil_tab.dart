@@ -191,16 +191,15 @@ class _ProfilTabState extends State<ProfilTab> {
                       'metier_personnalise': metierController.text.trim(),
                       'a_complete_profil': true,
                     };
-                    
+                    final navigator = Navigator.of(context);
                     try {
                       await supabase.from('utilisateurs').update(updates).eq('id', _localUserData['id']);
-                      if (mounted) {
-                        setState(() => _localUserData.addAll(updates));
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Profil mis à jour !")));
-                      }
+                      if (!mounted) return;
+                      setState(() => _localUserData.addAll(updates));
+                      navigator.pop();
+                      _showSnackBar("Profil mis à jour !");
                     } catch (e) {
-                      print("Erreur update: $e");
+                      debugPrint("Erreur update: $e");
                     }
                   },
                   style: ElevatedButton.styleFrom(

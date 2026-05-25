@@ -244,7 +244,7 @@ class _AdminSignalementsPageState extends State<AdminSignalementsPage> {
                       onPressed: () => _updateStatut(id, 'ferme'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.white38,
-                        side: BorderSide(color: Colors.white12),
+                        side: const BorderSide(color: Colors.white12),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10)),
                         padding: const EdgeInsets.symmetric(vertical: 10),

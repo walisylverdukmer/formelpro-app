@@ -23,7 +23,7 @@ class CategoriesChips extends StatelessWidget {
     if (n.contains('plomb')) return Icons.water_drop;
     if (n.contains('élec') || n.contains('electr')) return Icons.electric_bolt;
     if (n.contains('maçon') || n.contains('macon') ||
-        n.contains('bâtiment') || n.contains('batiment')) return Icons.foundation;
+        n.contains('bâtiment') || n.contains('batiment')) { return Icons.foundation; }
     if (n.contains('mécan') || n.contains('mecan') || n.contains('auto')) {
       return Icons.settings_suggest;
     }
