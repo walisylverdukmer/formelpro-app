@@ -1,13 +1,15 @@
 {
-    "name": "formelpro",
-    "short_name": "formelpro",
-    "start_url": ".",
+    "name": "FormelPro",
+    "short_name": "FormelPro",
+    "description": "Mise en relation géolocalisée entre clients et techniciens certifiés.",
+    "start_url": "/",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#0F172A",
+    "theme_color": "#E67E22",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
+    "categories": ["business", "productivity", "utilities"],
+    "lang": "fr",
     "icons": [
         {
             "src": "icons/Icon-192.png",
@@ -31,5 +33,7 @@
             "type": "image/png",
             "purpose": "maskable"
         }
-    ]
+    ],
+    "screenshots": [],
+    "shortcuts": []
 }

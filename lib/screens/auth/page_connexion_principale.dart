@@ -1,4 +1,5 @@
 ﻿import 'dart:ui'; // Obligatoire pour le flou (ImageFilter)
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -8,6 +9,7 @@ import 'choix_profil.dart';
 import 'reset_password_page.dart';
 import 'package:formelpro/screens/dashboard/main_dashboard.dart';
 import 'package:formelpro/screens/complete_profil_page.dart';
+import 'package:formelpro/widgets/google_sign_in_button.dart';
 
 final supabase = Supabase.instance.client;
 
@@ -22,6 +24,7 @@ class _PageConnexionPrincipaleState extends State<PageConnexionPrincipale> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
+  bool _isLoadingGoogle = false;
   String? _errorMessage;
 
   // --- Fonction de Connexion ---
@@ -81,6 +84,25 @@ class _PageConnexionPrincipaleState extends State<PageConnexionPrincipale> {
     }
   }
 
+  Future<void> _signInWithGoogle() async {
+    setState(() {
+      _isLoadingGoogle = true;
+      _errorMessage = null;
+    });
+    try {
+      await supabase.auth.signInWithOAuth(
+        OAuthProvider.google,
+        redirectTo: kIsWeb ? null : 'formelpro://login-callback/',
+        authScreenLaunchMode: LaunchMode.externalApplication,
+      );
+      // AuthGate gère la navigation via onAuthStateChange
+    } catch (e) {
+      if (mounted) setState(() => _errorMessage = 'Connexion Google impossible.');
+    } finally {
+      if (mounted) setState(() => _isLoadingGoogle = false);
+    }
+  }
+
   // Utilitaire simple pour traduire les erreurs courantes de Supabase
   String _translateError(String message) {
     if (message.contains("Invalid login credentials")) {
@@ -121,14 +143,24 @@ class _PageConnexionPrincipaleState extends State<PageConnexionPrincipale> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Icon(Icons.handyman_rounded, size: 70, color: Colors.white),
-                    const SizedBox(height: 16),
+                    Image.asset(
+                      'assets/images/logo.png',
+                      width: 90,
+                      height: 90,
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) => const Icon(
+                        Icons.handyman_rounded,
+                        size: 70,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 14),
                     Text(
                       "FORMELPRO",
                       textAlign: TextAlign.center,
                       style: GoogleFonts.poppins(
-                        fontSize: 36, 
-                        fontWeight: FontWeight.w900, 
+                        fontSize: 36,
+                        fontWeight: FontWeight.w900,
                         color: Colors.white,
                         letterSpacing: 2,
                       ),
@@ -221,7 +253,39 @@ class _PageConnexionPrincipaleState extends State<PageConnexionPrincipale> {
                       ),
                     ),
 
-                    const SizedBox(height: 30),
+                    const SizedBox(height: 24),
+
+                    // ─── Séparateur OU ───
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Divider(
+                              color: Colors.white.withValues(alpha: 0.25)),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Text(
+                            'ou',
+                            style: GoogleFonts.inter(
+                                color: Colors.white54, fontSize: 13),
+                          ),
+                        ),
+                        Expanded(
+                          child: Divider(
+                              color: Colors.white.withValues(alpha: 0.25)),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // ─── Bouton Google ───
+                    GoogleSignInButton(
+                      isLoading: _isLoadingGoogle,
+                      onPressed: _signInWithGoogle,
+                    ),
+
+                    const SizedBox(height: 24),
 
                     TextButton(
                       onPressed: () {

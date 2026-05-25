@@ -17,7 +17,7 @@
 | Géolocalisation pays            | ✅ Stable           |
 | Reset password                  | 🔲 À faire         |
 | Vérification email              | 🔲 Production      |
-| OAuth Google/Apple              | 🔲 Non prioritaire |
+| OAuth Google                    | ✅ Implémenté       |
 | Hardening sécurité              | ⚠️ Partiel         |
 
 ---

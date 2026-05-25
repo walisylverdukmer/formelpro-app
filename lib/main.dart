@@ -6,6 +6,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
+import 'package:formelpro/screens/auth/google_onboarding_page.dart';
 import 'package:formelpro/screens/auth/page_connexion_principale.dart';
 import 'package:formelpro/screens/complete_profil_page.dart';
 import 'package:formelpro/screens/dashboard/main_dashboard.dart';
@@ -42,6 +43,9 @@ Future<void> main() async {
   await Supabase.initialize(
     url: supabaseUrl,
     anonKey: supabaseAnonKey,
+    authOptions: const FlutterAuthClientOptions(
+      authFlowType: AuthFlowType.pkce,
+    ),
   );
 
   runApp(const FormelProApp());
@@ -109,17 +113,14 @@ class _FormelProAppState extends State<FormelProApp> {
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
 
-  Future<Map<String, dynamic>?> _getUserProfile(String userId) async {
-    try {
-      return await Supabase.instance.client
-          .from('utilisateurs')
-          .select('role, pays, a_complete_profil')
-          .eq('id', userId)
-          .maybeSingle();
-    } catch (e) {
-      debugPrint("Erreur AuthGate (Profil): $e");
-      return null;
-    }
+  // Pas de try-catch : les erreurs remontent dans FutureBuilder.hasError
+  // maybeSingle() retourne null si aucune ligne (nouveau user Google)
+  Future<Map<String, dynamic>?> _getUserProfile(String userId) {
+    return Supabase.instance.client
+        .from('utilisateurs')
+        .select('role, pays, a_complete_profil')
+        .eq('id', userId)
+        .maybeSingle();
   }
 
   // Demande la permission et abonne l'appareil au topic FCM de l'utilisateur
@@ -179,11 +180,25 @@ class AuthGate extends StatelessWidget {
               return const _LoadingScreen();
             }
 
-            if (profileSnapshot.hasError || profileSnapshot.data == null) {
+            // Erreur réseau / DB : retour à la page de connexion
+            if (profileSnapshot.hasError) {
+              debugPrint("AuthGate erreur profil: ${profileSnapshot.error}");
               return const PageConnexionPrincipale();
             }
 
-            final data = profileSnapshot.data!;
+            final data = profileSnapshot.data;
+
+            // Pas de ligne dans utilisateurs → nouvel utilisateur Google
+            if (data == null) {
+              final provider =
+                  session.user.appMetadata['provider'] as String? ?? '';
+              if (provider == 'google') {
+                return const GoogleOnboardingPage();
+              }
+              // Cas anormal (email sans profil) → retour login
+              return const PageConnexionPrincipale();
+            }
+
             final bool aCompleteProfil = data['a_complete_profil'] ?? false;
 
             // Abonnement FCM dès que l'utilisateur est authentifié
@@ -218,8 +233,20 @@ class _LoadingScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            Image.asset(
+              'assets/images/logo.png',
+              width: 80,
+              height: 80,
+              fit: BoxFit.contain,
+              errorBuilder: (_, __, ___) => const Icon(
+                Icons.handyman_rounded,
+                size: 80,
+                color: Color(0xFFE67E22),
+              ),
+            ),
+            const SizedBox(height: 28),
             const CircularProgressIndicator(color: Color(0xFFE67E22), strokeWidth: 3),
-            const SizedBox(height: 25),
+            const SizedBox(height: 20),
             Text(
               "Chargement de FormelPro...",
               style: GoogleFonts.inter(color: Colors.white70, fontSize: 14, letterSpacing: 0.5),

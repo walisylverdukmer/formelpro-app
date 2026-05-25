@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/user_model.dart';
@@ -71,7 +72,16 @@ class AuthService {
     }
   }
 
-  // 5. Déconnexion
+  // 5. Connexion via Google OAuth (Supabase Auth)
+  Future<void> signInWithGoogle() async {
+    await _supabase.auth.signInWithOAuth(
+      OAuthProvider.google,
+      redirectTo: kIsWeb ? null : 'formelpro://login-callback/',
+      authScreenLaunchMode: LaunchMode.externalApplication,
+    );
+  }
+
+  // 6. Déconnexion
   Future<void> signOut() async {
     try {
       await _supabase.auth.signOut();
@@ -80,9 +90,9 @@ class AuthService {
     }
   }
 
-  // 6. Récupérer l'ID de l'utilisateur actuel (Helper)
+  // 7. Récupérer l'ID de l'utilisateur actuel (Helper)
   String? get currentUserId => _supabase.auth.currentUser?.id;
 
-  // 7. Stream sur l'état de l'authentification (Utile pour réagir en temps réel)
+  // 8. Stream sur l'état de l'authentification (Utile pour réagir en temps réel)
   Stream<AuthState> get authStateChanges => _supabase.auth.onAuthStateChange;
 }

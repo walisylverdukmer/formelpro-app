@@ -19,7 +19,17 @@
       "PowerShell(Remove-Item \"c:\\\\Users\\\\HP\\\\Documents\\\\FormelPro\\\\lib\\\\services\\\\sub_categories_page.dart\" -Confirm:$false)",
       "Bash(not exist *)",
       "PowerShell(New-Item -ItemType Directory -Force -Path \"c:\\\\Users\\\\HP\\\\Documents\\\\FormelPro\\\\lib\\\\screens\\\\admin\")",
-      "Bash(powershell -Command ' *)"
+      "Bash(powershell -Command ' *)",
+      "Bash(copy \"c:\\\\Users\\\\HP\\\\Documents\\\\FormelPro\\\\assets\\\\images\\\\logo.png\" \"c:\\\\Users\\\\HP\\\\Documents\\\\FormelPro\\\\web\\\\logo.png\")",
+      "Bash(copy \"c:\\\\Users\\\\HP\\\\Documents\\\\FormelPro\\\\assets\\\\images\\\\logo.png\" \"c:\\\\Users\\\\HP\\\\Documents\\\\FormelPro\\\\web\\\\favicon.png\")",
+      "Bash(copy \"c:\\\\Users\\\\HP\\\\Documents\\\\FormelPro\\\\assets\\\\images\\\\logo.png\" \"c:\\\\Users\\\\HP\\\\Documents\\\\FormelPro\\\\web\\\\icons\\\\Icon-192.png\")",
+      "Bash(copy \"c:\\\\Users\\\\HP\\\\Documents\\\\FormelPro\\\\assets\\\\images\\\\logo.png\" \"c:\\\\Users\\\\HP\\\\Documents\\\\FormelPro\\\\web\\\\icons\\\\Icon-512.png\")",
+      "Bash(copy \"c:\\\\Users\\\\HP\\\\Documents\\\\FormelPro\\\\assets\\\\images\\\\logo.png\" \"c:\\\\Users\\\\HP\\\\Documents\\\\FormelPro\\\\web\\\\icons\\\\Icon-maskable-192.png\")",
+      "Bash(cp \"c:/Users/HP/Documents/FormelPro/assets/images/logo.png\" \"c:/Users/HP/Documents/FormelPro/web/logo.png\")",
+      "Bash(cp \"c:/Users/HP/Documents/FormelPro/assets/images/logo.png\" \"c:/Users/HP/Documents/FormelPro/web/favicon.png\")",
+      "Bash(cp \"c:/Users/HP/Documents/FormelPro/assets/images/logo.png\" \"c:/Users/HP/Documents/FormelPro/web/icons/Icon-192.png\")",
+      "Bash(cp \"c:/Users/HP/Documents/FormelPro/assets/images/logo.png\" \"c:/Users/HP/Documents/FormelPro/web/icons/Icon-512.png\")",
+      "Bash(cp \"c:/Users/HP/Documents/FormelPro/assets/images/logo.png\" \"c:/Users/HP/Documents/FormelPro/web/icons/Icon-maskable-192.png\")"
     ]
   }
 }
