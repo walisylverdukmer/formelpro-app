@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\HP\\\\Documents\\\\FormelPro\" -Force)",
+      "Bash(Select-Object Name, Mode)",
+      "Bash(Format-Table -AutoSize)",
+      "Bash(flutter --version)",
+      "Bash(dart pub *)",
+      "Bash(ls \"C:/Users/HP/AppData/Local/Pub/Cache/hosted/pub.dev/\" | grep -E \"latlong2|flutter_map\" 2>&1)",
+      "Read(//c/Users/HP/AppData/Local/Pub/Cache/hosted/pub.dev/**)",
+      "Bash(flutter clean *)",
+      "Bash(flutter pub *)",
+      "Bash(flutter build *)",
+      "Bash(flutter run *)",
+      "Bash(flutter analyze *)",
+      "Bash(Remove-Item \"c:\\\\Users\\\\HP\\\\Documents\\\\FormelPro\\\\lib\\\\screens\\\\dashboard\\\\tech_dashboard.dart\")",
+      "PowerShell(Remove-Item \"c:\\\\Users\\\\HP\\\\Documents\\\\FormelPro\\\\lib\\\\screens\\\\dashboard\\\\tech_dashboard.dart\" -Confirm:$false)",
+      "PowerShell(Remove-Item \"c:\\\\Users\\\\HP\\\\Documents\\\\FormelPro\\\\lib\\\\services\\\\request_form_page.dart\" -Confirm:$false)",
+      "PowerShell(Remove-Item \"c:\\\\Users\\\\HP\\\\Documents\\\\FormelPro\\\\lib\\\\services\\\\sub_categories_page.dart\" -Confirm:$false)",
+      "Bash(not exist *)",
+      "PowerShell(New-Item -ItemType Directory -Force -Path \"c:\\\\Users\\\\HP\\\\Documents\\\\FormelPro\\\\lib\\\\screens\\\\admin\")",
+      "Bash(powershell -Command ' *)"
+    ]
+  }
+}
