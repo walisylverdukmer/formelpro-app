@@ -1,4 +1,6 @@
-# Flutter
+# =========================
+# FLUTTER
+# =========================
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
@@ -6,39 +8,70 @@
 .pub/
 build/
 
-# Android
+# =========================
+# ANDROID
+# =========================
 android/.gradle/
 android/app/debug/
 android/app/profile/
 android/app/release/
 
-# iOS
+# =========================
+# IOS
+# =========================
 ios/Pods/
 ios/.symlinks/
 ios/Flutter/Flutter.framework
 ios/Flutter/Flutter.podspec
 
-# macOS
+# =========================
+# MACOS
+# =========================
 macos/Pods/
 
-# Linux
+# =========================
+# LINUX
+# =========================
 linux/flutter/ephemeral/
 
-# Windows
+# =========================
+# WINDOWS
+# =========================
 windows/flutter/ephemeral/
 
-# Firebase
+# =========================
+# FIREBASE
+# =========================
 android/app/google-services.json
 ios/Runner/GoogleService-Info.plist
 firebase-adminsdk.json
 
-# IDE
-.vscode/
-.idea/
+# =========================
+# SUPABASE
+# =========================
+supabase/.temp/
 
-# Logs
-*.log
-
-# Environment
+# =========================
+# LOCAL CONFIG
+# =========================
+dart_defines.json
 .env
 .env.local
+
+# =========================
+# IDE / EDITORS
+# =========================
+.vscode/
+.idea/
+.claude/
+
+# =========================
+# LOGS
+# =========================
+*.log
+
+# =========================
+# GENERATED / SYSTEM
+# =========================
+.DS_Store
+Thumbs.db
