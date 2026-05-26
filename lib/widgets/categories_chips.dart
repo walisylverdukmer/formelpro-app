@@ -1,4 +1,3 @@
-﻿import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -22,8 +21,12 @@ class CategoriesChips extends StatelessWidget {
     final n = nom.toLowerCase();
     if (n.contains('plomb')) return Icons.water_drop;
     if (n.contains('élec') || n.contains('electr')) return Icons.electric_bolt;
-    if (n.contains('maçon') || n.contains('macon') ||
-        n.contains('bâtiment') || n.contains('batiment')) { return Icons.foundation; }
+    if (n.contains('maçon') ||
+        n.contains('macon') ||
+        n.contains('bâtiment') ||
+        n.contains('batiment')) {
+      return Icons.foundation;
+    }
     if (n.contains('mécan') || n.contains('mecan') || n.contains('auto')) {
       return Icons.settings_suggest;
     }
@@ -43,7 +46,9 @@ class CategoriesChips extends StatelessWidget {
     if (n.contains('inform') || n.contains('réseau') || n.contains('reseau')) {
       return Icons.computer;
     }
-    if (n.contains('chauffage') || n.contains('sanitaire')) return Icons.thermostat;
+    if (n.contains('chauffage') || n.contains('sanitaire')) {
+      return Icons.thermostat;
+    }
     if (n.contains('toiture') || n.contains('couver')) return Icons.roofing;
     if (n.contains('serrur')) return Icons.lock;
     return Icons.build_rounded;
@@ -53,32 +58,21 @@ class CategoriesChips extends StatelessWidget {
   Widget build(BuildContext context) {
     if (categories.isEmpty) return const SizedBox.shrink();
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(24),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-          ),
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: List.generate(categories.length, (i) {
-                final cat = categories[i];
-                return _buildChip(
-                  cat['id'].toString(),
-                  cat['nom'].toString(),
-                  _iconFor(cat['nom'].toString()),
-                  i,
-                );
-              }),
-            ),
-          ),
+    return SizedBox(
+      width: double.infinity,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+        child: Row(
+          children: List.generate(categories.length, (i) {
+            final cat = categories[i];
+            return _buildChip(
+              cat['id'].toString(),
+              cat['nom'].toString(),
+              _iconFor(cat['nom'].toString()),
+              i,
+            );
+          }),
         ),
       ),
     );
@@ -97,16 +91,17 @@ class CategoriesChips extends StatelessWidget {
     return GestureDetector(
       onTap: () => onSelect(id, titre),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
+        padding: const EdgeInsets.only(right: 16),
         child: Column(
           children: [
             AnimatedBuilder(
               animation: shimmerController,
               builder: (context, _) {
                 final v = shimmerController.value;
-                return Container(
-                  height: 55,
-                  width: 55,
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  height: 58,
+                  width: 58,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: LinearGradient(
@@ -115,7 +110,7 @@ class CategoriesChips extends StatelessWidget {
                       colors: [
                         colors[0],
                         colors[1],
-                        Colors.white.withValues(alpha: 0.3),
+                        Colors.white.withValues(alpha: 0.25),
                         colors[0],
                       ],
                       stops: [
@@ -127,13 +122,15 @@ class CategoriesChips extends StatelessWidget {
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: colors[0].withValues(alpha: 0.3),
-                        blurRadius: 8,
+                        color: colors[0].withValues(
+                          alpha: isSelected ? 0.45 : 0.22,
+                        ),
+                        blurRadius: isSelected ? 14 : 8,
                         offset: const Offset(0, 4),
                       ),
                     ],
                     border: isSelected
-                        ? Border.all(color: Colors.white, width: 2.5)
+                        ? Border.all(color: colors[0], width: 2.5)
                         : null,
                   ),
                   child: Icon(icon, color: Colors.white, size: 24),
@@ -142,20 +139,15 @@ class CategoriesChips extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             SizedBox(
-              width: 72,
+              width: 68,
               child: Text(
                 titre,
                 style: GoogleFonts.inter(
                   fontSize: 10,
                   fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                  color: Colors.white,
-                  shadows: const [
-                    Shadow(
-                      offset: Offset(0, 1.5),
-                      blurRadius: 4.0,
-                      color: Color(0xBF000000),
-                    ),
-                  ],
+                  color: isSelected
+                      ? const Color(0xFF1E293B)
+                      : const Color(0xFF475569),
                 ),
                 textAlign: TextAlign.center,
                 maxLines: 2,

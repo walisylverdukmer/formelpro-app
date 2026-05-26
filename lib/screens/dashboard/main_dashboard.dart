@@ -1,8 +1,7 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-// --- IMPORTS ---
 import 'package:formelpro/screens/tabs/missions_tab.dart';
 import 'package:formelpro/screens/tabs/demandes_tab.dart';
 import 'package:formelpro/screens/dashboard/profil_tab.dart';
@@ -39,15 +38,6 @@ class _MainDashboardPageState extends State<MainDashboardPage> {
     super.dispose();
   }
 
-  // Définition des ombres pour la lisibilité sur fond d'image
-  final List<Shadow> _textShadows = [
-    Shadow(
-      offset: const Offset(0, 1.5),
-      blurRadius: 4.0,
-      color: Colors.black.withValues(alpha: 0.6),
-    ),
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -70,10 +60,12 @@ class _MainDashboardPageState extends State<MainDashboardPage> {
       if (user != null) {
         final response = await supabase
             .from('utilisateurs')
-            .select('id, role, pays, prenom, nom_complet, photo_profil_url, ville, commune, quartier, score_global, note_moyenne, total_transactions, is_premium, metier_personnalise, disponible, is_identite_verifiee, a_complete_profil, telephone, savoir_faire, is_admin')
+            .select(
+              'id, role, pays, prenom, nom_complet, photo_profil_url, ville, commune, quartier, score_global, note_moyenne, total_transactions, is_premium, metier_personnalise, disponible, is_identite_verifiee, a_complete_profil, telephone, savoir_faire, is_admin',
+            )
             .eq('id', user.id)
             .single();
-        
+
         if (mounted) {
           setState(() {
             _userData = response;
@@ -93,7 +85,7 @@ class _MainDashboardPageState extends State<MainDashboardPage> {
   Widget build(BuildContext context) {
     if (_isLoading || _userData == null) {
       return Scaffold(
-        backgroundColor: const Color(0xFF0F172A),
+        backgroundColor: const Color(0xFFF8FAFC),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -110,7 +102,10 @@ class _MainDashboardPageState extends State<MainDashboardPage> {
                 ),
               ),
               const SizedBox(height: 24),
-              const CircularProgressIndicator(color: Color(0xFFE67E22), strokeWidth: 2),
+              const CircularProgressIndicator(
+                color: Color(0xFFE67E22),
+                strokeWidth: 2,
+              ),
             ],
           ),
         ),
@@ -118,10 +113,10 @@ class _MainDashboardPageState extends State<MainDashboardPage> {
     }
 
     final bool isCI = _userData!['pays'] == 'CIV';
-    final String backgroundImage = isCI ? 'assets/images/fond_ci.jpeg' : 'assets/images/fond_cmr.jpeg';
-    final Color accentColor = isCI ? const Color(0xFFE67E22) : const Color(0xFFE74C3C);
-    final String role = _userData!['role']?.toString().toLowerCase() ?? 'client';
-
+    final Color accentColor =
+        isCI ? const Color(0xFFE67E22) : const Color(0xFFE74C3C);
+    final String role =
+        _userData!['role']?.toString().toLowerCase() ?? 'client';
     final String uid = _userData!['id']?.toString() ?? '';
 
     final List<Widget> pages = [
@@ -140,11 +135,16 @@ class _MainDashboardPageState extends State<MainDashboardPage> {
     ];
 
     return Scaffold(
-      extendBodyBehindAppBar: true, 
+      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.white,
         elevation: 0,
+        surfaceTintColor: Colors.transparent,
         centerTitle: false,
+        bottom: const PreferredSize(
+          preferredSize: Size.fromHeight(1),
+          child: Divider(height: 1, color: Color(0xFFE2E8F0)),
+        ),
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -161,8 +161,7 @@ class _MainDashboardPageState extends State<MainDashboardPage> {
               style: GoogleFonts.poppins(
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
-                color: Colors.white,
-                shadows: _textShadows,
+                color: const Color(0xFF0F172A),
               ),
             ),
           ],
@@ -172,24 +171,7 @@ class _MainDashboardPageState extends State<MainDashboardPage> {
           SizedBox(width: 16),
         ],
       ),
-      body: Stack(
-        children: [
-          // On n'affiche le fond que si on n'est pas sur l'accueil technicien (qui gère son propre fond)
-          if (role == 'client' || _currentIndex != 0)
-            Positioned.fill(
-              child: Image.asset(
-                backgroundImage, 
-                fit: BoxFit.cover,
-                color: Colors.black.withValues(alpha: 0.3),
-                colorBlendMode: BlendMode.darken,
-              ),
-            ),
-          IndexedStack(
-            index: _currentIndex,
-            children: pages,
-          ),
-        ],
-      ),
+      body: IndexedStack(index: _currentIndex, children: pages),
       bottomNavigationBar: _buildBottomNav(accentColor, role),
     );
   }
@@ -231,25 +213,30 @@ class _MainDashboardPageState extends State<MainDashboardPage> {
   Widget _buildBottomNav(Color accentColor, String role) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF0F172A).withValues(alpha: 0.98),
-        border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.1), width: 0.5)),
+        color: Colors.white,
+        border: const Border(
+          top: BorderSide(color: Color(0xFFE2E8F0), width: 1),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.4), 
-            blurRadius: 20, 
-            offset: const Offset(0, -5)
-          )
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 16,
+            offset: const Offset(0, -4),
+          ),
         ],
       ),
       child: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) => setState(() => _currentIndex = index),
         selectedItemColor: accentColor,
-        unselectedItemColor: Colors.white.withValues(alpha: 0.4),
+        unselectedItemColor: const Color(0xFF94A3B8),
         backgroundColor: Colors.transparent,
         elevation: 0,
         type: BottomNavigationBarType.fixed,
-        selectedLabelStyle: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12),
+        selectedLabelStyle: GoogleFonts.inter(
+          fontWeight: FontWeight.bold,
+          fontSize: 12,
+        ),
         unselectedLabelStyle: GoogleFonts.inter(fontSize: 11),
         items: [
           const BottomNavigationBarItem(

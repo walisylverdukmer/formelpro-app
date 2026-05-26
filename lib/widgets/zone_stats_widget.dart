@@ -72,9 +72,16 @@ class _ZoneStatsWidgetState extends State<ZoneStatsWidget> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.07),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -84,7 +91,7 @@ class _ZoneStatsWidgetState extends State<ZoneStatsWidget> {
             decoration: BoxDecoration(
               color: online > 0
                   ? const Color(0xFF22C55E)
-                  : Colors.white.withValues(alpha: 0.25),
+                  : const Color(0xFFCBD5E1),
               shape: BoxShape.circle,
             ),
           ),
@@ -94,31 +101,34 @@ class _ZoneStatsWidgetState extends State<ZoneStatsWidget> {
                 ? Text(
                     "$online technicien${online > 1 ? 's' : ''} en ligne · $zoneLabel",
                     style: GoogleFonts.inter(
-                        fontSize: 13,
-                        color: Colors.white70,
-                        fontWeight: FontWeight.w500),
+                      fontSize: 13,
+                      color: const Color(0xFF475569),
+                      fontWeight: FontWeight.w500,
+                    ),
                   )
                 : Text(
                     "Aucun technicien en ligne · $zoneLabel",
                     style: GoogleFonts.inter(
-                        fontSize: 13, color: Colors.white38),
+                      fontSize: 13,
+                      color: const Color(0xFF94A3B8),
+                    ),
                   ),
           ),
           if (total > 0) ...[
             const SizedBox(width: 8),
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
               decoration: BoxDecoration(
-                color: widget.accentColor.withValues(alpha: 0.15),
+                color: widget.accentColor.withValues(alpha: 0.10),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
                 "$total dispo",
                 style: GoogleFonts.inter(
-                    fontSize: 11,
-                    color: widget.accentColor,
-                    fontWeight: FontWeight.w700),
+                  fontSize: 11,
+                  color: widget.accentColor,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
           ],
@@ -131,7 +141,7 @@ class _ZoneStatsWidgetState extends State<ZoneStatsWidget> {
     return Container(
       height: 38,
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
+        color: const Color(0xFFE2E8F0),
         borderRadius: BorderRadius.circular(14),
       ),
     );

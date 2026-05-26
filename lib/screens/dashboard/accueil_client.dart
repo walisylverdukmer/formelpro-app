@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -27,10 +27,6 @@ class _AccueilClientState extends State<AccueilClient>
   final TextEditingController _searchController = TextEditingController();
 
   late AnimationController _shimmerController;
-
-  static const _textShadows = [
-    Shadow(offset: Offset(0, 1.5), blurRadius: 4.0, color: Color(0xBF000000)),
-  ];
 
   @override
   void initState() {
@@ -84,7 +80,12 @@ class _AccueilClientState extends State<AccueilClient>
         techIdsFiltres =
             techCats.map<String>((t) => t['technicien_id'].toString()).toList();
         if (techIdsFiltres.isEmpty) {
-          if (mounted) setState(() { _techniciens = []; _isFetching = false; });
+          if (mounted) {
+            setState(() {
+              _techniciens = [];
+              _isFetching = false;
+            });
+          }
           return;
         }
       } else if (_filtres.categorieNom != null) {
@@ -94,7 +95,12 @@ class _AccueilClientState extends State<AccueilClient>
             .ilike('nom', '%${_filtres.categorieNom}%')
             .eq('est_valide', true);
         if (cats.isEmpty) {
-          if (mounted) setState(() { _techniciens = []; _isFetching = false; });
+          if (mounted) {
+            setState(() {
+              _techniciens = [];
+              _isFetching = false;
+            });
+          }
           return;
         }
         final catIds = cats.map<String>((c) => c['id'].toString()).toList();
@@ -105,7 +111,12 @@ class _AccueilClientState extends State<AccueilClient>
         techIdsFiltres =
             techCats.map<String>((t) => t['technicien_id'].toString()).toList();
         if (techIdsFiltres.isEmpty) {
-          if (mounted) setState(() { _techniciens = []; _isFetching = false; });
+          if (mounted) {
+            setState(() {
+              _techniciens = [];
+              _isFetching = false;
+            });
+          }
           return;
         }
       }
@@ -113,7 +124,7 @@ class _AccueilClientState extends State<AccueilClient>
       var query = supabase
           .from('utilisateurs')
           .select(
-            'id, nom_complet, metier_personnalise, photo_profil_url, score_global, note_moyenne, ville, commune, quartier, disponible, is_premium, premium_level, est_en_ligne, telephone, is_identite_verifiee',
+            'id, nom_complet, metier_personnalise, savoir_faire, photo_profil_url, score_global, note_moyenne, ville, commune, quartier, disponible, is_premium, premium_level, est_en_ligne, telephone, is_identite_verifiee',
           )
           .eq('role', 'technicien')
           .eq('pays', pays);
@@ -189,17 +200,22 @@ class _AccueilClientState extends State<AccueilClient>
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: Image.asset(flagPath,
-                    width: 70, height: 45, fit: BoxFit.cover),
+                child: Image.asset(
+                  flagPath,
+                  width: 70,
+                  height: 45,
+                  fit: BoxFit.cover,
+                ),
               ),
               const SizedBox(height: 20),
               Text(
                 isCI ? "FormelPro Côte d'Ivoire" : "FormelPro Cameroun",
                 textAlign: TextAlign.center,
                 style: GoogleFonts.poppins(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: accentColor),
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: accentColor,
+                ),
               ),
               const SizedBox(height: 12),
               Text(
@@ -207,8 +223,10 @@ class _AccueilClientState extends State<AccueilClient>
                     ? "Trouvez les artisans qualifiés de proximité."
                     : "Accédez au réseau certifié au Cameroun.",
                 textAlign: TextAlign.center,
-                style:
-                    GoogleFonts.inter(fontSize: 14, color: Colors.grey.shade700),
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  color: Colors.grey.shade700,
+                ),
               ),
               const SizedBox(height: 24),
               SizedBox(
@@ -219,7 +237,8 @@ class _AccueilClientState extends State<AccueilClient>
                     backgroundColor: accentColor,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                   child: const Text("Continuer"),
                 ),
@@ -233,63 +252,41 @@ class _AccueilClientState extends State<AccueilClient>
 
   @override
   Widget build(BuildContext context) {
-    final String userDisplayName = widget.userData['prenom'] ?? 'Client';
     final String pays = widget.userData['pays'] ?? 'CIV';
+    final String prenom = widget.userData['prenom'] ?? 'vous';
     final Color primaryColor =
         pays == 'CIV' ? const Color(0xFFE67E22) : const Color(0xFFE74C3C);
     final String flagPath =
         pays == 'CIV' ? "assets/images/ci.jpg" : "assets/images/cmr.jpg";
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: const Color(0xFFF8FAFC),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        "Bonjour $userDisplayName",
-                        style: GoogleFonts.inter(
-                            fontSize: 16,
-                            color: Colors.white,
-                            shadows: _textShadows),
-                      ),
-                      const SizedBox(width: 8),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: Image.asset(flagPath,
-                            width: 24, height: 16, fit: BoxFit.cover),
-                      ),
-                    ],
-                  ),
-                  Text(
-                    "Besoin d'un pro ?",
-                    style: GoogleFonts.poppins(
-                      fontSize: 26,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      shadows: _textShadows,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 25),
-              _buildSearchBar(primaryColor),
+              _buildHeader(prenom, flagPath, primaryColor),
               const SizedBox(height: 16),
-              ZoneStatsWidget(
-                pays: pays,
-                commune: widget.userData['commune'] as String?,
-                accentColor: primaryColor,
+              _buildHeroBanner(pays, primaryColor),
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: ZoneStatsWidget(
+                  pays: pays,
+                  commune: widget.userData['commune'] as String?,
+                  accentColor: primaryColor,
+                ),
               ),
-              const SizedBox(height: 25),
-              _buildSectionHeader("Catégories populaires"),
-              const SizedBox(height: 15),
+              const SizedBox(height: 28),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: _buildSectionTitle(
+                  "Catégories populaires",
+                  accentColor: primaryColor,
+                ),
+              ),
+              const SizedBox(height: 12),
               CategoriesChips(
                 pays: pays,
                 shimmerController: _shimmerController,
@@ -312,12 +309,23 @@ class _AccueilClientState extends State<AccueilClient>
                   _fetchTechniciens();
                 },
               ),
-              const SizedBox(height: 35),
-              _buildSectionHeader("Techniciens recommandés"),
-              const SizedBox(height: 15),
-              _buildTechList(primaryColor),
-              const SizedBox(height: 40),
+              const SizedBox(height: 28),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: _buildSectionTitle(
+                  "Techniciens recommandés",
+                  accentColor: primaryColor,
+                  onMore: _resetFilters,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: _buildTechList(primaryColor),
+              ),
+              const SizedBox(height: 32),
               _buildFooter(),
+              const SizedBox(height: 16),
             ],
           ),
         ),
@@ -325,26 +333,68 @@ class _AccueilClientState extends State<AccueilClient>
     );
   }
 
+  Widget _buildHeader(String prenom, String flagPath, Color primaryColor) {
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                "Bonjour $prenom 👋",
+                style: GoogleFonts.inter(
+                  fontSize: 15,
+                  color: const Color(0xFF64748B),
+                ),
+              ),
+              const Spacer(),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: Image.asset(
+                  flagPath,
+                  width: 28,
+                  height: 18,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            "Besoin d'un pro ?",
+            style: GoogleFonts.poppins(
+              fontSize: 26,
+              fontWeight: FontWeight.bold,
+              color: const Color(0xFF0F172A),
+            ),
+          ),
+          const SizedBox(height: 16),
+          _buildSearchBar(primaryColor),
+        ],
+      ),
+    );
+  }
+
   Widget _buildSearchBar(Color primaryColor) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
-          )
-        ],
+        color: const Color(0xFFF1F5F9),
+        borderRadius: BorderRadius.circular(14),
       ),
       child: TextField(
         controller: _searchController,
         onSubmitted: (_) => _fetchTechniciens(),
         textInputAction: TextInputAction.search,
+        style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF0F172A)),
         decoration: InputDecoration(
-          hintText: "Rechercher un artisan...",
-          prefixIcon: const Icon(Icons.search, color: Color(0xFF1E293B)),
+          hintText: "Rechercher un artisan, un métier...",
+          hintStyle: GoogleFonts.inter(
+            fontSize: 14,
+            color: const Color(0xFF94A3B8),
+          ),
+          prefixIcon: const Icon(Icons.search, color: Color(0xFF64748B), size: 20),
           suffixIcon: GestureDetector(
             onTap: () => _openFiltres(primaryColor),
             child: Stack(
@@ -352,17 +402,16 @@ class _AccueilClientState extends State<AccueilClient>
               children: [
                 Icon(
                   Icons.tune_rounded,
-                  color: _filtres.actif
-                      ? primaryColor
-                      : const Color(0xFF94A3B8),
+                  color: _filtres.actif ? primaryColor : const Color(0xFF94A3B8),
+                  size: 20,
                 ),
                 if (_filtres.actif)
                   Positioned(
                     top: 12,
                     right: 12,
                     child: Container(
-                      width: 8,
-                      height: 8,
+                      width: 7,
+                      height: 7,
                       decoration: BoxDecoration(
                         color: primaryColor,
                         shape: BoxShape.circle,
@@ -373,50 +422,188 @@ class _AccueilClientState extends State<AccueilClient>
             ),
           ),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 15),
+          contentPadding: const EdgeInsets.symmetric(vertical: 14),
         ),
       ),
     );
   }
 
+  Widget _buildHeroBanner(String pays, Color primaryColor) {
+    final heroImage = pays == 'CIV'
+        ? 'assets/images/fond_ci.jpeg'
+        : 'assets/images/fond_cmr.jpeg';
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      height: 150,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        image: DecorationImage(
+          image: AssetImage(heroImage),
+          fit: BoxFit.cover,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: primaryColor.withValues(alpha: 0.25),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: LinearGradient(
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+            colors: [
+              const Color(0xFF0F172A).withValues(alpha: 0.78),
+              Colors.transparent,
+            ],
+          ),
+        ),
+        padding: const EdgeInsets.all(22),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "Experts certifiés",
+              style: GoogleFonts.inter(
+                fontSize: 12,
+                color: Colors.white70,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              "Proches de vous",
+              style: GoogleFonts.poppins(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.search, size: 13, color: primaryColor),
+                  const SizedBox(width: 5),
+                  Text(
+                    "Explorer",
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: primaryColor,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(
+    String title, {
+    Color? accentColor,
+    VoidCallback? onMore,
+  }) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          title,
+          style: GoogleFonts.poppins(
+            fontSize: 17,
+            fontWeight: FontWeight.w700,
+            color: const Color(0xFF0F172A),
+          ),
+        ),
+        if (onMore != null)
+          TextButton(
+            onPressed: onMore,
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              minimumSize: Size.zero,
+            ),
+            child: Text(
+              "Tout voir",
+              style: GoogleFonts.inter(
+                fontSize: 13,
+                color: accentColor ?? const Color(0xFF64748B),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
   Widget _buildTechList(Color primaryColor) {
     if (_isFetching) {
-      return const Center(child: CircularProgressIndicator(color: Colors.white));
+      return Column(
+        children: List.generate(3, (_) => _buildShimmerCard()),
+      );
     }
     if (_techniciens.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                _filtres.actif ? Icons.filter_list_off_rounded : Icons.search_off_rounded,
-                size: 48,
-                color: Colors.white24,
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 40),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              _filtres.actif
+                  ? Icons.filter_list_off_rounded
+                  : Icons.search_off_rounded,
+              size: 52,
+              color: const Color(0xFFCBD5E1),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              _filtres.actif
+                  ? "Aucun technicien pour ces critères."
+                  : "Aucun technicien disponible.",
+              style: GoogleFonts.poppins(
+                color: const Color(0xFF475569),
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
               ),
-              const SizedBox(height: 16),
+              textAlign: TextAlign.center,
+            ),
+            if (_filtres.actif) ...[
+              const SizedBox(height: 6),
               Text(
-                _filtres.actif
-                    ? "Aucun technicien pour ces critères."
-                    : "Aucun technicien disponible.",
-                style: GoogleFonts.poppins(
-                  color: Colors.white70,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
+                "Essayez d'élargir vos filtres.",
+                style: GoogleFonts.inter(
+                  color: const Color(0xFF94A3B8),
+                  fontSize: 13,
                 ),
                 textAlign: TextAlign.center,
               ),
-              if (_filtres.actif) ...[
-                const SizedBox(height: 6),
-                Text(
-                  "Essayez d'élargir vos filtres.",
-                  style: GoogleFonts.inter(color: Colors.white38, fontSize: 13),
-                  textAlign: TextAlign.center,
+              const SizedBox(height: 16),
+              OutlinedButton(
+                onPressed: _resetFilters,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: primaryColor,
+                  side: BorderSide(color: primaryColor),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
-              ],
+                child: const Text("Réinitialiser les filtres"),
+              ),
             ],
-          ),
+          ],
         ),
       );
     }
@@ -424,6 +611,7 @@ class _AccueilClientState extends State<AccueilClient>
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
+      padding: EdgeInsets.zero,
       itemCount: _techniciens.length,
       itemBuilder: (context, i) => CarteTechnicien(
         tech: _techniciens[i],
@@ -434,27 +622,16 @@ class _AccueilClientState extends State<AccueilClient>
     );
   }
 
-  Widget _buildSectionHeader(String title) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          title,
-          style: GoogleFonts.poppins(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            color: Colors.white,
-            shadows: _textShadows,
-          ),
+  Widget _buildShimmerCard() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Container(
+        height: 90,
+        decoration: BoxDecoration(
+          color: const Color(0xFFE2E8F0),
+          borderRadius: BorderRadius.circular(20),
         ),
-        TextButton(
-          onPressed: _resetFilters,
-          child: const Text(
-            "Tout voir",
-            style: TextStyle(color: Colors.white70, fontSize: 12),
-          ),
-        ),
-      ],
+      ),
     );
   }
 
@@ -464,12 +641,18 @@ class _AccueilClientState extends State<AccueilClient>
         children: [
           Text(
             "FormelPro par Solution Makers",
-            style: GoogleFonts.inter(fontSize: 11, color: Colors.white70),
+            style: GoogleFonts.inter(
+              fontSize: 11,
+              color: const Color(0xFF94A3B8),
+            ),
           ),
           const SizedBox(height: 4),
-          const Text(
-            "© 2026 - Côte d'Ivoire & Cameroun",
-            style: TextStyle(fontSize: 10, color: Colors.white54),
+          Text(
+            "© 2026 — Côte d'Ivoire & Cameroun",
+            style: GoogleFonts.inter(
+              fontSize: 10,
+              color: const Color(0xFFCBD5E1),
+            ),
           ),
         ],
       ),

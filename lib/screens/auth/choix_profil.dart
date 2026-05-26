@@ -1,8 +1,6 @@
-﻿import 'package:flutter/material.dart';
-import 'dart:ui';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'dart:async';
-import 'auth_email_mdp.dart'; // Assurez-vous que ce fichier existe
+import 'auth_email_mdp.dart';
 
 // --- ÉTAPE 1 : SÉLECTION DU PAYS ---
 class ChoixProfilPage extends StatelessWidget {
@@ -11,119 +9,195 @@ class ChoixProfilPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
-      body: Stack(
-        children: [
-          // Image de fond fixe
-          Positioned.fill(
-            child: Image.asset(
-              "assets/images/choix_drapeau.jpeg",
-              fit: BoxFit.cover,
-            ),
-          ),
-          
-          Positioned.fill(
-            child: Container(color: Colors.black.withValues(alpha: 0.3)),
-          ),
-
-          // Framework Centralisé
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(30),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-                  child: Container(
-                    padding: const EdgeInsets.all(30),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(30),
-                      border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Image.asset(
-                          'assets/images/logo.png',
-                          width: 60,
-                          height: 60,
-                          fit: BoxFit.contain,
-                          errorBuilder: (_, __, ___) => const Icon(
-                            Icons.handyman_rounded,
-                            size: 60,
-                            color: Color(0xFFE67E22),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          "FormelPro",
-                          style: GoogleFonts.poppins(
-                            fontSize: 32,
-                            fontWeight: FontWeight.w800,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          "Choisissez votre zone d'intervention",
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            color: Colors.white.withValues(alpha: 0.7),
-                          ),
-                        ),
-                        const SizedBox(height: 32),
-                        Row(
-                          children: [
-                            _buildPaysOption(context, "Côte d'Ivoire", 'CIV', "assets/images/ci.jpg"),
-                            const SizedBox(width: 16),
-                            _buildPaysOption(context, "Cameroun", 'CMR', "assets/images/cmr.jpg"),
-                          ],
-                        ),
-                      ],
+      backgroundColor: const Color(0xFFF8FAFC),
+      body: SafeArea(
+        child: Column(
+          children: [
+            const Spacer(),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                children: [
+                  Image.asset(
+                    'assets/images/logo.png',
+                    width: 72,
+                    height: 72,
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, __, ___) => const Icon(
+                      Icons.handyman_rounded,
+                      size: 72,
+                      color: Color(0xFFE67E22),
                     ),
                   ),
+                  const SizedBox(height: 16),
+                  Text(
+                    "FormelPro",
+                    style: GoogleFonts.poppins(
+                      fontSize: 32,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF0F172A),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    "Votre réseau d'experts certifiés",
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      color: const Color(0xFF64748B),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 48),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Text(
+                "Choisissez votre pays",
+                style: GoogleFonts.poppins(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF0F172A),
                 ),
               ),
             ),
-          ),
-
-          // COPYRIGHT EN BAS
-          _buildCopyright(),
-        ],
+            const SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Row(
+                children: [
+                  _buildPaysCard(
+                    context,
+                    "Côte d'Ivoire",
+                    'CIV',
+                    "assets/images/tech_ci.jpg",
+                    "assets/images/ci.jpg",
+                    const Color(0xFFE67E22),
+                  ),
+                  const SizedBox(width: 16),
+                  _buildPaysCard(
+                    context,
+                    "Cameroun",
+                    'CMR',
+                    "assets/images/tech_cmr.jpg",
+                    "assets/images/cmr.jpg",
+                    const Color(0xFFE74C3C),
+                  ),
+                ],
+              ),
+            ),
+            const Spacer(),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 24),
+              child: Text(
+                "FormelPro par Solution Makers",
+                style: GoogleFonts.inter(
+                  fontSize: 11,
+                  color: const Color(0xFF94A3B8),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildPaysOption(BuildContext context, String nom, String code, String imagePath) {
+  Widget _buildPaysCard(
+    BuildContext context,
+    String nom,
+    String code,
+    String bgImage,
+    String flagPath,
+    Color accent,
+  ) {
     return Expanded(
       child: GestureDetector(
         onTap: () => Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => ChoixRolePage(paysCode: code)),
+          MaterialPageRoute(builder: (_) => ChoixRolePage(paysCode: code)),
         ),
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 20),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.05),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(22),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.07),
+                blurRadius: 16,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
           child: Column(
             children: [
-              // Utilisation de l'image au lieu de l'émoji
               ClipRRect(
-                borderRadius: BorderRadius.circular(6),
-                child: Image.asset(imagePath, width: 50, height: 35, fit: BoxFit.cover),
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(22)),
+                child: Image.asset(
+                  bgImage,
+                  width: double.infinity,
+                  height: 115,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    height: 115,
+                    decoration: BoxDecoration(
+                      color: accent.withValues(alpha: 0.08),
+                      borderRadius:
+                          const BorderRadius.vertical(top: Radius.circular(22)),
+                    ),
+                    child: Center(
+                      child: Icon(
+                        Icons.landscape_rounded,
+                        size: 40,
+                        color: accent.withValues(alpha: 0.35),
+                      ),
+                    ),
+                  ),
+                ),
               ),
-              const SizedBox(height: 12),
-              Text(
-                nom,
-                style: GoogleFonts.inter(
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                  fontSize: 12,
+              Padding(
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: Image.asset(
+                        flagPath,
+                        width: 36,
+                        height: 22,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      nom,
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                        color: const Color(0xFF0F172A),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 10),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      decoration: BoxDecoration(
+                        color: accent,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        "Choisir",
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -144,218 +218,220 @@ class ChoixRolePage extends StatefulWidget {
 }
 
 class _ChoixRolePageState extends State<ChoixRolePage> {
-  String? roleSelectionne;
-  final PageController _pageController = PageController();
-  int _currentPage = 0;
-  Timer? _carouselTimer;
-
-  final List<String> _imagesFond = [
-    "assets/images/fond_1.jpeg",
-    "assets/images/fond_2.jpeg",
-    "assets/images/fond_3.jpeg",
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    _carouselTimer = Timer.periodic(const Duration(seconds: 5), (Timer timer) {
-      if (_currentPage < _imagesFond.length - 1) {
-        _currentPage++;
-      } else {
-        _currentPage = 0;
-      }
-      if (_pageController.hasClients) {
-        _pageController.animateToPage(
-          _currentPage,
-          duration: const Duration(milliseconds: 1000),
-          curve: Curves.easeInOut,
-        );
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _carouselTimer?.cancel();
-    _pageController.dispose();
-    super.dispose();
-  }
+  String? _roleSelectionne;
 
   @override
   Widget build(BuildContext context) {
-    Color accentColor = widget.paysCode == 'CIV' 
-        ? const Color(0xFFE67E22) 
-        : const Color(0xFFE74C3C);
+    final bool isCI = widget.paysCode == 'CIV';
+    final Color accent =
+        isCI ? const Color(0xFFE67E22) : const Color(0xFFE74C3C);
+    final String flagPath =
+        isCI ? "assets/images/ci.jpg" : "assets/images/cmr.jpg";
+    final String paysNom = isCI ? "Côte d'Ivoire" : "Cameroun";
 
     return Scaffold(
-      backgroundColor: Colors.black,
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: PageView.builder(
-              controller: _pageController,
-              itemCount: _imagesFond.length,
-              itemBuilder: (context, index) => Image.asset(
-                _imagesFond[index],
-                fit: BoxFit.cover,
-              ),
-            ),
+      backgroundColor: const Color(0xFFF8FAFC),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Color(0xFF0F172A),
+            size: 20,
           ),
-          
-          Positioned.fill(
-            child: Container(color: Colors.black.withValues(alpha: 0.4)),
-          ),
-
-          Positioned(
-            top: 50,
-            left: 10,
-            child: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ),
-
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(30),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-                  child: Container(
-                    padding: const EdgeInsets.all(30),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(30),
-                      border: Border.all(color: accentColor.withValues(alpha: 0.7), width: 1.5),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: Image.asset(
+                      flagPath,
+                      width: 32,
+                      height: 20,
+                      fit: BoxFit.cover,
                     ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          "Profil ${widget.paysCode == 'CIV' ? 'Ivoirien' : 'Camerounais'}",
-                          style: GoogleFonts.poppins(
-                            fontSize: 26,
-                            fontWeight: FontWeight.w800,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          "Quel est votre statut ?",
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            color: Colors.white.withValues(alpha: 0.7),
-                          ),
-                        ),
-                        const SizedBox(height: 32),
-                        
-                        _buildRoleOption("Je suis Client", 'client', Icons.person, accentColor),
-                        const SizedBox(height: 16),
-                        _buildRoleOption("Je suis Technicien", 'technicien', Icons.handyman, accentColor),
-                        
-                        const SizedBox(height: 32),
-                        
-                        if (roleSelectionne != null)
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => AuthEmailMdpPage(
-                                      paysCode: widget.paysCode,
-                                      role: roleSelectionne!,
-                                    ),
-                                  ),
-                                );
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: accentColor,
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                              ),
-                              child: const Text(
-                                "Continuer",
-                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    paysNom,
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      color: const Color(0xFF64748B),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 28),
+              Text(
+                "Votre statut ?",
+                style: GoogleFonts.poppins(
+                  fontSize: 26,
+                  fontWeight: FontWeight.w800,
+                  color: const Color(0xFF0F172A),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                "Choisissez comment vous souhaitez utiliser FormelPro.",
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  color: const Color(0xFF64748B),
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 32),
+              _buildRoleCard(
+                'client',
+                Icons.person_rounded,
+                "Je cherche un expert",
+                "Trouvez des professionnels certifiés pour vos travaux.",
+                accent,
+              ),
+              const SizedBox(height: 16),
+              _buildRoleCard(
+                'technicien',
+                Icons.handyman_rounded,
+                "Je suis prestataire",
+                "Proposez vos services et développez votre clientèle.",
+                accent,
+              ),
+              const Spacer(),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _roleSelectionne == null
+                      ? null
+                      : () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => AuthEmailMdpPage(
+                                paysCode: widget.paysCode,
+                                role: _roleSelectionne!,
                               ),
                             ),
                           ),
-                      ],
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: accent,
+                    disabledBackgroundColor: const Color(0xFFE2E8F0),
+                    foregroundColor: Colors.white,
+                    disabledForegroundColor: const Color(0xFF94A3B8),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: Text(
+                    "Continuer",
+                    style: GoogleFonts.inter(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
                     ),
                   ),
                 ),
               ),
-            ),
+              const SizedBox(height: 24),
+            ],
           ),
-
-          _buildCopyright(),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildRoleOption(String titre, String code, IconData icon, Color accentColor) {
-    bool isSelected = roleSelectionne == code;
+  Widget _buildRoleCard(
+    String code,
+    IconData icon,
+    String titre,
+    String desc,
+    Color accent,
+  ) {
+    final bool selected = _roleSelectionne == code;
     return GestureDetector(
-      onTap: () => setState(() => roleSelectionne = code),
-      child: Container(
-        padding: const EdgeInsets.all(16),
+      onTap: () => setState(() => _roleSelectionne = code),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: isSelected ? accentColor.withValues(alpha: 0.2) : Colors.white.withValues(alpha: 0.05),
+          color: selected ? accent.withValues(alpha: 0.06) : Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? accentColor : Colors.white.withValues(alpha: 0.1),
-            width: isSelected ? 2 : 1,
+            color: selected ? accent : const Color(0xFFE2E8F0),
+            width: selected ? 2 : 1,
           ),
+          boxShadow: selected
+              ? [
+                  BoxShadow(
+                    color: accent.withValues(alpha: 0.15),
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
+                  )
+                ]
+              : [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
+                  )
+                ],
         ),
         child: Row(
           children: [
-            Icon(icon, color: isSelected ? accentColor : Colors.white, size: 24),
-            const SizedBox(width: 16),
-            Text(
-              titre,
-              style: GoogleFonts.inter(
-                color: Colors.white,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: selected ? accent : const Color(0xFFF1F5F9),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(
+                icon,
+                color: selected ? Colors.white : const Color(0xFF64748B),
+                size: 28,
               ),
             ),
-            const Spacer(),
-            if (isSelected) Icon(Icons.check_circle, color: accentColor),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    titre,
+                    style: GoogleFonts.poppins(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF0F172A),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    desc,
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: const Color(0xFF64748B),
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (selected) ...[
+              const SizedBox(width: 8),
+              Icon(Icons.check_circle_rounded, color: accent, size: 24),
+            ],
           ],
         ),
       ),
     );
   }
-}
-
-// --- WIDGET GLOBAL : COPYRIGHT ---
-Widget _buildCopyright() {
-  return Positioned(
-    bottom: 20,
-    left: 0,
-    right: 0,
-    child: Column(
-      children: [
-        Text(
-          "Développé par Lionel Nguekam Walisylver",
-          style: GoogleFonts.inter(
-            fontSize: 11,
-            color: Colors.white.withValues(alpha: 0.5),
-            fontWeight: FontWeight.w300,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          "Copyright Abidjan - 2026",
-          style: GoogleFonts.inter(
-            fontSize: 10,
-            color: Colors.white.withValues(alpha: 0.3),
-            letterSpacing: 1.2,
-          ),
-        ),
-      ],
-    ),
-  );
 }

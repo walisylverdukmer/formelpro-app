@@ -1,25 +1,35 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:formelpro/widgets/carte_technicien.dart';
+import 'package:formelpro/screens/dashboard/details_technicien.dart';
+
 class TechnicianSelectionPage extends StatefulWidget {
-  final String categoryName; // Ex: 'Plomberie'
+  final String categoryName;
+  final String categoryId;
+  final String pays;
   final Color accentColor;
+  final String? clientId;
 
   const TechnicianSelectionPage({
-    super.key, 
-    required this.categoryName, 
-    required this.accentColor
+    super.key,
+    required this.categoryName,
+    required this.categoryId,
+    required this.pays,
+    required this.accentColor,
+    this.clientId,
   });
 
   @override
-  State<TechnicianSelectionPage> createState() => _TechnicianSelectionPageState();
+  State<TechnicianSelectionPage> createState() =>
+      _TechnicianSelectionPageState();
 }
 
 class _TechnicianSelectionPageState extends State<TechnicianSelectionPage> {
   final supabase = Supabase.instance.client;
   bool _isLoading = true;
-  List<dynamic> _technicians = [];
+  List<Map<String, dynamic>> _technicians = [];
 
   @override
   void initState() {
@@ -29,24 +39,55 @@ class _TechnicianSelectionPageState extends State<TechnicianSelectionPage> {
 
   Future<void> _fetchTechnicians() async {
     try {
-      // On récupère les techniciens qui ont cette spécialité
-      // Le tri se fait d'abord par 'est_en_ligne' puis par 'commune'
+      final techCats = await supabase
+          .from('technicien_categories')
+          .select('technicien_id')
+          .eq('categorie_id', widget.categoryId);
+
+      final ids = techCats
+          .map<String>((t) => t['technicien_id'].toString())
+          .toList();
+
+      if (ids.isEmpty) {
+        if (mounted) setState(() => _isLoading = false);
+        return;
+      }
+
       final response = await supabase
           .from('utilisateurs')
-          .select()
+          .select(
+            'id, nom_complet, metier_personnalise, savoir_faire, photo_profil_url, score_global, note_moyenne, ville, commune, quartier, disponible, is_premium, premium_level, est_en_ligne, telephone, is_identite_verifiee',
+          )
           .eq('role', 'technicien')
-          .ilike('specialites', '%${widget.categoryName}%')
+          .eq('pays', widget.pays)
+          .inFilter('id', ids)
+          .order('is_premium', ascending: false)
           .order('est_en_ligne', ascending: false)
-          .order('commune', ascending: true);
+          .order('score_global', ascending: false)
+          .limit(50);
 
-      setState(() {
-        _technicians = response;
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _technicians = List<Map<String, dynamic>>.from(response);
+          _isLoading = false;
+        });
+      }
     } catch (e) {
-      debugPrint("Erreur : $e");
+      debugPrint('Erreur fetch techniciens catégorie: $e');
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  void _ouvrirFiche(Map<String, dynamic> tech) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => DetailsTechnicien(
+          tech: tech,
+          accentColor: widget.accentColor,
+        ),
+      ),
+    );
   }
 
   @override
@@ -54,121 +95,110 @@ class _TechnicianSelectionPageState extends State<TechnicianSelectionPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        elevation: 0,
         backgroundColor: Colors.white,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        centerTitle: false,
+        bottom: const PreferredSize(
+          preferredSize: Size.fromHeight(1),
+          child: Divider(height: 1, color: Color(0xFFE2E8F0)),
+        ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded,
+              color: Color(0xFF1E293B), size: 20),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
-          widget.categoryName,
-          style: GoogleFonts.poppins(color: Colors.black, fontWeight: FontWeight.bold),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              widget.categoryName,
+              style: GoogleFonts.poppins(
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF0F172A),
+                fontSize: 18,
+              ),
+            ),
+            if (!_isLoading)
+              Text(
+                "${_technicians.length} expert${_technicians.length > 1 ? 's' : ''}",
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  color: const Color(0xFF94A3B8),
+                ),
+              ),
+          ],
         ),
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator(color: widget.accentColor))
+          ? _buildLoading()
           : _technicians.isEmpty
               ? _buildEmptyState()
-              : ListView.builder(
-                  padding: const EdgeInsets.all(20),
-                  itemCount: _technicians.length,
-                  itemBuilder: (context, index) {
-                    final tech = _technicians[index];
-                    return _buildTechCard(tech);
-                  },
-                ),
+              : _buildList(),
     );
   }
 
-  Widget _buildTechCard(Map<String, dynamic> tech) {
-    final bool isOnline = tech['est_en_ligne'] ?? false;
-    final String photoUrl = tech['photo_profil_url'] ?? tech['photo_url'] ?? '';
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          )
-        ],
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.all(15),
-        leading: Stack(
-          children: [
-            CircleAvatar(
-              radius: 30,
-              backgroundColor: Colors.grey[200],
-              backgroundImage: photoUrl.isNotEmpty ? NetworkImage(photoUrl) : null,
-              child: photoUrl.isEmpty ? const Icon(Icons.person, color: Colors.grey) : null,
-            ),
-            Positioned(
-              right: 0,
-              bottom: 0,
-              child: Container(
-                width: 16,
-                height: 16,
-                decoration: BoxDecoration(
-                  color: isOnline ? Colors.green : Colors.red,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 2.5),
-                ),
-              ),
-            ),
-          ],
-        ),
-        title: Text(
-          "${tech['prenom'] ?? ''} ${tech['nom_complet'] ?? ''}",
-          style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 16),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                Icon(Icons.location_on, size: 14, color: widget.accentColor),
-                const SizedBox(width: 4),
-                Text("${tech['commune'] ?? 'Zone non précisée'}", style: GoogleFonts.inter(fontSize: 13)),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text(
-              isOnline ? "Disponible maintenant" : "Hors ligne",
-              style: GoogleFonts.inter(
-                fontSize: 12, 
-                color: isOnline ? Colors.green : Colors.red[300],
-                fontWeight: FontWeight.w500
-              ),
-            ),
-          ],
-        ),
-        trailing: Container(
-          padding: const EdgeInsets.all(8),
+  Widget _buildLoading() {
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: 4,
+      itemBuilder: (_, __) => Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Container(
+          height: 90,
           decoration: BoxDecoration(
-            color: widget.accentColor.withValues(alpha: 0.1),
-            shape: BoxShape.circle,
+            color: const Color(0xFFE2E8F0),
+            borderRadius: BorderRadius.circular(20),
           ),
-          child: Icon(Icons.chat_rounded, color: widget.accentColor, size: 20),
         ),
-        onTap: () => _startConversation(tech),
       ),
     );
   }
 
-  void _startConversation(Map<String, dynamic> tech) {
-    // Prochaine étape : Logique pour créer la conversation et ouvrir le ChatScreen
-    debugPrint("Démarrer chat avec ${tech['id']}");
+  Widget _buildList() {
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+      physics: const BouncingScrollPhysics(),
+      itemCount: _technicians.length,
+      itemBuilder: (context, index) => CarteTechnicien(
+        tech: _technicians[index],
+        accentColor: widget.accentColor,
+        clientId: widget.clientId,
+        onTap: () => _ouvrirFiche(_technicians[index]),
+      ),
+    );
   }
 
   Widget _buildEmptyState() {
-    return const Center(
-      child: Text("Aucun technicien disponible pour ce métier."),
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.person_search_rounded, size: 64, color: Color(0xFFCBD5E1)),
+            const SizedBox(height: 20),
+            Text(
+              "Aucun technicien disponible",
+              style: GoogleFonts.poppins(
+                fontSize: 17,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF475569),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "Aucun prestataire certifié n'est encore référencé pour cette spécialité dans votre zone.",
+              textAlign: TextAlign.center,
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                color: const Color(0xFF94A3B8),
+                height: 1.5,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -72,12 +72,11 @@ class AuthService {
     }
   }
 
-  static const _webRedirectUrl = 'https://formelpro-app.vercel.app';
   static const _mobileRedirectUrl = 'formelpro://login-callback/';
 
   // 5. Connexion via Google OAuth (Supabase Auth)
   Future<void> signInWithGoogle() async {
-    const redirectTo = kIsWeb ? _webRedirectUrl : _mobileRedirectUrl;
+    final redirectTo = kIsWeb ? Uri.base.origin : _mobileRedirectUrl;
     debugPrint('[OAuth] signInWithGoogle — redirect: $redirectTo');
     await _supabase.auth.signInWithOAuth(
       OAuthProvider.google,

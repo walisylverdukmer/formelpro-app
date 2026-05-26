@@ -131,7 +131,7 @@ class _CarteTechnicienState extends State<CarteTechnicien> {
                     ),
                 ],
               ),
-              const SizedBox(width: 15),
+              const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -142,7 +142,10 @@ class _CarteTechnicienState extends State<CarteTechnicien> {
                           child: Text(
                             widget.tech['nom_complet'] ?? 'Anonyme',
                             style: GoogleFonts.poppins(
-                                fontWeight: FontWeight.bold, fontSize: 15),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                              color: const Color(0xFF0F172A),
+                            ),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -151,7 +154,7 @@ class _CarteTechnicienState extends State<CarteTechnicien> {
                           const Tooltip(
                             message: "Identité vérifiée",
                             child: Icon(Icons.verified_rounded,
-                                color: Colors.blue, size: 14),
+                                color: Color(0xFF3B82F6), size: 14),
                           ),
                         ],
                         if (isPremium) ...[
@@ -160,31 +163,54 @@ class _CarteTechnicienState extends State<CarteTechnicien> {
                         ],
                       ],
                     ),
+                    const SizedBox(height: 2),
                     Text(
                       widget.tech['metier_personnalise'] ?? 'Prestataire',
                       style: GoogleFonts.inter(
-                          fontSize: 12,
-                          color: widget.accentColor,
-                          fontWeight: FontWeight.w600),
+                        fontSize: 12,
+                        color: widget.accentColor,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                    const SizedBox(height: 4),
+                    if (widget.tech['savoir_faire'] != null &&
+                        (widget.tech['savoir_faire'] as String).isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        widget.tech['savoir_faire'],
+                        style: GoogleFonts.inter(
+                          fontSize: 11,
+                          color: const Color(0xFF94A3B8),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                    const SizedBox(height: 5),
                     Row(
                       children: [
                         const Icon(Icons.star_rounded,
-                            color: Colors.amber, size: 16),
-                        const SizedBox(width: 4),
+                            color: Colors.amber, size: 15),
+                        const SizedBox(width: 3),
                         Text(
                           "${widget.tech['score_global'] ?? '5.0'}",
-                          style: const TextStyle(
-                              fontSize: 12, fontWeight: FontWeight.bold),
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF1E293B),
+                          ),
                         ),
-                        const SizedBox(width: 10),
-                        const Icon(Icons.location_on,
-                            color: Colors.grey, size: 14),
-                        Text(
-                          " ${widget.tech['commune'] ?? 'Abidjan'}",
-                          style: const TextStyle(
-                              fontSize: 11, color: Colors.grey),
+                        const SizedBox(width: 8),
+                        const Icon(Icons.location_on_outlined,
+                            color: Color(0xFF94A3B8), size: 13),
+                        Flexible(
+                          child: Text(
+                            " ${widget.tech['commune'] ?? widget.tech['ville'] ?? '—'}",
+                            style: GoogleFonts.inter(
+                              fontSize: 11,
+                              color: const Color(0xFF94A3B8),
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                       ],
                     ),

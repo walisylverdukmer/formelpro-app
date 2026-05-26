@@ -142,10 +142,9 @@ class _DetailsTechnicienState extends State<DetailsTechnicien> {
             maxChildSize: 0.92,
             builder: (context, scrollController) {
               return Container(
-                decoration: BoxDecoration(
-                  color: const Color(0xFF0F172A),
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(35)),
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: ListView(
@@ -155,9 +154,9 @@ class _DetailsTechnicienState extends State<DetailsTechnicien> {
                     Center(
                       child: Container(
                         width: 40, height: 4,
-                        margin: const EdgeInsets.only(bottom: 25),
+                        margin: const EdgeInsets.only(bottom: 24),
                         decoration: BoxDecoration(
-                          color: Colors.white24,
+                          color: const Color(0xFFCBD5E1),
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
@@ -171,7 +170,7 @@ class _DetailsTechnicienState extends State<DetailsTechnicien> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(nom, style: GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
+                              Text(nom, style: GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.bold, color: const Color(0xFF0F172A))),
                               Text(metier.toUpperCase(), style: GoogleFonts.inter(fontSize: 13, color: widget.accentColor, fontWeight: FontWeight.w700, letterSpacing: 1.2)),
                             ],
                           ),
@@ -179,7 +178,7 @@ class _DetailsTechnicienState extends State<DetailsTechnicien> {
                         if (widget.tech['is_identite_verifiee'] == true)
                           const Tooltip(
                             message: "Identité vérifiée",
-                            child: Icon(Icons.verified, color: Colors.blue, size: 28),
+                            child: Icon(Icons.verified, color: Color(0xFF3B82F6), size: 28),
                           ),
                       ],
                     ),
@@ -191,7 +190,7 @@ class _DetailsTechnicienState extends State<DetailsTechnicien> {
                     _buildSectionTitle("À propos du prestataire"),
                     Text(
                       widget.tech['savoir_faire'] ?? "Ce professionnel n'a pas encore ajouté de description détaillée de son expertise.",
-                      style: GoogleFonts.inter(color: Colors.white70, height: 1.6, fontSize: 14),
+                      style: GoogleFonts.inter(color: const Color(0xFF475569), height: 1.6, fontSize: 14),
                     ),
 
                     const SizedBox(height: 25),
@@ -206,7 +205,7 @@ class _DetailsTechnicienState extends State<DetailsTechnicien> {
                         Expanded(
                           child: _buildActionButton(
                             "Message", Icons.chat_bubble_rounded,
-                            Colors.white.withValues(alpha: 0.1), Colors.white,
+                            const Color(0xFFF1F5F9), const Color(0xFF0F172A),
                             _startConversation,
                           ),
                         ),
@@ -255,7 +254,14 @@ class _DetailsTechnicienState extends State<DetailsTechnicien> {
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: Text(title, style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
+      child: Text(
+        title,
+        style: GoogleFonts.poppins(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          color: const Color(0xFF0F172A),
+        ),
+      ),
     );
   }
 
@@ -263,16 +269,16 @@ class _DetailsTechnicienState extends State<DetailsTechnicien> {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 18),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.04),
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+        color: const Color(0xFFF1F5F9),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           _buildStatItem("Note", rating.toStringAsFixed(1), Icons.star_rounded, Colors.amber),
-          Container(width: 1, height: 30, color: Colors.white10),
-          _buildStatItem("Missions", "$jobs", Icons.check_circle_rounded, Colors.greenAccent),
+          Container(width: 1, height: 30, color: const Color(0xFFE2E8F0)),
+          _buildStatItem("Missions", "$jobs", Icons.check_circle_rounded, const Color(0xFF22C55E)),
         ],
       ),
     );
@@ -285,11 +291,21 @@ class _DetailsTechnicienState extends State<DetailsTechnicien> {
           children: [
             Icon(icon, color: color, size: 20),
             const SizedBox(width: 6),
-            Text(val, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
+            Text(
+              val,
+              style: const TextStyle(
+                color: Color(0xFF0F172A),
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 4),
-        Text(label, style: const TextStyle(color: Colors.white38, fontSize: 12)),
+        Text(
+          label,
+          style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
+        ),
       ],
     );
   }
@@ -298,22 +314,32 @@ class _DetailsTechnicienState extends State<DetailsTechnicien> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.03),
-        border: Border.all(color: Colors.white10),
+        color: const Color(0xFFF1F5F9),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
         borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: widget.accentColor.withValues(alpha: 0.7), size: 18),
+          Icon(icon, color: widget.accentColor, size: 18),
           const SizedBox(width: 10),
-          Text(text, style: const TextStyle(color: Colors.white70, fontSize: 14)),
+          Text(
+            text,
+            style: const TextStyle(color: Color(0xFF475569), fontSize: 14),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildActionButton(String label, IconData icon, Color bg, Color textCol, VoidCallback onTap) {
+  Widget _buildActionButton(
+    String label,
+    IconData icon,
+    Color bg,
+    Color textCol,
+    VoidCallback onTap,
+  ) {
+    final bool hasShadow = textCol == Colors.white;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -324,8 +350,14 @@ class _DetailsTechnicienState extends State<DetailsTechnicien> {
           decoration: BoxDecoration(
             color: bg,
             borderRadius: BorderRadius.circular(18),
-            boxShadow: bg != Colors.white.withValues(alpha: 0.1)
-                ? [BoxShadow(color: bg.withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 6))]
+            boxShadow: hasShadow
+                ? [
+                    BoxShadow(
+                      color: bg.withValues(alpha: 0.35),
+                      blurRadius: 12,
+                      offset: const Offset(0, 6),
+                    )
+                  ]
                 : [],
           ),
           child: Row(
@@ -333,7 +365,14 @@ class _DetailsTechnicienState extends State<DetailsTechnicien> {
             children: [
               Icon(icon, color: textCol, size: 20),
               const SizedBox(width: 10),
-              Text(label, style: TextStyle(color: textCol, fontWeight: FontWeight.bold, fontSize: 15)),
+              Text(
+                label,
+                style: TextStyle(
+                  color: textCol,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                ),
+              ),
             ],
           ),
         ),

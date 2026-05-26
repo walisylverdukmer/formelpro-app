@@ -1,7 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:latlong2/latlong.dart';
 import '../../widgets/location_picker_widget.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -156,18 +155,24 @@ class _ChatScreenState extends State<ChatScreen> {
                 const SizedBox(height: 15),
                 InkWell(
                   onTap: () async {
-                    final LatLng? result = await Navigator.push(
+                    final result =
+                        await Navigator.push<Map<String, dynamic>>(
                       context,
                       MaterialPageRoute(
                         builder: (context) => LocationPickerWidget(
                           accentColor: widget.accentColor,
-                          onLocationSelected: (LatLng coords) {},
+                          paysCode: 'CIV',
                         ),
                       ),
                     );
                     if (result != null && mounted) {
+                      final parts = [
+                        result['ville'],
+                        result['commune'],
+                        result['quartier'],
+                      ].where((s) => s != null && (s as String).isNotEmpty).join(', ');
                       setModalState(() {
-                        detailController.text = "${result.latitude.toStringAsFixed(4)}, ${result.longitude.toStringAsFixed(4)}";
+                        detailController.text = parts;
                       });
                     }
                   },
