@@ -767,3 +767,48 @@ ALTER TABLE public.utilisateurs
 CREATE INDEX IF NOT EXISTS idx_utilisateurs_premium_ranking
   ON public.utilisateurs(pays, is_premium DESC, premium_level DESC, score_global DESC)
   WHERE role = 'technicien' AND disponible = true;
+
+
+-- =============================================================================
+-- 16. DEMANDES_SERVICE_DOMESTIQUE [À CRÉER]
+-- Services sensibles : ménagère, servante, serveuse — validation humaine obligatoire
+-- Exécuter dans Supabase SQL Editor
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS public.demandes_service_domestique (
+  id                  UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  demandeur_id        UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  type_service        TEXT NOT NULL CHECK (type_service IN ('menagere', 'servante', 'serveuse')),
+  type_prestation     TEXT,
+  nom_demandeur       TEXT NOT NULL,
+  telephone_demandeur TEXT,
+  ville               TEXT,
+  commune             TEXT,
+  description         TEXT,
+  date_souhaitee      TEXT,
+  statut              TEXT DEFAULT 'en_attente_validation'
+                        CHECK (statut IN ('en_attente_validation', 'en_cours_traitement', 'affecte', 'annule', 'cloture')),
+  enquete_effectuee   BOOLEAN DEFAULT false,
+  niveau_validation   INTEGER DEFAULT 0,
+  notes_admin         TEXT,
+  created_at          TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.demandes_service_domestique ENABLE ROW LEVEL SECURITY;
+
+-- Demandeur : voir ses propres demandes + en créer
+CREATE POLICY "dsd_select_own" ON public.demandes_service_domestique
+  FOR SELECT USING (auth.uid() = demandeur_id);
+
+CREATE POLICY "dsd_insert_own" ON public.demandes_service_domestique
+  FOR INSERT WITH CHECK (auth.uid() = demandeur_id);
+
+-- Admins : accès complet
+CREATE POLICY "dsd_admin_all" ON public.demandes_service_domestique
+  FOR ALL USING (
+    EXISTS (SELECT 1 FROM public.utilisateurs WHERE id = auth.uid() AND is_admin = true)
+  );
+
+-- Index pour admin dashboard
+CREATE INDEX IF NOT EXISTS idx_dsd_statut ON public.demandes_service_domestique(statut, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_dsd_type ON public.demandes_service_domestique(type_service, statut);

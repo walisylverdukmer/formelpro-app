@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../chat/chat_screen.dart';
+import '../booking/demande_service_domestique_page.dart';
 
 class DetailsTechnicien extends StatefulWidget {
   final Map<String, dynamic> tech;
@@ -16,6 +17,14 @@ class DetailsTechnicien extends StatefulWidget {
 
 class _DetailsTechnicienState extends State<DetailsTechnicien> {
   final _supabase = Supabase.instance.client;
+
+  static const _sensibleKeywords = ['ménag', 'servante', 'serveuse', 'femme de'];
+
+  bool get _isServiceSensible {
+    final metier =
+        (widget.tech['metier_personnalise'] ?? '').toString().toLowerCase();
+    return _sensibleKeywords.any((kw) => metier.contains(kw));
+  }
 
   // --- CHAT ---
   Future<void> _startConversation() async {
@@ -192,25 +201,63 @@ class _DetailsTechnicienState extends State<DetailsTechnicien> {
 
                     const SizedBox(height: 35),
 
-                    // BOUTON PRINCIPAL — CONTACTER
-                    _buildActionButton(
-                      "Contacter par message",
-                      Icons.chat_bubble_rounded,
-                      widget.accentColor, Colors.white,
-                      _startConversation,
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.lock_rounded, size: 13, color: Color(0xFF94A3B8)),
+                    // BOUTON PRINCIPAL — adapté au type de service
+                    if (_isServiceSensible) ...[
+                      Container(
+                        padding: const EdgeInsets.all(14),
+                        margin: const EdgeInsets.only(bottom: 14),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF22C55E).withValues(alpha: 0.06),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                              color: const Color(0xFF22C55E).withValues(alpha: 0.2)),
+                        ),
+                        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          const Icon(Icons.verified_user_rounded,
+                              color: Color(0xFF22C55E), size: 18),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              'Ce profil nécessite une validation FormelPro. Faites une demande encadrée pour être mis en relation.',
+                              style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  color: const Color(0xFF166534),
+                                  height: 1.4),
+                            ),
+                          ),
+                        ]),
+                      ),
+                      _buildActionButton(
+                        'Faire une demande encadrée',
+                        Icons.assignment_ind_rounded,
+                        const Color(0xFF22C55E), Colors.white,
+                        () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => DemandServiceDomestiquePage(
+                                accentColor: widget.accentColor),
+                          ),
+                        ),
+                      ),
+                    ] else ...[
+                      _buildActionButton(
+                        'Contacter par message',
+                        Icons.chat_bubble_rounded,
+                        widget.accentColor, Colors.white,
+                        _startConversation,
+                      ),
+                      const SizedBox(height: 12),
+                      Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                        const Icon(Icons.lock_rounded,
+                            size: 13, color: Color(0xFF94A3B8)),
                         const SizedBox(width: 6),
                         Text(
                           "L'appel se débloque après échange dans le chat",
-                          style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFF94A3B8)),
+                          style: GoogleFonts.inter(
+                              fontSize: 12, color: const Color(0xFF94A3B8)),
                         ),
-                      ],
-                    ),
+                      ]),
+                    ],
 
                     // BOUTON SIGNALER (discret, uniquement si ce n'est pas son propre profil)
                     if (!isOwnProfile) ...[

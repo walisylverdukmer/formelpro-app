@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../screens/booking/demande_service_domestique_page.dart';
 
 // Callback étendu : query métier + typePrestation optionnel + disponibleSeulement
 typedef OnServiceTap = void Function(
@@ -34,6 +35,7 @@ class ServicesRapidesWidget extends StatelessWidget {
       'color': Color(0xFF8B5CF6),
       'query': 'ménage',
       'type': 'menage',
+      'securise': true,
     },
     {
       'label': 'Électricien',
@@ -66,7 +68,12 @@ class ServicesRapidesWidget extends StatelessWidget {
     if (type == 'gaz') {
       _showGazSheet(context, query, color);
     } else if (type == 'menage') {
-      _showMenageSheet(context, query, color);
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => DemandServiceDomestiquePage(accentColor: color),
+        ),
+      );
     } else {
       onServiceTap(query, disponibleSeulement: false);
     }
@@ -83,23 +90,6 @@ class ServicesRapidesWidget extends StatelessWidget {
           onServiceTap(
             query,
             disponibleSeulement: dipoNow,
-          );
-        },
-      ),
-    );
-  }
-
-  void _showMenageSheet(BuildContext context, String query, Color color) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (_) => _MenagereSheet(
-        accentColor: color,
-        onSelect: (String type) {
-          onServiceTap(
-            query,
-            typePrestation: type,
-            disponibleSeulement: false,
           );
         },
       ),
@@ -155,6 +145,7 @@ class ServicesRapidesWidget extends StatelessWidget {
                 label: s['label'] as String,
                 imagePath: s['image'] as String?,
                 color: s['color'] as Color,
+                securise: s['securise'] as bool? ?? false,
                 onTap: () => _handleTap(context, s),
               );
             },
@@ -325,380 +316,11 @@ class _GazSheetState extends State<_GazSheet> {
   }
 }
 
-// ─── Sheet contextuelle : Femme de ménage ─────────────────────────────────────
-
-class _MenagereSheet extends StatefulWidget {
-  final Color accentColor;
-  final void Function(String typePrestation) onSelect;
-
-  const _MenagereSheet({
-    required this.accentColor,
-    required this.onSelect,
-  });
-
-  @override
-  State<_MenagereSheet> createState() => _MenagereSheetState();
-}
-
-class _MenagereSheetState extends State<_MenagereSheet> {
-  static const List<Map<String, dynamic>> _types = [
-    {
-      'label': 'Résidente',
-      'subtitle': "Vit à domicile chez l'employeur",
-      'icon': Icons.home_rounded,
-      'color': Color(0xFF8B5CF6),
-      'value': 'résidente',
-    },
-    {
-      'label': 'Journalière',
-      'subtitle': 'Travaille et rentre chaque soir',
-      'icon': Icons.wb_sunny_rounded,
-      'color': Color(0xFFF59E0B),
-      'value': 'journalière',
-    },
-    {
-      'label': 'Ponctuelle',
-      'subtitle': 'Ménage, vaisselle, lessive à la demande',
-      'icon': Icons.cleaning_services_rounded,
-      'color': Color(0xFF22C55E),
-      'value': 'ponctuelle',
-    },
-  ];
-
-  // null = étape 1 (choix type), non-null = étape 2 (formulaire)
-  String? _selectedType;
-
-  final _adresseCtrl = TextEditingController();
-  final _messageCtrl = TextEditingController();
-  bool _confirmed = false;
-
-  @override
-  void dispose() {
-    _adresseCtrl.dispose();
-    _messageCtrl.dispose();
-    super.dispose();
-  }
-
-  void _onTypeSelected(String type) {
-    setState(() => _selectedType = type);
-  }
-
-  void _onConfirm() {
-    setState(() => _confirmed = true);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-      ),
-      padding: EdgeInsets.only(
-        left: 24, right: 24, top: 20,
-        bottom: MediaQuery.of(context).viewInsets.bottom +
-            MediaQuery.of(context).padding.bottom +
-            24,
-      ),
-      child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 250),
-        child: _confirmed
-            ? _buildConfirmation()
-            : _selectedType == null
-                ? _buildTypeSelection()
-                : _buildForm(),
-      ),
-    );
-  }
-
-  Widget _buildHandle() {
-    return Center(
-      child: Container(
-        width: 40, height: 4,
-        margin: const EdgeInsets.only(bottom: 20),
-        decoration: BoxDecoration(
-            color: const Color(0xFFE2E8F0),
-            borderRadius: BorderRadius.circular(2)),
-      ),
-    );
-  }
-
-  Widget _buildTypeSelection() {
-    return Column(
-      key: const ValueKey('type'),
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildHandle(),
-        Row(children: [
-          Container(
-            width: 44, height: 44,
-            decoration: BoxDecoration(
-              color: const Color(0xFF8B5CF6).withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(Icons.cleaning_services_rounded,
-                color: Color(0xFF8B5CF6), size: 24),
-          ),
-          const SizedBox(width: 12),
-          Text(
-            'Type de prestation',
-            style: GoogleFonts.poppins(
-                fontSize: 17, fontWeight: FontWeight.w700,
-                color: const Color(0xFF0F172A)),
-          ),
-        ]),
-        const SizedBox(height: 20),
-        ..._types.map((t) => _TypeOption(
-              label: t['label'] as String,
-              subtitle: t['subtitle'] as String,
-              icon: t['icon'] as IconData,
-              color: t['color'] as Color,
-              onTap: () => _onTypeSelected(t['value'] as String),
-            )),
-        const SizedBox(height: 4),
-        TextButton(
-          onPressed: () {
-            Navigator.pop(context);
-            widget.onSelect('ménage');
-          },
-          child: Text('Voir toutes les ménagères',
-              style: GoogleFonts.inter(fontSize: 13, color: const Color(0xFF94A3B8))),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildForm() {
-    return Column(
-      key: const ValueKey('form'),
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildHandle(),
-        Row(children: [
-          GestureDetector(
-            onTap: () => setState(() => _selectedType = null),
-            child: const Icon(Icons.arrow_back_rounded, size: 22, color: Color(0xFF0F172A)),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              'Ménagère ${_selectedType ?? ''}',
-              style: GoogleFonts.poppins(
-                  fontSize: 17, fontWeight: FontWeight.w700,
-                  color: const Color(0xFF0F172A)),
-            ),
-          ),
-        ]),
-        const SizedBox(height: 6),
-        Text(
-          'Confirmez vos informations pour que notre équipe vous contacte.',
-          style: GoogleFonts.inter(fontSize: 13, color: const Color(0xFF64748B)),
-        ),
-        const SizedBox(height: 20),
-        TextField(
-          controller: _adresseCtrl,
-          onChanged: (_) => setState(() {}),
-          style: GoogleFonts.inter(fontSize: 13),
-          decoration: InputDecoration(
-            hintText: 'Votre adresse / quartier *',
-            hintStyle: GoogleFonts.inter(color: const Color(0xFF94A3B8), fontSize: 13),
-            prefixIcon: Icon(Icons.location_on_rounded,
-                color: widget.accentColor, size: 20),
-            border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: const BorderSide(color: Color(0xFFE2E8F0))),
-            enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: const BorderSide(color: Color(0xFFE2E8F0))),
-            focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide(color: widget.accentColor)),
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-          ),
-        ),
-        const SizedBox(height: 12),
-        TextField(
-          controller: _messageCtrl,
-          style: GoogleFonts.inter(fontSize: 13),
-          maxLines: 3,
-          decoration: InputDecoration(
-            hintText: 'Message complémentaire (horaires, exigences...)',
-            hintStyle: GoogleFonts.inter(color: const Color(0xFF94A3B8), fontSize: 13),
-            border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: const BorderSide(color: Color(0xFFE2E8F0))),
-            enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: const BorderSide(color: Color(0xFFE2E8F0))),
-            focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: BorderSide(color: widget.accentColor)),
-            contentPadding: const EdgeInsets.all(14),
-          ),
-        ),
-        const SizedBox(height: 20),
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: _adresseCtrl.text.trim().isEmpty ? null : _onConfirm,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF8B5CF6),
-              disabledBackgroundColor: const Color(0xFFE2E8F0),
-              padding: const EdgeInsets.symmetric(vertical: 15),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16)),
-              elevation: 0,
-            ),
-            child: Text('Envoyer ma demande',
-                style: GoogleFonts.inter(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white)),
-          ),
-        ),
-        // Le bouton déclenche la confirmation sans aller vers la liste des techs
-      ],
-    );
-  }
-
-  Widget _buildConfirmation() {
-    return Column(
-      key: const ValueKey('confirm'),
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _buildHandle(),
-        Container(
-          width: 64, height: 64,
-          decoration: BoxDecoration(
-            color: const Color(0xFF8B5CF6).withValues(alpha: 0.1),
-            shape: BoxShape.circle,
-          ),
-          child: const Icon(Icons.check_circle_rounded,
-              color: Color(0xFF8B5CF6), size: 36),
-        ),
-        const SizedBox(height: 16),
-        Text('Demande envoyée !',
-            style: GoogleFonts.poppins(
-                fontSize: 20, fontWeight: FontWeight.bold,
-                color: const Color(0xFF0F172A))),
-        const SizedBox(height: 12),
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: const Color(0xFF8B5CF6).withValues(alpha: 0.06),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-                color: const Color(0xFF8B5CF6).withValues(alpha: 0.15)),
-          ),
-          child: Text(
-            'Merci.\nNotre équipe vous recontactera sous peu pour un entretien et une sélection adaptée de ménagère.',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.inter(
-                fontSize: 14, color: const Color(0xFF334155), height: 1.6),
-          ),
-        ),
-        const SizedBox(height: 24),
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF8B5CF6),
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16)),
-              elevation: 0,
-            ),
-            child: Text('Fermer',
-                style: GoogleFonts.inter(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white)),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _TypeOption extends StatelessWidget {
-  final String label;
-  final String subtitle;
-  final IconData icon;
-  final Color color;
-  final VoidCallback onTap;
-
-  const _TypeOption({
-    required this.label,
-    required this.subtitle,
-    required this.icon,
-    required this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Material(
-        color: color.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(16),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            child: Row(
-              children: [
-                Container(
-                  width: 42,
-                  height: 42,
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(icon, color: color, size: 22),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        label,
-                        style: GoogleFonts.poppins(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF0F172A)),
-                      ),
-                      Text(
-                        subtitle,
-                        style: GoogleFonts.inter(
-                            fontSize: 12, color: const Color(0xFF64748B)),
-                      ),
-                    ],
-                  ),
-                ),
-                Icon(Icons.arrow_forward_ios_rounded,
-                    size: 14, color: color.withValues(alpha: 0.6)),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ─── Card service rapide ───────────────────────────────────────────────────────
-
 class _ServiceCard extends StatelessWidget {
   final String label;
   final String? imagePath;
   final Color color;
+  final bool securise;
   final VoidCallback onTap;
 
   const _ServiceCard({
@@ -706,6 +328,7 @@ class _ServiceCard extends StatelessWidget {
     required this.imagePath,
     required this.color,
     required this.onTap,
+    this.securise = false,
   });
 
   @override
@@ -798,8 +421,32 @@ class _ServiceCard extends StatelessWidget {
                         color: color.withValues(alpha: 0.15),
                         shape: BoxShape.circle,
                       ),
-                      child:
-                          Icon(Icons.handyman_rounded, color: color, size: 18),
+                      child: Icon(Icons.handyman_rounded, color: color, size: 18),
+                    ),
+                  ),
+                ),
+              if (securise)
+                Positioned(
+                  top: 5,
+                  right: 5,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF22C55E).withValues(alpha: 0.9),
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.verified_user_rounded,
+                            color: Colors.white, size: 7),
+                        SizedBox(width: 2),
+                        Text('Sécurisé',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 6,
+                                fontWeight: FontWeight.bold)),
+                      ],
                     ),
                   ),
                 ),
