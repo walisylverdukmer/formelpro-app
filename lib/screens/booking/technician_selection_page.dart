@@ -176,24 +176,46 @@ class _TechnicianSelectionPageState extends State<TechnicianSelectionPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.person_search_rounded, size: 64, color: Color(0xFFCBD5E1)),
-            const SizedBox(height: 20),
+            Container(
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                color: widget.accentColor.withValues(alpha: 0.08),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.person_search_rounded, size: 52,
+                  color: widget.accentColor.withValues(alpha: 0.45)),
+            ),
+            const SizedBox(height: 24),
             Text(
-              "Aucun technicien disponible",
+              "Aucun expert trouvé\npour ce métier",
+              textAlign: TextAlign.center,
               style: GoogleFonts.poppins(
                 fontSize: 17,
                 fontWeight: FontWeight.w600,
-                color: const Color(0xFF475569),
+                color: const Color(0xFF334155),
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             Text(
-              "Aucun prestataire certifié n'est encore référencé pour cette spécialité dans votre zone.",
+              "Aucun prestataire certifié n'est encore référencé pour « ${widget.categoryName} » dans votre zone.",
               textAlign: TextAlign.center,
               style: GoogleFonts.inter(
                 fontSize: 14,
                 color: const Color(0xFF94A3B8),
                 height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 28),
+            OutlinedButton.icon(
+              onPressed: () => Navigator.pop(context),
+              icon: const Icon(Icons.arrow_back_rounded, size: 16),
+              label: const Text('Retour aux catégories'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: widget.accentColor,
+                side: BorderSide(color: widget.accentColor),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
               ),
             ),
           ],

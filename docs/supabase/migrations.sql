@@ -274,6 +274,7 @@ CREATE INDEX IF NOT EXISTS idx_avis_tech ON public.avis USING btree (tech_id);
 
 -- Trigger existant — appelle la fonction calculer_reputation_technicien()
 -- (fonction à créer si elle n'existe pas encore — voir bloc FONCTIONS ci-dessous)
+DROP TRIGGER IF EXISTS trigger_update_reputation ON public.avis;
 CREATE TRIGGER trigger_update_reputation
     AFTER INSERT OR UPDATE ON avis
     FOR EACH ROW EXECUTE FUNCTION calculer_reputation_technicien();
@@ -302,6 +303,7 @@ CREATE INDEX IF NOT EXISTS idx_notif_user ON public.notifications USING btree (u
 
 -- Trigger existant : déclenche l'Edge Function send-push-notification
 -- (déjà en place en production — NE PAS recréer si la table existe déjà)
+DROP TRIGGER IF EXISTS "send-push-on-insert" ON public.notifications;
 CREATE TRIGGER "send-push-on-insert"
     AFTER INSERT ON notifications
     FOR EACH ROW EXECUTE FUNCTION supabase_functions.http_request(
@@ -434,6 +436,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+DROP TRIGGER IF EXISTS trigger_increment_transactions ON public.transactions;
 CREATE TRIGGER trigger_increment_transactions
     AFTER UPDATE ON public.transactions
     FOR EACH ROW EXECUTE FUNCTION public.increment_total_transactions();
@@ -568,6 +571,7 @@ BEGIN
 END;
 $$;
 
+DROP TRIGGER IF EXISTS trigger_notifier_admins_nouveau_doc ON public.documents_verification;
 CREATE TRIGGER trigger_notifier_admins_nouveau_doc
   AFTER INSERT ON public.documents_verification
   FOR EACH ROW EXECUTE FUNCTION public.notifier_admins_nouveau_doc();
@@ -619,6 +623,7 @@ BEGIN
 END;
 $$;
 
+DROP TRIGGER IF EXISTS trigger_notifier_tech_statut_doc ON public.documents_verification;
 CREATE TRIGGER trigger_notifier_tech_statut_doc
   AFTER UPDATE OF statut ON public.documents_verification
   FOR EACH ROW EXECUTE FUNCTION public.notifier_tech_statut_doc();

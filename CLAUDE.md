@@ -30,9 +30,10 @@
 - **Marchés :** Côte d'Ivoire (`CIV`) + Cameroun (`CMR`)
 - **Backend :** Supabase (PostgreSQL + Auth + Realtime + Storage + Edge Functions)
 - **Notifications :** Firebase Cloud Messaging (FCM)
-- **Identité visuelle :** "Soft Premium" — fond clair, coins arrondis, ombres légères
+- **Identité visuelle :** "Soft Premium" — fonds image pays, coins arrondis, ombres légères
 - **Thème pays :** Orange `#E67E22` (CIV) / Rouge `#CE1126` (CMR)
 - **Devises :** FCFA (toujours suffixer les montants)
+- **Web :** Portail recrutement HTML standalone déployé sur Vercel (`/devenir-prestataire`) — hors Flutter
 
 ---
 
@@ -44,8 +45,9 @@
 flutter run --dart-define-from-file=dart_defines.json                                                           # Lancer l'app
 flutter build apk --split-per-abi --dart-define-from-file=dart_defines.json                                    # APK debug
 flutter build apk --release --obfuscate --split-debug-info=symbols/ --dart-define-from-file=dart_defines.json  # APK release
+flutter build web --dart-define-from-file=dart_defines.json                                                    # Build web (Vercel)
 flutter clean && flutter pub get                                                                                 # Nettoyer + réinstaller
-flutter analyze                                                                                                  # Analyse statique
+flutter analyze                                                                                                  # Analyse statique (doit retourner 0 issues)
 flutter pub get                                                                                                  # Après modification pubspec.yaml
 ```
 
@@ -514,8 +516,13 @@ Préparer cette migration en :
 | Fichier | Rôle |
 |---------|------|
 | `lib/services/notification_router.dart` | `navigatorKey` global + `routeFromNotification()` — navigation FCM hors widget tree |
-| `lib/screens/dashboard/verification_documents_page.dart` | Upload docs identité tech + statut par document — nécessite SQL §13 |
-| `lib/screens/admin/admin_documents_page.dart` | Validation/rejet docs par admin — nécessite SQL §14, accès via `is_admin=true` |
+| `lib/screens/dashboard/verification_documents_page.dart` | Upload docs identité tech + statut par document — SQL §13 exécuté |
+| `lib/screens/admin/admin_documents_page.dart` | Validation/rejet docs par admin — SQL §14 exécuté, accès via `is_admin=true` |
 | `lib/widgets/stats_dashboard_tech.dart` | Revenus FCFA + graphique mensuel (6 mois) — chargé dans `accueil_technicien.dart` |
 | `lib/widgets/filtres_techniciens.dart` | Model `FiltresTechniciens` + bottom sheet filtres avancés |
-| `lib/widgets/categories_chips.dart` | Chips catégories **DB-driven** — reçoit `categories: List<Map>` + `activeCatId` + `onSelect(id, nom)` — icon mapper par nom — filtre via `categorieId` réel (pas de ilike) |
+| `lib/widgets/categories_chips.dart` | Cartes image **96×116px DB-driven** — reçoit `categories: List<Map>` + `activeCatId` + `onSelect(id, nom)` — image mapper par nom — filtre via `categorieId` réel (pas de ilike) |
+| `lib/widgets/services_rapides_widget.dart` | 5 boutons 1-clic avec images métiers — filtre via `categorieNom` ilike (fallback quand pas de categorieId) |
+| `lib/widgets/carte_technicien.dart` | Card technicien — avatar 76×76px `borderRadius(14)` + `_DisponibiliteBadge` + favori cœur |
+| `web/devenir-prestataire.html` | Portail recrutement HTML standalone — Supabase JS CDN — zéro Flutter — mobile-first |
+| `vercel.json` | `outputDirectory: build/web` + SPA catch-all `→ /index.html` — cleanUrls pour `.html` statiques |
+| `docs/supabase/migrations.sql` | Toutes les migrations SQL — triggers idempotents (`DROP TRIGGER IF EXISTS`) — **remplacer `<SERVICE_ROLE_KEY>` ligne ~307** |

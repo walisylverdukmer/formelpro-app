@@ -8,6 +8,7 @@ import 'package:formelpro/widgets/filtres_techniciens.dart';
 import 'package:formelpro/widgets/services_rapides_widget.dart';
 import 'package:formelpro/widgets/zone_stats_widget.dart';
 import 'package:formelpro/screens/dashboard/details_technicien.dart';
+import 'package:formelpro/screens/booking/technician_selection_page.dart';
 
 class AccueilClient extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -326,20 +327,32 @@ class _AccueilClientState extends State<AccueilClient>
                 activeCatId: _filtres.categorieId,
                 categories: _topCategories,
                 onSelect: (id, nom) {
-                  setState(() {
-                    _filtres = _filtres.categorieId == id
-                        ? FiltresTechniciens(
-                            disponibleSeulement: _filtres.disponibleSeulement,
-                            noteMin: _filtres.noteMin,
-                          )
-                        : FiltresTechniciens(
-                            categorieId: id,
-                            categorieNom: nom,
-                            disponibleSeulement: _filtres.disponibleSeulement,
-                            noteMin: _filtres.noteMin,
-                          );
-                  });
-                  _fetchTechniciens();
+                  // Premier tap : filtre en place + scroll vers les résultats
+                  // Deuxième tap sur la même carte : ouvre la page dédiée
+                  if (_filtres.categorieId == id) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => TechnicianSelectionPage(
+                          categoryName: nom,
+                          categoryId: id,
+                          pays: pays,
+                          accentColor: primaryColor,
+                          clientId: widget.userData['id']?.toString(),
+                        ),
+                      ),
+                    );
+                  } else {
+                    setState(() {
+                      _filtres = FiltresTechniciens(
+                        categorieId: id,
+                        categorieNom: nom,
+                        disponibleSeulement: _filtres.disponibleSeulement,
+                        noteMin: _filtres.noteMin,
+                      );
+                    });
+                    _fetchTechniciens();
+                  }
                 },
               ),
               const SizedBox(height: 28),
@@ -591,56 +604,7 @@ class _AccueilClientState extends State<AccueilClient>
       );
     }
     if (_techniciens.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 40),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              _filtres.actif
-                  ? Icons.filter_list_off_rounded
-                  : Icons.search_off_rounded,
-              size: 52,
-              color: const Color(0xFFCBD5E1),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              _filtres.actif
-                  ? "Aucun technicien pour ces critères."
-                  : "Aucun technicien disponible.",
-              style: GoogleFonts.poppins(
-                color: const Color(0xFF475569),
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            if (_filtres.actif) ...[
-              const SizedBox(height: 6),
-              Text(
-                "Essayez d'élargir vos filtres.",
-                style: GoogleFonts.inter(
-                  color: const Color(0xFF94A3B8),
-                  fontSize: 13,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              OutlinedButton(
-                onPressed: _resetFilters,
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: primaryColor,
-                  side: BorderSide(color: primaryColor),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text("Réinitialiser les filtres"),
-              ),
-            ],
-          ],
-        ),
-      );
+      return _buildEmptyState(primaryColor);
     }
 
     return ListView.builder(
@@ -653,6 +617,82 @@ class _AccueilClientState extends State<AccueilClient>
         accentColor: primaryColor,
         clientId: widget.userData['id']?.toString(),
         onTap: () => _ouvrirFiche(_techniciens[i], primaryColor),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(Color primaryColor) {
+    final bool hasFilter = _filtres.actif;
+    final bool hasCat = _filtres.categorieNom != null || _filtres.categorieId != null;
+
+    String title;
+    String subtitle;
+    IconData icon;
+
+    if (hasCat) {
+      title = "Aucun expert trouvé pour ce métier";
+      subtitle = "Aucun prestataire certifié n'est encore référencé pour ce service dans votre zone.";
+      icon = Icons.person_search_rounded;
+    } else if (hasFilter) {
+      title = "Aucun résultat";
+      subtitle = "Aucun technicien ne correspond à vos critères de recherche.";
+      icon = Icons.filter_list_off_rounded;
+    } else {
+      title = "Aucun technicien disponible";
+      subtitle = "Aucun prestataire n'est encore référencé dans votre zone. Revenez bientôt !";
+      icon = Icons.groups_rounded;
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 96,
+            height: 96,
+            decoration: BoxDecoration(
+              color: primaryColor.withValues(alpha: 0.08),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 48, color: primaryColor.withValues(alpha: 0.5)),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            title,
+            style: GoogleFonts.poppins(
+              color: const Color(0xFF334155),
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            subtitle,
+            style: GoogleFonts.inter(
+              color: const Color(0xFF94A3B8),
+              fontSize: 13,
+              height: 1.5,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          if (hasFilter) ...[
+            const SizedBox(height: 20),
+            OutlinedButton.icon(
+              onPressed: _resetFilters,
+              icon: const Icon(Icons.refresh_rounded, size: 16),
+              label: const Text("Réinitialiser les filtres"),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: primaryColor,
+                side: BorderSide(color: primaryColor),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

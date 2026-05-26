@@ -169,20 +169,50 @@
     // ── PWA install prompt ──
     var deferredPrompt = null;
 
+    // Détection : app déjà installée en mode standalone (PWA / TWA)
+    var isStandalone = window.matchMedia('(display-mode: standalone)').matches
+        || window.navigator.standalone === true
+        || document.referrer.startsWith('android-app://');
+
+    // Persistance du refus : ne pas re-proposer si l'utilisateur a déjà fermé
+    var wasDismissed = localStorage.getItem('fp-pwa-dismissed') === '1';
+
+    function _shouldShowBanner() {
+      return !isStandalone && !wasDismissed && deferredPrompt !== null;
+    }
+
     window.addEventListener('beforeinstallprompt', function (e) {
       e.preventDefault();
       deferredPrompt = e;
-      var banner = document.getElementById('pwa-banner');
-      if (banner) banner.style.display = 'flex';
+      if (_shouldShowBanner()) {
+        var banner = document.getElementById('pwa-banner');
+        if (banner) banner.style.display = 'flex';
+      }
     });
 
+    // Après installation réussie : masquer définitivement
     window.addEventListener('appinstalled', function () {
       var banner = document.getElementById('pwa-banner');
       if (banner) banner.style.display = 'none';
       deferredPrompt = null;
+      localStorage.setItem('fp-pwa-dismissed', '1');
+    });
+
+    // Masquer si passage en standalone après chargement
+    window.matchMedia('(display-mode: standalone)').addEventListener('change', function (e) {
+      if (e.matches) {
+        var banner = document.getElementById('pwa-banner');
+        if (banner) banner.style.display = 'none';
+      }
     });
 
     document.addEventListener('DOMContentLoaded', function () {
+      // Si déjà en standalone au chargement : s'assurer que la bannière est cachée
+      if (isStandalone) {
+        var banner = document.getElementById('pwa-banner');
+        if (banner) banner.style.display = 'none';
+      }
+
       var installBtn = document.getElementById('pwa-install-btn');
       var closeBtn = document.getElementById('pwa-close-btn');
 
@@ -190,10 +220,13 @@
         installBtn.addEventListener('click', function () {
           if (!deferredPrompt) return;
           deferredPrompt.prompt();
-          deferredPrompt.userChoice.then(function () {
+          deferredPrompt.userChoice.then(function (choice) {
             deferredPrompt = null;
             var banner = document.getElementById('pwa-banner');
             if (banner) banner.style.display = 'none';
+            if (choice.outcome === 'accepted') {
+              localStorage.setItem('fp-pwa-dismissed', '1');
+            }
           });
         });
       }
@@ -202,6 +235,11 @@
         closeBtn.addEventListener('click', function () {
           var banner = document.getElementById('pwa-banner');
           if (banner) banner.style.display = 'none';
+          // Mémoriser le refus pendant 7 jours
+          localStorage.setItem('fp-pwa-dismissed', '1');
+          setTimeout(function () {
+            localStorage.removeItem('fp-pwa-dismissed');
+          }, 7 * 24 * 60 * 60 * 1000);
         });
       }
     });

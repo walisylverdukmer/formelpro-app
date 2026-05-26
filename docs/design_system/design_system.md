@@ -1,6 +1,6 @@
 # Design System — FormelPro "Soft Premium"
 
-*Dernière mise à jour : 2026-05-20*
+*Dernière mise à jour : 2026-05-26 — Session 8 : withValues migration, image cards, fonds écrans, badges disponibilité*
 
 ---
 
@@ -54,8 +54,8 @@ Color accentColor(String pays) {
 // Variante light pour fonds
 Color accentColorLight(String pays) {
   return pays == 'CIV'
-      ? const Color(0xFFE67E22).withOpacity(0.15)
-      : const Color(0xFFCE1126).withOpacity(0.15);
+      ? const Color(0xFFE67E22).withValues(alpha: 0.15)
+      : const Color(0xFFCE1126).withValues(alpha: 0.15);
 }
 ```
 
@@ -135,7 +135,7 @@ const kShadowLight = [
 // Ombre bouton accent (couleur dépend de accentColor)
 List<BoxShadow> accentShadow(Color accent) => [
   BoxShadow(
-    color: accent.withOpacity(0.30),
+    color: accent.withValues(alpha: 0.30),
     blurRadius: 12,
     offset: const Offset(0, 6),
   )
@@ -201,9 +201,9 @@ GoogleFonts.inter(fontSize: 13, color: accentColor)
 Container(
   padding: const EdgeInsets.all(20),
   decoration: BoxDecoration(
-    color: Colors.white.withOpacity(0.04),
+    color: Colors.white.withValues(alpha: 0.04),
     borderRadius: BorderRadius.circular(20),
-    border: Border.all(color: Colors.white.withOpacity(0.08)),
+    border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
   ),
   child: ...,
 )
@@ -215,11 +215,11 @@ Container(
 Container(
   padding: const EdgeInsets.all(20),
   decoration: BoxDecoration(
-    color: Colors.white.withOpacity(0.05),
+    color: Colors.white.withValues(alpha: 0.05),
     borderRadius: BorderRadius.circular(22),
-    border: Border.all(color: accentColor.withOpacity(0.25)),
+    border: Border.all(color: accentColor.withValues(alpha: 0.25)),
     boxShadow: [
-      BoxShadow(color: accentColor.withOpacity(0.08), blurRadius: 16, offset: const Offset(0, 4)),
+      BoxShadow(color: accentColor.withValues(alpha: 0.08), blurRadius: 16, offset: const Offset(0, 4)),
     ],
   ),
   child: ...,
@@ -251,7 +251,7 @@ ElevatedButton(
 OutlinedButton(
   onPressed: onPressed,
   style: OutlinedButton.styleFrom(
-    side: BorderSide(color: Colors.white.withOpacity(0.15)),
+    side: BorderSide(color: Colors.white.withValues(alpha: 0.15)),
     padding: const EdgeInsets.symmetric(vertical: 14),
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
   ),
@@ -270,14 +270,14 @@ TextField(
     hintText: "Saisir...",
     hintStyle: GoogleFonts.inter(color: Colors.white38),
     filled: true,
-    fillColor: Colors.white.withOpacity(0.05),
+    fillColor: Colors.white.withValues(alpha: 0.05),
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(14),
-      borderSide: BorderSide(color: Colors.white.withOpacity(0.10)),
+      borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.10)),
     ),
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(14),
-      borderSide: BorderSide(color: Colors.white.withOpacity(0.10)),
+      borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.10)),
     ),
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(14),
@@ -294,9 +294,9 @@ TextField(
 Container(
   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
   decoration: BoxDecoration(
-    color: statutColor.withOpacity(0.15),
+    color: statutColor.withValues(alpha: 0.15),
     borderRadius: BorderRadius.circular(20),
-    border: Border.all(color: statutColor.withOpacity(0.30)),
+    border: Border.all(color: statutColor.withValues(alpha: 0.30)),
   ),
   child: Text(
     label,
@@ -369,14 +369,56 @@ AnimatedOpacity(
   child: Container(
     height: 80,
     decoration: BoxDecoration(
-      color: Colors.white.withOpacity(0.08),
+      color: Colors.white.withValues(alpha: 0.08),
       borderRadius: BorderRadius.circular(20),
     ),
   ),
 )
 ```
 
-### 7.10 État vide (Empty State)
+### 7.10 Avatar Technicien (76×76px arrondi)
+
+```dart
+ClipRRect(
+  borderRadius: BorderRadius.circular(14),
+  child: photoUrl != null
+      ? Image.network(photoUrl, width: 76, height: 76, fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => _buildAvatarFallback())
+      : _buildAvatarFallback(),
+)
+
+Widget _buildAvatarFallback() => Container(
+  width: 76, height: 76,
+  decoration: BoxDecoration(
+    color: accentColor.withValues(alpha: 0.1),
+    borderRadius: BorderRadius.circular(14),
+  ),
+  child: Icon(Icons.person_rounded, color: accentColor, size: 36),
+);
+```
+
+### 7.11 Badge Disponibilité
+
+```dart
+// Trois états — chip coloré 10px
+if (isOnline)    _chip(Color(0xFF22C55E), 'En ligne maintenant');
+if (disponible)  _chip(Color(0xFF3B82F6), 'Disponible');
+else             _chip(Color(0xFF94A3B8), 'Indisponible');
+
+Widget _chip(Color color, String label) => Container(
+  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+  decoration: BoxDecoration(
+    color: color.withValues(alpha: 0.1),
+    borderRadius: BorderRadius.circular(8),
+    border: Border.all(color: color.withValues(alpha: 0.25)),
+  ),
+  child: Text(label, style: TextStyle(
+    fontSize: 10, fontWeight: FontWeight.w600, color: color,
+  )),
+);
+```
+
+### 7.12 État vide (Empty State)
 
 ```dart
 Center(
@@ -404,24 +446,62 @@ Center(
 
 ## 8. FONDS D'ÉCRANS PAR CONTEXTE
 
+### 8.1 Mapping assets → écrans
+
+| Asset | Écran | Overlay |
+|-------|-------|---------|
+| `assets/images/login_bg.jpeg` | Login (`page_connexion_principale.dart`) | Gradient `[0x77000000, 0xDD0F172A]` |
+| `assets/images/fond_ci.jpeg` | Dashboard client CIV | Blanc 88% (`Color(0xFFF8FAFC).withValues(alpha: 0.88)`) |
+| `assets/images/fond_cmr.jpeg` | Dashboard client CMR | Blanc 88% |
+| `assets/images/fond_ci_T.jpeg` | Dashboard tech CIV | Dark 85% (`0xFF0F172A` alpha 0.85) + BackdropFilter blur 30 |
+| `assets/images/fond_cmr_T.jpeg` | Dashboard tech CMR | Dark 85% + BackdropFilter blur 30 |
+
+### 8.2 Pattern fond image avec overlay (écran clair)
+
 ```dart
-// Auth / Choix pays
-assets/images/choix_drapeau.jpeg
-assets/images/ci.jpg (CIV)
-assets/images/cmr.jpg (CMR)
-
-// Dashboard fond par pays
-assets/images/fond_ci.jpeg   (CIV — client)
-assets/images/fond_cmr.jpeg  (CMR — client)
-assets/images/fond_ci_T.jpeg  (CIV — technicien)
-assets/images/fond_cmr_T.jpeg (CMR — technicien)
-
-// Catégories
-assets/images/fond_3.jpeg    (Urgence & Travaux)
-assets/images/fond_hy.jpg   (Maison & Hygiène)
-assets/images/fond_ga.jpg   (Évènements & Gastro)
-assets/images/fond_lo.jpg   (Logistique & Gaz)
+// Dashboard client — fond image + overlay clair pour lisibilité des cartes blanches
+Scaffold(
+  backgroundColor: const Color(0xFF0F172A),
+  body: Stack(
+    children: [
+      Positioned.fill(
+        child: Image.asset(bgImage, fit: BoxFit.cover),
+      ),
+      Positioned.fill(
+        child: Container(
+          color: const Color(0xFFF8FAFC).withValues(alpha: 0.88),
+        ),
+      ),
+      // Contenu principal
+    ],
+  ),
+)
 ```
+
+### 8.3 Catégories — image cards 96×116px
+
+```dart
+// categories_chips.dart — mapping nom → image asset
+static String? _imageFor(String nom) {
+  final n = nom.toLowerCase();
+  if (n.contains('élec') || n.contains('electr')) return 'assets/images/categories/fond_energie.jpg';
+  if (n.contains('bâtiment') || n.contains('menuis')) return 'assets/images/categories/fond_batiment.jpg';
+  if (n.contains('livraison') || n.contains('gaz')) return 'assets/images/categories/fond_livraison.jpg';
+  if (n.contains('ménage') || n.contains('service')) return 'assets/images/categories/fond_services.jpg';
+  if (n.contains('plomb') || n.contains('maison')) return 'assets/images/categories/fond_maison.jpg';
+  return null; // → fallback gradient
+}
+```
+
+### 8.4 Services rapides — mapping query → image
+
+| Service | Query | Asset |
+|---------|-------|-------|
+| Livraison gaz | `'gaz'` | `assets/images/metiers/fond_lovraison_gaz.jpg` |
+| Femme de ménage | `'ménage'` | `assets/images/metiers/fond_menagegère.jpg` |
+| Électricien | `'électricité'` | `assets/images/metiers/Fond_electricité.jpg` |
+| Plombier | `'plomberie'` | `null` → icône `Icons.handyman_rounded` |
+| Menuisier | `'menuiserie'` | `null` → icône `Icons.handyman_rounded` |
 
 ---
 

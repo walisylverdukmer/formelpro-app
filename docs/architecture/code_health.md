@@ -1,6 +1,6 @@
 # Code Health & Dette Technique — FormelPro
 
-*Dernière mise à jour : 2026-05-20 — Session 4 : FCM routing, verification page, admin page*
+*Dernière mise à jour : 2026-05-26 — Session 8 : UI refonte visuelle, portail web, Vercel fix, SQL idempotent*
 
 ---
 
@@ -8,10 +8,10 @@
 
 | Catégorie | Score | Détail |
 |-----------|-------|--------|
-| Architecture | 7/10 | Séparation screens/widgets/services correcte mais quelques erreurs de placement |
-| Qualité code | 7/10 | Cohérent, lisible, mais quelques doublons et fichiers surdimensionnés |
-| Sécurité | 6/10 | RLS ✅ mais secrets hardcodés ⚠️ |
-| Maintenabilité | 7/10 | Conventions respectées, documentation manquait (corrigée) |
+| Architecture | 8/10 | Séparation screens/widgets/services propre — doublons résolus, web/ séparé |
+| Qualité code | 8/10 | Cohérent, lisible, `withValues(alpha:)` 100%, `flutter analyze` 0 issues |
+| Sécurité | 7/10 | RLS ✅, secrets dart_defines ✅, bucket Storage et <SERVICE_ROLE_KEY> à finaliser |
+| Maintenabilité | 8/10 | Conventions respectées, documentation à jour, migrations idempotentes |
 | Performance | 7/10 | StreamBuilders corrects, quelques requêtes trop larges |
 
 ---
@@ -100,8 +100,8 @@ Fichiers dépassant 300 lignes — candidats à l'extraction de sous-widgets :
 | `chat_screen.dart` | ~384 | Widget `_MessageBubble`, widget `_ChatInput` |
 | `main_dashboard.dart` | ~360 | Widget `_DashboardTab`, logique FCM → service |
 | `profil_tab.dart` | ~354 | Widget `_EditModal`, widget `_ProfileHeader` |
-| `accueil_client.dart` | ~330 | Widget `_TechFilter`, logique chargement → service |
-| `services/request_form_page.dart` | ~353 | À déplacer + extraire formulaire |
+| `accueil_client.dart` | ~380 | Widget `_TechFilter`, logique chargement → service |
+| `web/devenir-prestataire.html` | ~350 | HTML monolithique — acceptable car standalone |
 
 ---
 
@@ -159,14 +159,15 @@ Certains `try/catch` n'affichent pas d'erreur à l'utilisateur — ils `debugPri
 
 ## 5. PLAN DE REFACTORING RECOMMANDÉ
 
-### Priorité immédiate (ne pas bloquer le dev fonctionnel)
-1. Corriger le statut `'Confirmé'` → `'accepte'` dans mission_detail_page.dart
-2. Corriger les filtres pays `'CI'`/`'CM'` → `'CIV'`/`'CMR'`
+### Priorité immédiate
+1. ~~Corriger le statut `'Confirmé'` → `'accepte'`~~ ✅ corrigé
+2. ~~Corriger les filtres pays `'CI'`/`'CM'` → `'CIV'`/`'CMR'`~~ ✅ corrigé
+3. Remplacer `<SERVICE_ROLE_KEY>` dans migrations.sql ligne ~307
 
 ### Sprint refactoring dédié (1 journée)
-1. Supprimer `tech_dashboard.dart` (fusionner dans `accueil_technicien.dart`)
-2. Déplacer `request_form_page.dart` + `sub_categories_page.dart`
-3. Unifier `photo_url` / `photo_profil_url`
+1. ~~Supprimer `tech_dashboard.dart`~~ ✅ fait
+2. ~~Déplacer `request_form_page.dart` + `sub_categories_page.dart`~~ ✅ fait
+3. Unifier `photo_url` → `photo_profil_url` (vérifier les quelques usages résiduels)
 
 ### Refactoring progressif (au fil des features)
 1. Extraire les sous-widgets des gros fichiers lors des modifications

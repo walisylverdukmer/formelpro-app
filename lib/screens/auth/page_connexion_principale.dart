@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, kReleaseMode;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -84,17 +84,25 @@ class _PageConnexionPrincipaleState extends State<PageConnexionPrincipale> {
   }
 
   static const _mobileRedirectUrl = 'formelpro://login-callback/';
+  static const _productionWebUrl = 'https://formelpro-app.vercel.app';
+
+  String get _webRedirectUrl {
+    if (!kIsWeb) return _mobileRedirectUrl;
+    // En release (build web Vercel) : URL de production fixe
+    if (kReleaseMode) return _productionWebUrl;
+    // En dev local : origine dynamique (localhost:xxxx)
+    return Uri.base.origin;
+  }
 
   Future<void> _signInWithGoogle() async {
     setState(() {
       _isLoadingGoogle = true;
       _errorMessage = null;
     });
-    final redirectTo = kIsWeb ? Uri.base.origin : _mobileRedirectUrl;
     try {
       await supabase.auth.signInWithOAuth(
         OAuthProvider.google,
-        redirectTo: redirectTo,
+        redirectTo: _webRedirectUrl,
         authScreenLaunchMode: kIsWeb
             ? LaunchMode.platformDefault
             : LaunchMode.externalApplication,

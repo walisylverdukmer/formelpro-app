@@ -1,6 +1,6 @@
 # Architecture Système — FormelPro
 
-*Dernière mise à jour : 2026-05-20*
+*Dernière mise à jour : 2026-05-26 — Session 8*
 
 ---
 
@@ -134,16 +134,28 @@ Client FCM (main.dart)
     └── onMessageOpenedApp → routing futur Phase 3
 ```
 
-### 2.5 Flux Notation (backend prêt, Flutter à connecter)
+### 2.5 Flux Notation
 
 ```
 MesInterventionsPage
     └── statut = 'termine'
-            └── Bouton "Laisser un avis" (à implémenter)
+            └── Bouton "Laisser un avis"
                     └── Modal notation (étoiles 1-5 + commentaire)
                             └── insert avis
                                     └── Trigger calculer_reputation_technicien()
                                             └── UPDATE utilisateurs SET note_moyenne, score_global
+```
+
+### 2.6 Flux Portail Recrutement Web
+
+```
+Facebook / WhatsApp / TikTok / QR Code
+    └── https://formelpro-app.vercel.app/devenir-prestataire
+            └── web/devenir-prestataire.html (HTML standalone)
+                    ├── Formulaire : prénom, nom, email, téléphone, pays, ville, métier
+                    ├── supabase.auth.signUp(email, password généré)
+                    ├── if session → supabase.from('utilisateurs').insert(role: 'technicien')
+                    └── Écran succès : email + mot de passe temporaire (tap-to-copy)
 ```
 
 ---
@@ -160,24 +172,26 @@ lib/
 │
 ├── services/                    RÔLE: Logique métier découplée des widgets
 │   ├── auth_service.dart        → signUp, signIn, signOut, getCurrentProfile
-│   └── notification_service.dart → Stream notif + SnackBar temps réel
-│   ⚠️ MAUVAIS PLACEMENT (à déplacer en screens/) :
-│   ├── request_form_page.dart   → screens/interventions/
-│   └── sub_categories_page.dart → screens/
+│   ├── notification_service.dart → Stream notif + SnackBar temps réel
+│   └── notification_router.dart → navigatorKey global + routeFromNotification()
 │
 ├── screens/                     RÔLE: Écrans (1 fichier = 1 page)
 │   ├── auth/
-│   │   ├── choix_profil.dart          → Étape 1 : choix pays
+│   │   ├── choix_profil.dart          → Étape 1 : choix pays (glassmorphism)
 │   │   ├── auth_email_mdp.dart        → Étape 2 : inscription
-│   │   └── page_connexion_principale.dart → Login
+│   │   ├── page_connexion_principale.dart → Login — fond image login_bg.jpeg
+│   │   └── reset_password_page.dart   → Réinitialisation mot de passe
 │   │
 │   ├── dashboard/
 │   │   ├── main_dashboard.dart        → Orchestrateur TabBar (rôle + pays)
-│   │   ├── accueil_client.dart        → Liste techs + shimmer
-│   │   ├── accueil_technicien.dart    → Dashboard tech
-│   │   ├── tech_dashboard.dart        ⚠️ DOUBLON de accueil_technicien
+│   │   ├── accueil_client.dart        → Liste techs + shimmer — fond fond_ci.jpeg/fond_cmr.jpeg
+│   │   ├── accueil_technicien.dart    → Dashboard tech — fond fond_ci_T.jpeg/fond_cmr_T.jpeg
 │   │   ├── details_technicien.dart    → Profil tech + Signaler
-│   │   └── profil_tab.dart            → Profil éditable + toggle rôle
+│   │   ├── profil_tab.dart            → Profil éditable + toggle rôle + section admin
+│   │   └── verification_documents_page.dart → Upload docs identité tech
+│   │
+│   ├── admin/
+│   │   └── admin_documents_page.dart  → Validation/rejet docs (is_admin=true)
 │   │
 │   ├── interventions/
 │   │   ├── demande_intervention_page.dart  → Créer intervention
@@ -186,6 +200,7 @@ lib/
 │   │   └── intervention_detail_page.dart   → Contact + appel
 │   │
 │   ├── booking/
+│   │   ├── sub_categories_page.dart        → Sous-catégories de services
 │   │   └── technician_selection_page.dart  → Sélection tech par catégorie
 │   │
 │   ├── chat/
@@ -197,11 +212,19 @@ lib/
 │   │
 │   └── complete_profil_page.dart          → Finalisation profil
 │
-└── widgets/                     RÔLE: Composants réutilisables multi-écrans
-    ├── notification_badge.dart   → Badge + modal notifs
-    ├── location_picker_widget.dart → Carte GPS + sélection
-    ├── carte_technicien.dart     → Card liste technicien
-    └── category_picker.dart      → Dropdown métiers
+├── widgets/                     RÔLE: Composants réutilisables multi-écrans
+│   ├── notification_badge.dart        → Badge + modal notifs
+│   ├── location_picker_widget.dart    → Carte GPS + sélection
+│   ├── carte_technicien.dart          → Card technicien — avatar 76×76px arrondi + badge disponibilité
+│   ├── categories_chips.dart          → Cartes image 96×116px DB-driven — categorieId, fallback gradient
+│   ├── services_rapides_widget.dart   → 5 boutons 1-clic avec images métiers + fallback icône
+│   ├── stats_dashboard_tech.dart      → Revenus FCFA, missions, graphique mensuel
+│   ├── filtres_techniciens.dart       → Model FiltresTechniciens + bottom sheet filtres
+│   └── category_picker.dart           → Dropdown métiers
+│
+web/                             RÔLE: Pages HTML standalone (hors Flutter)
+└── devenir-prestataire.html          → Portail recrutement — mobile-first, Supabase JS CDN
+                                        URL: formelpro-app.vercel.app/devenir-prestataire
 ```
 
 ---

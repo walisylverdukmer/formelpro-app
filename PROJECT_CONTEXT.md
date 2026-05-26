@@ -97,9 +97,10 @@ lib/
     ├── notification_badge.dart      → Badge + modal bottom sheet notifications
     ├── stats_dashboard_tech.dart    → Revenus FCFA, missions, graphique mensuel
     ├── filtres_techniciens.dart     → Model FiltresTechniciens + bottom sheet filtres
-    ├── categories_chips.dart        → Chips catégories DB-driven — filtre par categorieId réel, icon mapper par nom
+    ├── categories_chips.dart        → Cartes image 96×116px DB-driven — categorieId direct, fallback gradient
+    ├── services_rapides_widget.dart → 5 boutons 1-clic avec images metiers, fallback icône
     ├── location_picker_widget.dart  → Carte + sélection GPS
-    ├── carte_technicien.dart        → Card liste technicien
+    ├── carte_technicien.dart        → Card technicien — avatar 76×76px arrondi + badge disponibilité
     └── category_picker.dart         → Dropdown métiers
 ```
 
@@ -144,15 +145,15 @@ lib/
 
 ---
 
-## 5. ÉTAT ACTUEL DU PROJET (au 2026-05-20, mis à jour session 3)
+## 5. ÉTAT ACTUEL DU PROJET (au 2026-05-26, mis à jour session 8)
 
 ### ✅ FONCTIONNEL ET COMPLET
 
 | Module | Détail |
 |--------|--------|
 | **Auth flow complet** | Choix pays → Inscription → Login → Complétion profil |
-| **Dashboard client** | Liste techs filtrés par pays, tri premium/score, shimmer loading |
-| **Dashboard technicien** | Toggle disponibilité, stats, réputation |
+| **Dashboard client** | Liste techs filtrés par pays, tri premium/score, shimmer loading — fond image `fond_ci.jpeg`/`fond_cmr.jpeg` |
+| **Dashboard technicien** | Toggle disponibilité, stats, réputation — fond image `fond_ci_T.jpeg`/`fond_cmr_T.jpeg` |
 | **Interventions CRUD** | Créer, accepter, suivre statuts, itinéraire Maps |
 | **Chat temps réel** | Messagerie RT + propositions intervention + partage lieu |
 | **Notifications RT** | Stream Supabase + FCM Edge Function Firebase |
@@ -160,24 +161,29 @@ lib/
 | **Géolocalisation** | GPS device + carte flutter_map + sélection lieu |
 | **Multi-pays** | UI et couleurs adaptées CIV/CMR |
 | **Notation post-intervention** | Modal étoiles 1-5 + commentaire → `avis` + trigger réputation auto |
-| **Filtre catégorie techniciens** | Chips 100% DB-driven (`categories_services` → `technicien_categories`) — icon mapper par nom, `categorieId` direct, plus de ilike |
+| **Filtre catégorie techniciens** | Chips 100% DB-driven (`categories_services` → `technicien_categories`) — cartes image 96×116px, `categorieId` direct, plus de ilike |
+| **Services rapides** | 5 boutons 1-clic avec images réelles (`fond_lovraison_gaz.jpg`, `fond_menagegère.jpg`, `Fond_electricité.jpg`) + fallback icône — filtre via `categorieNom` ilike |
 | **Recherche & filtres avancés** | Disponibilité, note min, catégorie (chips DB + bottom sheet DB), recherche texte OR (`nom_complet`/`metier_personnalise`) |
 | **FCM routing notifications** | Tap notif → `ChatScreen` ou `MissionDetailPage`/`InterventionDetailPage` selon `data['type']` ; gestion background + terminated (`pendingNotificationData`) |
 | **Vérification identité tech** | Page dédiée `verification_documents_page.dart` : upload CNI/passeport/certificat, statut par document (en_attente/approuvé/refusé+motif) ✅ SQL §13 exécuté — bucket Storage à créer |
 | **Espace admin validation docs** | `admin_documents_page.dart` : liste docs en attente, visionneuse, valider/refuser avec motif, trigger DB auto `is_identite_verifiee` ✅ SQL §14 exécuté — activer admin via UPDATE |
-| **Flutter Web** | Build web fonctionnel — Firebase conditionnel `kIsWeb` |
+| **Portail recrutement web** | `web/devenir-prestataire.html` — page HTML standalone, zéro Flutter, mobile-first, Supabase JS CDN — URL: `https://formelpro-app.vercel.app/devenir-prestataire` |
+| **Flutter Web + Vercel routing** | Build web fonctionnel — `vercel.json` corrigé (`outputDirectory: build/web`, SPA catch-all → `index.html`) |
+| **Migrations SQL idempotentes** | 5 triggers avec `DROP TRIGGER IF EXISTS` avant création — plus d'erreur "already exists" |
 
 ### ⚠️ PROBLÈMES CONNUS / DETTE TECHNIQUE
 
 | Problème | Priorité | Fichier | Statut |
 |----------|----------|---------|--------|
 | Clés Supabase en dur dans le code | 🔴 HAUTE | `lib/main.dart` | ✅ Migré vers `dart_defines.json` |
-| Doublon `accueil_technicien.dart` / `tech_dashboard.dart` | 🟡 MOYENNE | `screens/dashboard/` | ✅ |
+| Doublon `accueil_technicien.dart` / `tech_dashboard.dart` | 🟡 MOYENNE | `screens/dashboard/` | ✅ Résolu |
 | `request_form_page.dart` dans `services/` (mauvais dossier) | 🟡 MOYENNE | `lib/services/` | ✅ Supprimé (code mort) |
 | `sub_categories_page.dart` dans `services/` (mauvais dossier) | 🟡 MOYENNE | `lib/services/` | ✅ Déplacé → `screens/booking/` |
-| `withOpacity` déprécié (~175 occurrences) → utiliser `.withValues()` | 🟢 BASSE | Tous les fichiers | ✅ 130 remplacements effectués (session 6) |
+| `withOpacity` déprécié → utiliser `.withValues(alpha:)` | 🟢 BASSE | Tous les fichiers | ✅ 100% migré |
 | WhatsApp.zip dans les assets | 🟢 BASSE | `assets/images/` | 🔲 |
 | Colonnes `utilisateurs` à confirmer en DB (`quartier`, `disponible`) | 🔴 HAUTE | Supabase console | 🔲 |
+| Bucket Storage `documents` à créer (privé) | 🔴 HAUTE | Supabase Dashboard | 🔲 |
+| `<SERVICE_ROLE_KEY>` placeholder dans migrations.sql ligne ~307 | 🔴 HAUTE | `docs/supabase/migrations.sql` | 🔲 |
 
 ### 🔲 FONCTIONNALITÉS À CONSTRUIRE (backlog)
 
@@ -307,4 +313,4 @@ Lancement app
 
 ---
 
-*Dernière mise à jour : 2026-05-25 — Session 7 : Stabilisation visuelle/UX — logo AppBar + ChoixProfil + LoadingState, suppression code mort OngletAccueil (-180 lignes), bouton notification vide supprimé, état vide amélioré, flutter analyze 0 issues (était 14), seed SQL 10 techniciens demo créé (docs/seeds/techniciens_demo.sql)*
+*Dernière mise à jour : 2026-05-26 — Session 8 : Portail recrutement web (`web/devenir-prestataire.html`), refonte UI visuelle (fonds image login/dashboards, categories_chips 96×116px image cards, services_rapides avec images, avatars techs 76×76px, badge disponibilité), fix Vercel routing 404, migrations SQL idempotentes (5 triggers DROP IF EXISTS), flutter analyze 0 issues*
