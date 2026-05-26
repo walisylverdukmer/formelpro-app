@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:formelpro/services/technicien_service.dart';
 import 'package:formelpro/widgets/carte_technicien.dart';
@@ -9,9 +8,13 @@ import 'package:formelpro/widgets/filtres_techniciens.dart';
 import 'package:formelpro/widgets/services_rapides_widget.dart';
 import 'package:formelpro/widgets/zone_stats_widget.dart';
 import 'package:formelpro/widgets/experts_pres_widget.dart';
+import 'package:formelpro/widgets/accueil_header.dart';
+import 'package:formelpro/widgets/accueil_hero_banner.dart';
+import 'package:formelpro/widgets/technicien_empty_state.dart';
+import 'package:formelpro/widgets/shimmer_card.dart';
+import 'package:formelpro/widgets/country_welcome_modal.dart';
 import 'package:formelpro/screens/dashboard/details_technicien.dart';
 import 'package:formelpro/screens/booking/technician_selection_page.dart';
-import 'package:formelpro/widgets/location_picker_widget.dart';
 
 class AccueilClient extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -24,13 +27,11 @@ class AccueilClient extends StatefulWidget {
 
 class _AccueilClientState extends State<AccueilClient>
     with SingleTickerProviderStateMixin {
-  final supabase = Supabase.instance.client;
   List<Map<String, dynamic>> _techniciens = [];
   List<Map<String, dynamic>> _topCategories = [];
   bool _isFetching = true;
   FiltresTechniciens _filtres = const FiltresTechniciens();
   final TextEditingController _searchController = TextEditingController();
-
   late AnimationController _shimmerController;
 
   @override
@@ -41,7 +42,7 @@ class _AccueilClientState extends State<AccueilClient>
       duration: const Duration(milliseconds: 2500),
     )..repeat();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _showCountryModal();
+      showCountryWelcomeModal(context, widget.userData);
       _loadTopCategories();
       _fetchTechniciens();
     });
@@ -87,7 +88,8 @@ class _AccueilClientState extends State<AccueilClient>
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => DetailsTechnicien(tech: tech, accentColor: primaryColor),
+        builder: (_) =>
+            DetailsTechnicien(tech: tech, accentColor: primaryColor),
       ),
     );
   }
@@ -108,75 +110,6 @@ class _AccueilClientState extends State<AccueilClient>
     _fetchTechniciens();
   }
 
-  void _showCountryModal() {
-    final String pays = widget.userData['pays'] ?? 'CIV';
-    final bool isCI = pays == 'CIV';
-    final Color accentColor =
-        isCI ? const Color(0xFFE67E22) : const Color(0xFFE74C3C);
-    final String flagPath =
-        isCI ? "assets/images/ci.jpg" : "assets/images/cmr.jpg";
-
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.asset(
-                  flagPath,
-                  width: 70,
-                  height: 45,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                isCI ? "FormelPro Côte d'Ivoire" : "FormelPro Cameroun",
-                textAlign: TextAlign.center,
-                style: GoogleFonts.poppins(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: accentColor,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                isCI
-                    ? "Trouvez les artisans qualifiés de proximité."
-                    : "Accédez au réseau certifié au Cameroun.",
-                textAlign: TextAlign.center,
-                style: GoogleFonts.inter(
-                  fontSize: 14,
-                  color: Colors.grey.shade700,
-                ),
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: accentColor,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text("Continuer"),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final String pays = widget.userData['pays'] ?? 'CIV';
@@ -185,7 +118,6 @@ class _AccueilClientState extends State<AccueilClient>
         pays == 'CIV' ? const Color(0xFFE67E22) : const Color(0xFFE74C3C);
     final String flagPath =
         pays == 'CIV' ? "assets/images/ci.jpg" : "assets/images/cmr.jpg";
-
     final String bgImage = pays == 'CIV'
         ? 'assets/images/fond_ci.jpeg'
         : 'assets/images/fond_cmr.jpeg';
@@ -197,340 +129,130 @@ class _AccueilClientState extends State<AccueilClient>
           Positioned.fill(child: Image.asset(bgImage, fit: BoxFit.cover)),
           Positioned.fill(
             child: Container(
-              color: const Color(0xFFF8FAFC).withValues(alpha: 0.88),
-            ),
+                color: const Color(0xFFF8FAFC).withValues(alpha: 0.88)),
           ),
           SafeArea(
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-              _buildHeader(prenom, flagPath, primaryColor),
-              const SizedBox(height: 16),
-              _buildHeroBanner(pays, primaryColor),
-              const SizedBox(height: 20),
-              ServicesRapidesWidget(
-                accentColor: primaryColor,
-                commune: widget.userData['commune'] as String?,
-                onServiceTap: (query, {typePrestation, disponibleSeulement = false}) {
-                  setState(() {
-                    _filtres = FiltresTechniciens(
-                      categorieNom: query,
-                      typePrestation: typePrestation,
-                      disponibleSeulement: disponibleSeulement,
-                    );
-                  });
-                  _fetchTechniciens();
-                },
-              ),
-              const SizedBox(height: 16),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: ZoneStatsWidget(
-                  pays: pays,
-                  commune: widget.userData['commune'] as String?,
-                  accentColor: primaryColor,
-                ),
-              ),
-              const SizedBox(height: 28),
-              ExpertsPresWidget(
-                pays: pays,
-                accentColor: primaryColor,
-                commune: widget.userData['commune'] as String?,
-                clientId: widget.userData['id']?.toString(),
-              ),
-              const SizedBox(height: 28),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: _buildSectionTitle(
-                  "Catégories populaires",
-                  accentColor: primaryColor,
-                ),
-              ),
-              const SizedBox(height: 12),
-              CategoriesChips(
-                pays: pays,
-                shimmerController: _shimmerController,
-                activeCatId: _filtres.categorieId,
-                categories: _topCategories,
-                onSelect: (id, nom) {
-                  // Premier tap : filtre en place + scroll vers les résultats
-                  // Deuxième tap sur la même carte : ouvre la page dédiée
-                  if (_filtres.categorieId == id) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => TechnicianSelectionPage(
-                          categoryName: nom,
-                          categoryId: id,
-                          pays: pays,
-                          accentColor: primaryColor,
-                          clientId: widget.userData['id']?.toString(),
-                        ),
-                      ),
-                    );
-                  } else {
-                    setState(() {
-                      _filtres = FiltresTechniciens(
-                        categorieId: id,
-                        categorieNom: nom,
-                        disponibleSeulement: _filtres.disponibleSeulement,
-                        noteMin: _filtres.noteMin,
-                      );
-                    });
-                    _fetchTechniciens();
-                  }
-                },
-              ),
-              const SizedBox(height: 28),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: _buildSectionTitle(
-                  "Techniciens recommandés",
-                  accentColor: primaryColor,
-                  onMore: _resetFilters,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: _buildTechList(primaryColor),
-              ),
-              const SizedBox(height: 32),
-              _buildFooter(),
-              const SizedBox(height: 16),
-            ],
-          ),
-        ),
-      ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHeader(String prenom, String flagPath, Color primaryColor) {
-    return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Text(
-                "Bonjour $prenom 👋",
-                style: GoogleFonts.inter(
-                  fontSize: 15,
-                  color: const Color(0xFF64748B),
-                ),
-              ),
-              const Spacer(),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: Image.asset(
-                  flagPath,
-                  width: 28,
-                  height: 18,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            "Besoin d'un pro ?",
-            style: GoogleFonts.poppins(
-              fontSize: 26,
-              fontWeight: FontWeight.bold,
-              color: const Color(0xFF0F172A),
-            ),
-          ),
-          const SizedBox(height: 16),
-          _buildSearchBar(primaryColor),
-          const SizedBox(height: 10),
-          _buildLocationRow(primaryColor),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLocationRow(Color primaryColor) {
-    final String? commune = _filtres.commune ?? widget.userData['commune'] as String?;
-    return GestureDetector(
-      onTap: () async {
-        final pays = widget.userData['pays'] ?? 'CIV';
-        final result = await Navigator.push<Map<String, dynamic>>(
-          context,
-          MaterialPageRoute(
-            builder: (_) => LocationPickerWidget(
-              accentColor: primaryColor,
-              paysCode: pays,
-            ),
-          ),
-        );
-        if (result != null && mounted) {
-          setState(() {
-            _filtres = _filtres.copyWith(
-              commune: result['commune'] as String?,
-              quartier: result['quartier'] as String?,
-            );
-          });
-          _fetchTechniciens();
-        }
-      },
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.location_on_rounded, size: 14, color: primaryColor),
-          const SizedBox(width: 4),
-          Text(
-            (commune != null && commune.isNotEmpty) ? commune : 'Partout',
-            style: GoogleFonts.inter(
-              fontSize: 12,
-              color: const Color(0xFF475569),
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(width: 2),
-          const Icon(Icons.keyboard_arrow_down_rounded,
-              size: 14, color: Color(0xFF94A3B8)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSearchBar(Color primaryColor) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFFF1F5F9),
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: TextField(
-        controller: _searchController,
-        onSubmitted: (_) => _fetchTechniciens(),
-        textInputAction: TextInputAction.search,
-        style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF0F172A)),
-        decoration: InputDecoration(
-          hintText: "Rechercher un artisan, un métier...",
-          hintStyle: GoogleFonts.inter(
-            fontSize: 14,
-            color: const Color(0xFF94A3B8),
-          ),
-          prefixIcon: const Icon(Icons.search, color: Color(0xFF64748B), size: 20),
-          suffixIcon: GestureDetector(
-            onTap: () => _openFiltres(primaryColor),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Icon(
-                  Icons.tune_rounded,
-                  color: _filtres.actif ? primaryColor : const Color(0xFF94A3B8),
-                  size: 20,
-                ),
-                if (_filtres.actif)
-                  Positioned(
-                    top: 12,
-                    right: 12,
-                    child: Container(
-                      width: 7,
-                      height: 7,
-                      decoration: BoxDecoration(
-                        color: primaryColor,
-                        shape: BoxShape.circle,
-                      ),
+                  AccueilHeader(
+                    prenom: prenom,
+                    flagPath: flagPath,
+                    primaryColor: primaryColor,
+                    paysCode: pays,
+                    commune: _filtres.commune ??
+                        widget.userData['commune'] as String?,
+                    filtresActif: _filtres.actif,
+                    searchController: _searchController,
+                    onSearch: _fetchTechniciens,
+                    onOpenFiltres: () => _openFiltres(primaryColor),
+                    onLocationPicked: (result) {
+                      if (!mounted) return;
+                      setState(() {
+                        _filtres = _filtres.copyWith(
+                          commune: result['commune'] as String?,
+                          quartier: result['quartier'] as String?,
+                        );
+                      });
+                      _fetchTechniciens();
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  AccueilHeroBanner(pays: pays, primaryColor: primaryColor),
+                  const SizedBox(height: 20),
+                  ServicesRapidesWidget(
+                    accentColor: primaryColor,
+                    commune: widget.userData['commune'] as String?,
+                    onServiceTap: (query,
+                        {typePrestation, disponibleSeulement = false}) {
+                      setState(() {
+                        _filtres = FiltresTechniciens(
+                          categorieNom: query,
+                          typePrestation: typePrestation,
+                          disponibleSeulement: disponibleSeulement,
+                        );
+                      });
+                      _fetchTechniciens();
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: ZoneStatsWidget(
+                      pays: pays,
+                      commune: widget.userData['commune'] as String?,
+                      accentColor: primaryColor,
                     ),
                   ),
-              ],
-            ),
-          ),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 14),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeroBanner(String pays, Color primaryColor) {
-    final heroImage = pays == 'CIV'
-        ? 'assets/images/fond_ci.jpeg'
-        : 'assets/images/fond_cmr.jpeg';
-
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      height: 150,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        image: DecorationImage(
-          image: AssetImage(heroImage),
-          fit: BoxFit.cover,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: primaryColor.withValues(alpha: 0.25),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          gradient: LinearGradient(
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-            colors: [
-              const Color(0xFF0F172A).withValues(alpha: 0.78),
-              Colors.transparent,
-            ],
-          ),
-        ),
-        padding: const EdgeInsets.all(22),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              "Experts certifiés",
-              style: GoogleFonts.inter(
-                fontSize: 12,
-                color: Colors.white70,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              "Proches de vous",
-              style: GoogleFonts.poppins(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.search, size: 13, color: primaryColor),
-                  const SizedBox(width: 5),
-                  Text(
-                    "Explorer",
-                    style: GoogleFonts.inter(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: primaryColor,
+                  const SizedBox(height: 28),
+                  ExpertsPresWidget(
+                    pays: pays,
+                    accentColor: primaryColor,
+                    commune: widget.userData['commune'] as String?,
+                    clientId: widget.userData['id']?.toString(),
+                  ),
+                  const SizedBox(height: 28),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: _buildSectionTitle("Catégories populaires",
+                        accentColor: primaryColor),
+                  ),
+                  const SizedBox(height: 12),
+                  CategoriesChips(
+                    pays: pays,
+                    shimmerController: _shimmerController,
+                    activeCatId: _filtres.categorieId,
+                    categories: _topCategories,
+                    onSelect: (id, nom) {
+                      if (_filtres.categorieId == id) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => TechnicianSelectionPage(
+                              categoryName: nom,
+                              categoryId: id,
+                              pays: pays,
+                              accentColor: primaryColor,
+                              clientId: widget.userData['id']?.toString(),
+                            ),
+                          ),
+                        );
+                      } else {
+                        setState(() {
+                          _filtres = FiltresTechniciens(
+                            categorieId: id,
+                            categorieNom: nom,
+                            disponibleSeulement: _filtres.disponibleSeulement,
+                            noteMin: _filtres.noteMin,
+                          );
+                        });
+                        _fetchTechniciens();
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 28),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: _buildSectionTitle(
+                      "Techniciens recommandés",
+                      accentColor: primaryColor,
+                      onMore: _resetFilters,
                     ),
                   ),
+                  const SizedBox(height: 12),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: _buildTechList(primaryColor),
+                  ),
+                  const SizedBox(height: 32),
+                  _buildFooter(),
+                  const SizedBox(height: 16),
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -574,13 +296,16 @@ class _AccueilClientState extends State<AccueilClient>
   Widget _buildTechList(Color primaryColor) {
     if (_isFetching) {
       return Column(
-        children: List.generate(3, (_) => _buildShimmerCard()),
+        children: List.generate(3, (_) => const ShimmerCard()),
       );
     }
     if (_techniciens.isEmpty) {
-      return _buildEmptyState(primaryColor);
+      return TechnicienEmptyState(
+        filtres: _filtres,
+        primaryColor: primaryColor,
+        onReset: _resetFilters,
+      );
     }
-
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -595,113 +320,20 @@ class _AccueilClientState extends State<AccueilClient>
     );
   }
 
-  Widget _buildEmptyState(Color primaryColor) {
-    final bool hasFilter = _filtres.actif;
-    final bool hasCat = _filtres.categorieNom != null || _filtres.categorieId != null;
-
-    String title;
-    String subtitle;
-    IconData icon;
-
-    if (hasCat) {
-      title = "Aucun expert trouvé pour ce métier";
-      subtitle = "Aucun prestataire certifié n'est encore référencé pour ce service dans votre zone.";
-      icon = Icons.person_search_rounded;
-    } else if (hasFilter) {
-      title = "Aucun résultat";
-      subtitle = "Aucun technicien ne correspond à vos critères de recherche.";
-      icon = Icons.filter_list_off_rounded;
-    } else {
-      title = "Aucun technicien disponible";
-      subtitle = "Aucun prestataire n'est encore référencé dans votre zone. Revenez bientôt !";
-      icon = Icons.groups_rounded;
-    }
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 96,
-            height: 96,
-            decoration: BoxDecoration(
-              color: primaryColor.withValues(alpha: 0.08),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, size: 48, color: primaryColor.withValues(alpha: 0.5)),
-          ),
-          const SizedBox(height: 20),
-          Text(
-            title,
-            style: GoogleFonts.poppins(
-              color: const Color(0xFF334155),
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            subtitle,
-            style: GoogleFonts.inter(
-              color: const Color(0xFF94A3B8),
-              fontSize: 13,
-              height: 1.5,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          if (hasFilter) ...[
-            const SizedBox(height: 20),
-            OutlinedButton.icon(
-              onPressed: _resetFilters,
-              icon: const Icon(Icons.refresh_rounded, size: 16),
-              label: const Text("Réinitialiser les filtres"),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: primaryColor,
-                side: BorderSide(color: primaryColor),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildShimmerCard() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Container(
-        height: 90,
-        decoration: BoxDecoration(
-          color: const Color(0xFFE2E8F0),
-          borderRadius: BorderRadius.circular(20),
-        ),
-      ),
-    );
-  }
-
   Widget _buildFooter() {
     return Center(
       child: Column(
         children: [
           Text(
             "FormelPro par Solution Makers",
-            style: GoogleFonts.inter(
-              fontSize: 11,
-              color: const Color(0xFF94A3B8),
-            ),
+            style:
+                GoogleFonts.inter(fontSize: 11, color: const Color(0xFF94A3B8)),
           ),
           const SizedBox(height: 4),
           Text(
             "© 2026 — Côte d'Ivoire & Cameroun",
-            style: GoogleFonts.inter(
-              fontSize: 10,
-              color: const Color(0xFFCBD5E1),
-            ),
+            style:
+                GoogleFonts.inter(fontSize: 10, color: const Color(0xFFCBD5E1)),
           ),
         ],
       ),
