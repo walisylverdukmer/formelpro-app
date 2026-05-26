@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:formelpro/widgets/carte_technicien.dart';
 import 'package:formelpro/widgets/categories_chips.dart';
 import 'package:formelpro/widgets/filtres_techniciens.dart';
+import 'package:formelpro/widgets/services_rapides_widget.dart';
 import 'package:formelpro/widgets/zone_stats_widget.dart';
 import 'package:formelpro/screens/dashboard/details_technicien.dart';
 
@@ -269,6 +270,20 @@ class _AccueilClientState extends State<AccueilClient>
               _buildHeader(prenom, flagPath, primaryColor),
               const SizedBox(height: 16),
               _buildHeroBanner(pays, primaryColor),
+              const SizedBox(height: 20),
+              ServicesRapidesWidget(
+                accentColor: primaryColor,
+                onServiceTap: (query) {
+                  setState(() {
+                    _filtres = FiltresTechniciens(
+                      categorieNom: query,
+                      disponibleSeulement: _filtres.disponibleSeulement,
+                      noteMin: _filtres.noteMin,
+                    );
+                  });
+                  _fetchTechniciens();
+                },
+              ),
               const SizedBox(height: 16),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),

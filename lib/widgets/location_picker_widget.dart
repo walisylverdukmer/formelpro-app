@@ -25,10 +25,28 @@ class _LocationPickerWidgetState extends State<LocationPickerWidget> {
   static const _defaultCIV = LatLng(5.3544, -4.0023);
   static const _defaultCMR = LatLng(3.8480, 11.5021);
 
+  static const Map<String, List<String>> _regionsCIV = {
+    'Abidjan': ['Abobo', 'Adjamé', 'Attécoubé', 'Cocody', 'Koumassi', 'Marcory', 'Plateau', 'Port-Bouët', 'Treichville', 'Yopougon'],
+    'Yamoussoukro': ['Yamoussoukro Centre'],
+    'Bouaké': ['Bouaké Centre', 'Koko', 'Dar-Es-Salam'],
+    'Daloa': ['Daloa Centre'],
+    'San Pedro': ['San Pedro Centre', 'Bardot'],
+    'Korhogo': ['Korhogo Centre'],
+    'Man': ['Man Centre'],
+    'Gagnoa': ['Gagnoa Centre'],
+    'Divo': ['Divo Centre'],
+    'Abengourou': ['Abengourou Centre'],
+  };
+
+  static const List<String> _villesCMR = [
+    'Yaoundé', 'Douala', 'Garoua', 'Bamenda', 'Maroua',
+    'Bafoussam', 'Ngaoundéré', 'Bertoua', 'Kumba', 'Edéa',
+    'Nkongsamba', 'Kribi', 'Limbé', 'Buéa', 'Ebolowa',
+  ];
+
   final _mapController = MapController();
-  final _villeCtrl = TextEditingController();
-  final _communeCtrl = TextEditingController();
   final _quartierCtrl = TextEditingController();
+  final _repereCtrl = TextEditingController();
 
   Timer? _debounce;
   bool _useMap = true;
@@ -39,6 +57,11 @@ class _LocationPickerWidgetState extends State<LocationPickerWidget> {
   String _ville = '';
   String _commune = '';
   String _quartier = '';
+
+  // Afrique-First: sélections manuelles
+  String? _selectedRegion;
+  String? _selectedCommune;
+  String? _selectedVilleCMR;
 
   bool get _isCI => widget.paysCode == 'CIV';
 
@@ -52,9 +75,8 @@ class _LocationPickerWidgetState extends State<LocationPickerWidget> {
   @override
   void dispose() {
     _debounce?.cancel();
-    _villeCtrl.dispose();
-    _communeCtrl.dispose();
     _quartierCtrl.dispose();
+    _repereCtrl.dispose();
     super.dispose();
   }
 
@@ -133,19 +155,29 @@ class _LocationPickerWidgetState extends State<LocationPickerWidget> {
     final String ville;
     final String commune;
     final String quartier;
+    final String region;
     if (_useMap) {
       ville = _ville;
       commune = _isCI ? _commune : '';
       quartier = _quartier;
+      region = '';
+    } else if (_isCI) {
+      region = _selectedRegion ?? '';
+      commune = _selectedCommune ?? '';
+      ville = region;
+      quartier = _quartierCtrl.text.trim();
     } else {
-      ville = _villeCtrl.text.trim();
-      commune = _communeCtrl.text.trim();
+      region = '';
+      ville = _selectedVilleCMR ?? '';
+      commune = '';
       quartier = _quartierCtrl.text.trim();
     }
     Navigator.pop(context, {
       'ville': ville,
       'commune': commune,
       'quartier': quartier,
+      'region': region,
+      'repere': _repereCtrl.text.trim(),
     });
   }
 
@@ -356,19 +388,123 @@ class _LocationPickerWidgetState extends State<LocationPickerWidget> {
 
   Widget _buildManualView() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: _isCI ? _buildCIVFields() : _buildCMRFields(),
+      ),
+    );
+  }
+
+  List<Widget> _buildCIVFields() {
+    final communes = _selectedRegion != null
+        ? (_regionsCIV[_selectedRegion] ?? <String>[])
+        : <String>[];
+    return [
+      _buildLabel('Région'),
+      const SizedBox(height: 6),
+      _buildDropdown<String>(
+        value: _selectedRegion,
+        hint: 'Sélectionner une région',
+        icon: Icons.location_on_outlined,
+        items: _regionsCIV.keys.toList(),
+        onChanged: (v) => setState(() {
+          _selectedRegion = v;
+          _selectedCommune = null;
+        }),
+      ),
+      const SizedBox(height: 14),
+      _buildLabel('Commune'),
+      const SizedBox(height: 6),
+      _buildDropdown<String>(
+        value: _selectedCommune,
+        hint: communes.isEmpty ? 'Choisir une région d\'abord' : 'Sélectionner une commune',
+        icon: Icons.map_outlined,
+        items: communes,
+        onChanged: communes.isEmpty ? null : (v) => setState(() => _selectedCommune = v),
+      ),
+      const SizedBox(height: 14),
+      _buildLabel('Quartier / Zone'),
+      const SizedBox(height: 6),
+      _buildTextField(_quartierCtrl, 'Ex: Riviera 2, Zone 4...', Icons.near_me_outlined),
+      const SizedBox(height: 14),
+      _buildLabel('Point de repère (optionnel)'),
+      const SizedBox(height: 6),
+      _buildTextField(_repereCtrl, 'Ex: Face à la pharmacie, Derrière la mairie...', Icons.place_outlined),
+    ];
+  }
+
+  List<Widget> _buildCMRFields() {
+    return [
+      _buildLabel('Ville'),
+      const SizedBox(height: 6),
+      _buildDropdown<String>(
+        value: _selectedVilleCMR,
+        hint: 'Sélectionner une ville',
+        icon: Icons.location_city_outlined,
+        items: _villesCMR,
+        onChanged: (v) => setState(() => _selectedVilleCMR = v),
+      ),
+      const SizedBox(height: 14),
+      _buildLabel('Quartier / Zone'),
+      const SizedBox(height: 6),
+      _buildTextField(_quartierCtrl, 'Ex: Bastos, Akwa, Bali...', Icons.near_me_outlined),
+      const SizedBox(height: 14),
+      _buildLabel('Point de repère (optionnel)'),
+      const SizedBox(height: 6),
+      _buildTextField(_repereCtrl, 'Ex: Près du marché central, Face à l\'église...', Icons.place_outlined),
+    ];
+  }
+
+  Widget _buildLabel(String text) {
+    return Text(
+      text,
+      style: GoogleFonts.inter(
+        fontSize: 12,
+        fontWeight: FontWeight.w600,
+        color: const Color(0xFF64748B),
+        letterSpacing: 0.3,
+      ),
+    );
+  }
+
+  Widget _buildDropdown<T>({
+    required T? value,
+    required String hint,
+    required IconData icon,
+    required List<T> items,
+    required ValueChanged<T?>? onChanged,
+  }) {
+    final disabled = onChanged == null;
+    return Container(
+      decoration: BoxDecoration(
+        color: disabled ? const Color(0xFFF8FAFC) : Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: Row(
         children: [
-          _buildTextField(_villeCtrl, 'Ville', Icons.location_city_outlined),
-          if (_isCI) ...[
-            const SizedBox(height: 14),
-            _buildTextField(_communeCtrl, 'Commune', Icons.map_outlined),
-          ],
-          const SizedBox(height: 14),
-          _buildTextField(
-            _quartierCtrl,
-            'Quartier / Zone',
-            Icons.near_me_outlined,
+          Padding(
+            padding: const EdgeInsets.only(left: 12),
+            child: Icon(icon, size: 20, color: const Color(0xFF94A3B8)),
+          ),
+          Expanded(
+            child: DropdownButton<T>(
+              value: value,
+              isExpanded: true,
+              underline: const SizedBox.shrink(),
+              icon: const Icon(Icons.expand_more_rounded, size: 20, color: Color(0xFF94A3B8)),
+              style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF0F172A)),
+              hint: Text(
+                hint,
+                style: GoogleFonts.inter(fontSize: 13, color: const Color(0xFF94A3B8)),
+              ),
+              padding: const EdgeInsets.only(left: 10, right: 8),
+              items: items
+                  .map((e) => DropdownMenuItem<T>(value: e, child: Text(e.toString())))
+                  .toList(),
+              onChanged: onChanged,
+            ),
           ),
         ],
       ),
@@ -428,6 +564,14 @@ class _LocationPickerWidgetState extends State<LocationPickerWidget> {
         children: [
           if (hasPreview) ...[
             _buildAddressPreview(),
+            const SizedBox(height: 10),
+          ],
+          if (_useMap) ...[
+            _buildTextField(
+              _repereCtrl,
+              'Point de repère (optionnel)',
+              Icons.place_outlined,
+            ),
             const SizedBox(height: 12),
           ],
           SizedBox(
