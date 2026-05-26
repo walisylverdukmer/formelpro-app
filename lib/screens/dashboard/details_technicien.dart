@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../chat/chat_screen.dart';
 
 class DetailsTechnicien extends StatefulWidget {
@@ -52,6 +51,7 @@ class _DetailsTechnicienState extends State<DetailsTechnicien> {
               receiverName: "${widget.tech['prenom'] ?? ''} ${widget.tech['nom_complet'] ?? ''}".trim(),
               receiverId: widget.tech['id'],
               accentColor: widget.accentColor,
+              receiverPhone: widget.tech['telephone'] as String?,
             ),
           ),
         );
@@ -63,13 +63,6 @@ class _DetailsTechnicienState extends State<DetailsTechnicien> {
         );
       }
     }
-  }
-
-  // --- APPEL ---
-  Future<void> _makeCall(String? phone) async {
-    if (phone == null || phone.isEmpty) return;
-    final Uri url = Uri.parse("tel:$phone");
-    if (await canLaunchUrl(url)) await launchUrl(url);
   }
 
   // --- SIGNALER ---
@@ -199,23 +192,22 @@ class _DetailsTechnicienState extends State<DetailsTechnicien> {
 
                     const SizedBox(height: 35),
 
-                    // BOUTONS PRINCIPAUX
+                    // BOUTON PRINCIPAL — CONTACTER
+                    _buildActionButton(
+                      "Contacter par message",
+                      Icons.chat_bubble_rounded,
+                      widget.accentColor, Colors.white,
+                      _startConversation,
+                    ),
+                    const SizedBox(height: 12),
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Expanded(
-                          child: _buildActionButton(
-                            "Message", Icons.chat_bubble_rounded,
-                            const Color(0xFFF1F5F9), const Color(0xFF0F172A),
-                            _startConversation,
-                          ),
-                        ),
-                        const SizedBox(width: 15),
-                        Expanded(
-                          child: _buildActionButton(
-                            "Appeler", Icons.phone_forwarded_rounded,
-                            widget.accentColor, Colors.white,
-                            () => _makeCall(widget.tech['telephone']),
-                          ),
+                        const Icon(Icons.lock_rounded, size: 13, color: Color(0xFF94A3B8)),
+                        const SizedBox(width: 6),
+                        Text(
+                          "L'appel se débloque après échange dans le chat",
+                          style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFF94A3B8)),
                         ),
                       ],
                     ),

@@ -519,9 +519,11 @@ Préparer cette migration en :
 | `lib/screens/dashboard/verification_documents_page.dart` | Upload docs identité tech + statut par document — SQL §13 exécuté |
 | `lib/screens/admin/admin_documents_page.dart` | Validation/rejet docs par admin — SQL §14 exécuté, accès via `is_admin=true` |
 | `lib/widgets/stats_dashboard_tech.dart` | Revenus FCFA + graphique mensuel (6 mois) — chargé dans `accueil_technicien.dart` |
-| `lib/widgets/filtres_techniciens.dart` | Model `FiltresTechniciens` + bottom sheet filtres avancés |
+| `lib/widgets/filtres_techniciens.dart` | Model `FiltresTechniciens` (disponibleSeulement, noteMin, categorieId, categorieNom, **commune, quartier, typePrestation**) + bottom sheet filtres avancés |
 | `lib/widgets/categories_chips.dart` | Cartes image **96×116px DB-driven** — reçoit `categories: List<Map>` + `activeCatId` + `onSelect(id, nom)` — image mapper par nom — filtre via `categorieId` réel (pas de ilike) |
-| `lib/widgets/services_rapides_widget.dart` | 5 boutons 1-clic avec images métiers — filtre via `categorieNom` ilike (fallback quand pas de categorieId) |
+| `lib/widgets/services_rapides_widget.dart` | 5 boutons 1-clic avec images métiers — typedef `OnServiceTap(categorieNom, {typePrestation?, disponibleSeulement})` — bottom sheets contextuels Gaz + Ménagère |
+| `lib/widgets/experts_pres_widget.dart` | Liste horizontale experts disponibles (est_en_ligne OU disponible) — cartes 148px, badge statut, filtre par commune — "Voir plus" → `TechnicianSelectionPage` |
+| `lib/widgets/location_picker_widget.dart` | Carte flutter_map + GPS + Nominatim reverse geocode + sélection manuelle ville/commune/quartier — retourne `{ville, commune, quartier, region, repere}` |
 | `lib/widgets/carte_technicien.dart` | Card technicien — avatar 76×76px `borderRadius(14)` + `_DisponibiliteBadge` + favori cœur |
 | `web/devenir-prestataire.html` | Portail recrutement HTML standalone — Supabase JS CDN — zéro Flutter — mobile-first |
 | `vercel.json` | `outputDirectory: build/web` + SPA catch-all `→ /index.html` — cleanUrls pour `.html` statiques |

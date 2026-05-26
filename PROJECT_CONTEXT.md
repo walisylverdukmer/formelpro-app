@@ -96,10 +96,11 @@ lib/
 └── widgets/
     ├── notification_badge.dart      → Badge + modal bottom sheet notifications
     ├── stats_dashboard_tech.dart    → Revenus FCFA, missions, graphique mensuel
-    ├── filtres_techniciens.dart     → Model FiltresTechniciens + bottom sheet filtres
+    ├── filtres_techniciens.dart     → Model FiltresTechniciens (commune, quartier, typePrestation ajoutés) + bottom sheet filtres
     ├── categories_chips.dart        → Cartes image 96×116px DB-driven — categorieId direct, fallback gradient
-    ├── services_rapides_widget.dart → 5 boutons 1-clic avec images metiers, fallback icône
-    ├── location_picker_widget.dart  → Carte + sélection GPS
+    ├── services_rapides_widget.dart → 5 boutons 1-clic avec images métiers — typedef OnServiceTap, bottom sheets Gaz + Ménagère
+    ├── experts_pres_widget.dart     → Liste horizontale experts dispo (est_en_ligne/disponible) — cartes 148px, filtre commune
+    ├── location_picker_widget.dart  → Carte flutter_map + GPS + Nominatim — retourne ville/commune/quartier
     ├── carte_technicien.dart        → Card technicien — avatar 76×76px arrondi + badge disponibilité
     └── category_picker.dart         → Dropdown métiers
 ```
@@ -162,8 +163,11 @@ lib/
 | **Multi-pays** | UI et couleurs adaptées CIV/CMR |
 | **Notation post-intervention** | Modal étoiles 1-5 + commentaire → `avis` + trigger réputation auto |
 | **Filtre catégorie techniciens** | Chips 100% DB-driven (`categories_services` → `technicien_categories`) — cartes image 96×116px, `categorieId` direct, plus de ilike |
-| **Services rapides** | 5 boutons 1-clic avec images réelles (`fond_lovraison_gaz.jpg`, `fond_menagegère.jpg`, `Fond_electricité.jpg`) + fallback icône — filtre via `categorieNom` ilike |
-| **Recherche & filtres avancés** | Disponibilité, note min, catégorie (chips DB + bottom sheet DB), recherche texte OR (`nom_complet`/`metier_personnalise`) |
+| **Services rapides enrichis** | 5 boutons 1-clic avec images réelles + bottom sheets contextuels : Gaz (toggle dispo + infos livraison), Ménagère (3 types : Résidente/Journalière/Ponctuelle) — `OnServiceTap` typedef avec `typePrestation` |
+| **Experts près de vous** | Widget horizontal `ExpertsPresWidget` — jusqu'à 12 experts en ligne/dispos, cartes 148px avec photo/badge statut/note, filtre par commune, "Voir plus" → `TechnicianSelectionPage` |
+| **Localisation contextuelle** | Bouton commune dans l'en-tête `accueil_client.dart` → ouvre `LocationPickerWidget` → met à jour `_filtres.commune`/`quartier` et relance `_fetchTechniciens` |
+| **Filtrage proximité** | `_fetchTechniciens` applique `.ilike('commune', ...)` et `.ilike('quartier', ...)` depuis `FiltresTechniciens` |
+| **Recherche & filtres avancés** | Disponibilité, note min, catégorie (chips DB + bottom sheet DB), commune, quartier, typePrestation, recherche texte OR (`nom_complet`/`metier_personnalise`) |
 | **FCM routing notifications** | Tap notif → `ChatScreen` ou `MissionDetailPage`/`InterventionDetailPage` selon `data['type']` ; gestion background + terminated (`pendingNotificationData`) |
 | **Vérification identité tech** | Page dédiée `verification_documents_page.dart` : upload CNI/passeport/certificat, statut par document (en_attente/approuvé/refusé+motif) ✅ SQL §13 exécuté — bucket Storage à créer |
 | **Espace admin validation docs** | `admin_documents_page.dart` : liste docs en attente, visionneuse, valider/refuser avec motif, trigger DB auto `is_identite_verifiee` ✅ SQL §14 exécuté — activer admin via UPDATE |
@@ -313,4 +317,4 @@ Lancement app
 
 ---
 
-*Dernière mise à jour : 2026-05-26 — Session 8 : Portail recrutement web (`web/devenir-prestataire.html`), refonte UI visuelle (fonds image login/dashboards, categories_chips 96×116px image cards, services_rapides avec images, avatars techs 76×76px, badge disponibilité), fix Vercel routing 404, migrations SQL idempotentes (5 triggers DROP IF EXISTS), flutter analyze 0 issues*
+*Dernière mise à jour : 2026-05-26 — Session 10 : Ajustement stratégique majeur — Flow chat sécurisé. Chat devient centre du système : stream unique (StreamSubscription), proforma enrichi (service/prix/lieu/date), appel conditionnel (déblocage après 3 messages OU proforma), alerte sécurité avant confirmation offre, `receiverPhone` passé depuis `details_technicien`. Suppression appel direct depuis profil tech (bouton "Contacter" unique + note explicative). Flow ménagère 3-étapes : choix type → formulaire adresse/message → confirmation automatique (sans routing vers liste techs). flutter analyze 0 issues*

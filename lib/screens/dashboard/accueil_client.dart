@@ -7,8 +7,10 @@ import 'package:formelpro/widgets/categories_chips.dart';
 import 'package:formelpro/widgets/filtres_techniciens.dart';
 import 'package:formelpro/widgets/services_rapides_widget.dart';
 import 'package:formelpro/widgets/zone_stats_widget.dart';
+import 'package:formelpro/widgets/experts_pres_widget.dart';
 import 'package:formelpro/screens/dashboard/details_technicien.dart';
 import 'package:formelpro/screens/booking/technician_selection_page.dart';
+import 'package:formelpro/widgets/location_picker_widget.dart';
 
 class AccueilClient extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -140,6 +142,12 @@ class _AccueilClientState extends State<AccueilClient>
       }
       if (_filtres.disponibleSeulement) query = query.eq('disponible', true);
       if (_filtres.noteMin > 0) query = query.gte('note_moyenne', _filtres.noteMin);
+      if (_filtres.commune != null && _filtres.commune!.isNotEmpty) {
+        query = query.ilike('commune', '%${_filtres.commune}%');
+      }
+      if (_filtres.quartier != null && _filtres.quartier!.isNotEmpty) {
+        query = query.ilike('quartier', '%${_filtres.quartier}%');
+      }
       if (search.isNotEmpty) {
         query = query.or(
           'nom_complet.ilike.%$search%,metier_personnalise.ilike.%$search%',
@@ -292,12 +300,13 @@ class _AccueilClientState extends State<AccueilClient>
               const SizedBox(height: 20),
               ServicesRapidesWidget(
                 accentColor: primaryColor,
-                onServiceTap: (query) {
+                commune: widget.userData['commune'] as String?,
+                onServiceTap: (query, {typePrestation, disponibleSeulement = false}) {
                   setState(() {
                     _filtres = FiltresTechniciens(
                       categorieNom: query,
-                      disponibleSeulement: _filtres.disponibleSeulement,
-                      noteMin: _filtres.noteMin,
+                      typePrestation: typePrestation,
+                      disponibleSeulement: disponibleSeulement,
                     );
                   });
                   _fetchTechniciens();
@@ -311,6 +320,13 @@ class _AccueilClientState extends State<AccueilClient>
                   commune: widget.userData['commune'] as String?,
                   accentColor: primaryColor,
                 ),
+              ),
+              const SizedBox(height: 28),
+              ExpertsPresWidget(
+                pays: pays,
+                accentColor: primaryColor,
+                commune: widget.userData['commune'] as String?,
+                clientId: widget.userData['id']?.toString(),
               ),
               const SizedBox(height: 28),
               Padding(
@@ -420,6 +436,53 @@ class _AccueilClientState extends State<AccueilClient>
           ),
           const SizedBox(height: 16),
           _buildSearchBar(primaryColor),
+          const SizedBox(height: 10),
+          _buildLocationRow(primaryColor),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLocationRow(Color primaryColor) {
+    final String? commune = _filtres.commune ?? widget.userData['commune'] as String?;
+    return GestureDetector(
+      onTap: () async {
+        final pays = widget.userData['pays'] ?? 'CIV';
+        final result = await Navigator.push<Map<String, dynamic>>(
+          context,
+          MaterialPageRoute(
+            builder: (_) => LocationPickerWidget(
+              accentColor: primaryColor,
+              paysCode: pays,
+            ),
+          ),
+        );
+        if (result != null && mounted) {
+          setState(() {
+            _filtres = _filtres.copyWith(
+              commune: result['commune'] as String?,
+              quartier: result['quartier'] as String?,
+            );
+          });
+          _fetchTechniciens();
+        }
+      },
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.location_on_rounded, size: 14, color: primaryColor),
+          const SizedBox(width: 4),
+          Text(
+            (commune != null && commune.isNotEmpty) ? commune : 'Partout',
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              color: const Color(0xFF475569),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(width: 2),
+          const Icon(Icons.keyboard_arrow_down_rounded,
+              size: 14, color: Color(0xFF94A3B8)),
         ],
       ),
     );

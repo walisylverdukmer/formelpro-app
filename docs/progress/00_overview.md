@@ -4,7 +4,7 @@
 
 ---
 
-## ÉTAT GLOBAL AU 2026-05-26 (mis à jour session 8)
+## ÉTAT GLOBAL AU 2026-05-26 (mis à jour session 9)
 
 | Module | Fichier de suivi | Statut |
 |--------|-----------------|--------|
@@ -21,6 +21,8 @@
 | Favoris Techniciens | [11_favoris_factures_auth.md](11_favoris_factures_auth.md) | ✅ Complet |
 | UI Visuelle Premium | *(inline)* | ✅ Complet — catégories image cards, services rapides, avatars 76px, fonds image (session 8) |
 | Portail recrutement web | *(inline)* | ✅ Complet — `web/devenir-prestataire.html` + Vercel routing corrigé (session 8) |
+| Proximité & Experts dispo | *(inline)* | ✅ Complet — `ExpertsPresWidget` + bouton localisation + filtrage commune/quartier DB (session 9) |
+| Services rapides enrichis | *(inline)* | ✅ Complet — bottom sheets Gaz + Ménagère (3 types), `OnServiceTap` typedef (session 9) |
 
 ---
 
