@@ -2,6 +2,10 @@
   "cleanUrls": true,
   "rewrites": [
     {
+      "source": "/devenir-prestataire",
+      "destination": "/devenir-prestataire.html"
+    },
+    {
       "source": "/(.*)",
       "destination": "/"
     }

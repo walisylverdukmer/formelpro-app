@@ -126,28 +126,49 @@ class _PageConnexionPrincipaleState extends State<PageConnexionPrincipale> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _buildBrand(),
-              const SizedBox(height: 40),
-              _buildCard(),
-              const SizedBox(height: 20),
-              _buildDivider(),
-              const SizedBox(height: 16),
-              GoogleSignInButton(
-                isLoading: _isLoadingGoogle,
-                onPressed: _signInWithGoogle,
-              ),
-              const SizedBox(height: 28),
-              _buildSignUpLink(),
-            ],
+      backgroundColor: const Color(0xFF0F172A),
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/login_bg.jpeg',
+              fit: BoxFit.cover,
+            ),
           ),
-        ),
+          Positioned.fill(
+            child: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Color(0x77000000), Color(0xDD0F172A)],
+                ),
+              ),
+            ),
+          ),
+          SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildBrand(),
+                  const SizedBox(height: 40),
+                  _buildCard(),
+                  const SizedBox(height: 20),
+                  _buildDivider(),
+                  const SizedBox(height: 16),
+                  GoogleSignInButton(
+                    isLoading: _isLoadingGoogle,
+                    onPressed: _signInWithGoogle,
+                  ),
+                  const SizedBox(height: 28),
+                  _buildSignUpLink(),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -173,7 +194,7 @@ class _PageConnexionPrincipaleState extends State<PageConnexionPrincipale> {
           style: GoogleFonts.poppins(
             fontSize: 30,
             fontWeight: FontWeight.w800,
-            color: const Color(0xFF0F172A),
+            color: Colors.white,
           ),
         ),
         const SizedBox(height: 4),
@@ -182,7 +203,7 @@ class _PageConnexionPrincipaleState extends State<PageConnexionPrincipale> {
           textAlign: TextAlign.center,
           style: GoogleFonts.inter(
             fontSize: 14,
-            color: const Color(0xFF64748B),
+            color: Colors.white70,
           ),
         ),
       ],
@@ -369,18 +390,18 @@ class _PageConnexionPrincipaleState extends State<PageConnexionPrincipale> {
   Widget _buildDivider() {
     return Row(
       children: [
-        const Expanded(child: Divider(color: Color(0xFFE2E8F0))),
+        const Expanded(child: Divider(color: Colors.white24)),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: Text(
             'ou',
             style: GoogleFonts.inter(
               fontSize: 13,
-              color: const Color(0xFF94A3B8),
+              color: Colors.white54,
             ),
           ),
         ),
-        const Expanded(child: Divider(color: Color(0xFFE2E8F0))),
+        const Expanded(child: Divider(color: Colors.white24)),
       ],
     );
   }
@@ -396,7 +417,7 @@ class _PageConnexionPrincipaleState extends State<PageConnexionPrincipale> {
           text: TextSpan(
             style: GoogleFonts.inter(
               fontSize: 14,
-              color: const Color(0xFF64748B),
+              color: Colors.white70,
             ),
             children: const [
               TextSpan(text: "Pas encore de compte ? "),

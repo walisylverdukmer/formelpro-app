@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Rejoignez FormelPro — Inscrivez-vous comme prestataire certifié en Côte d'Ivoire et au Cameroun. Accédez à des missions, des clients vérifiés et un paiement sécurisé.">
+
+  <!-- OG / Facebook / WhatsApp / TikTok -->
+  <meta property="og:title" content="Devenez prestataire FormelPro 🔧">
+  <meta property="og:description" content="Inscrivez-vous gratuitement. Recevez des missions près de chez vous. Gagnez plus avec vos compétences.">
+  <meta property="og:image" content="https://formelpro-app.vercel.app/icons/Icon-512.png">
+  <meta property="og:image:width" content="512">
+  <meta property="og:image:height" content="512">
+  <meta property="og:url" content="https://formelpro-app.vercel.app/devenir-prestataire">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="fr_FR">
+  <meta property="og:site_name" content="FormelPro">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Devenez prestataire FormelPro">
+  <meta name="twitter:description" content="Inscrivez-vous gratuitement. Missions près de chez vous.">
+  <meta name="twitter:image" content="https://formelpro-app.vercel.app/icons/Icon-512.png">
+  <meta name="theme-color" content="#E67E22">
+
+  <title>Devenez prestataire — FormelPro</title>
+  <link rel="icon" href="/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg:       #0F172A;
+      --card:     #1E293B;
+      --input-bg: #253347;
+      --accent:   #E67E22;
+      --text:     #F8FAFC;
+      --muted:    rgba(248,250,252,0.55);
+      --border:   rgba(255,255,255,0.08);
+      --success:  #22C55E;
+      --r-sm:     12px;
+      --r:        20px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Header ── */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(15,23,42,0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 20px;
+    }
+    .header-inner {
+      max-width: 560px;
+      margin: 0 auto;
+      height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .logo img { width: 34px; height: 34px; border-radius: 8px; object-fit: contain; }
+    .logo-text {
+      font-family: 'Poppins', sans-serif;
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: 1.5px;
+    }
+    .header-link {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      padding: 8px 16px;
+      border: 1.5px solid rgba(230,126,34,0.35);
+      border-radius: 10px;
+      white-space: nowrap;
+    }
+
+    /* ── Container ── */
+    .container {
+      max-width: 560px;
+      margin: 0 auto;
+      padding: 24px 18px 64px;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      text-align: center;
+      padding: 32px 0 20px;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(230,126,34,0.12);
+      border: 1px solid rgba(230,126,34,0.28);
+      border-radius: 100px;
+      padding: 6px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 18px;
+      letter-spacing: 0.4px;
+    }
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: pulse 1.8s ease infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+    .hero h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 27px;
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 14px;
+    }
+    .hero h1 span { color: var(--accent); }
+    .hero p {
+      font-size: 15px;
+      color: var(--muted);
+      line-height: 1.65;
+      max-width: 380px;
+      margin: 0 auto 28px;
+    }
+
+    /* ── Stats ── */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+    .stat-card {
+      background: var(--card);
+      border-radius: 14px;
+      padding: 16px 8px;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+    .stat-val {
+      font-family: 'Poppins', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1;
+      margin-bottom: 5px;
+    }
+    .stat-lbl {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    /* ── Benefits ── */
+    .benefits {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+    .benefit {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      border: 1px solid var(--border);
+    }
+    .benefit-icon {
+      width: 46px;
+      height: 46px;
+      background: rgba(230,126,34,0.1);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+    .benefit-title {
+      font-family: 'Poppins', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 3px;
+    }
+    .benefit-desc { font-size: 12px; color: var(--muted); }
+
+    /* ── Form card ── */
+    .form-card {
+      background: var(--card);
+      border-radius: var(--r);
+      padding: 26px 22px;
+      border: 1px solid var(--border);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+    }
+    .form-heading {
+      font-family: 'Poppins', sans-serif;
+      font-size: 19px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .form-sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 26px;
+    }
+
+    /* ── Section header ── */
+    .sec-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 22px 0 14px;
+    }
+    .sec-num {
+      width: 28px;
+      height: 28px;
+      background: rgba(230,126,34,0.12);
+      border: 1px solid rgba(230,126,34,0.28);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+    .sec-label {
+      font-family: 'Poppins', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    /* ── Fields ── */
+    .field { margin-bottom: 13px; }
+    .field label {
+      display: block;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: rgba(248,250,252,0.65);
+      margin-bottom: 6px;
+      letter-spacing: 0.2px;
+      text-transform: uppercase;
+    }
+    .field label .req { color: var(--accent); margin-left: 2px; }
+    .field input,
+    .field select,
+    .field textarea {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r-sm);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      padding: 0 15px;
+      height: 52px;
+      outline: none;
+      transition: border-color 0.2s;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .field textarea {
+      height: auto;
+      min-height: 80px;
+      padding: 13px 15px;
+      resize: none;
+      line-height: 1.55;
+    }
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus { border-color: var(--accent); }
+    .field input::placeholder,
+    .field textarea::placeholder { color: rgba(248,250,252,0.22); }
+    .field select option { background: #1E293B; color: var(--text); }
+
+    .sel-wrap { position: relative; }
+    .sel-wrap::after {
+      content: '▾';
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      pointer-events: none;
+      font-size: 14px;
+    }
+
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+
+    /* ── Optional toggle ── */
+    .opt-toggle {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin: 18px 0 10px;
+      cursor: pointer;
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 600;
+      background: none;
+      border: none;
+      padding: 0;
+    }
+    .opt-body { display: none; }
+    .opt-body.open { display: block; }
+
+    /* ── Notice ── */
+    .notice {
+      display: flex;
+      gap: 8px;
+      background: rgba(230,126,34,0.07);
+      border: 1px solid rgba(230,126,34,0.15);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 12px;
+      color: rgba(248,250,252,0.6);
+      margin-top: 14px;
+      line-height: 1.55;
+    }
+
+    /* ── Submit ── */
+    .btn-submit {
+      width: 100%;
+      height: 56px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 14px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      box-shadow: 0 6px 22px rgba(230,126,34,0.32);
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    .btn-submit:active { opacity: 0.85; transform: scale(0.99); }
+    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .spin {
+      width: 20px; height: 20px;
+      border: 2.5px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: rot 0.7s linear infinite;
+      display: none;
+    }
+    @keyframes rot { to { transform: rotate(360deg); } }
+
+    /* ── Error ── */
+    .err-box {
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.28);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: #FCA5A5;
+      margin-top: 14px;
+      display: none;
+      line-height: 1.5;
+    }
+
+    /* ── Success screen ── */
+    #success-screen { display: none; }
+    .success-card {
+      background: var(--card);
+      border-radius: var(--r);
+      padding: 32px 22px;
+      text-align: center;
+      border: 1px solid var(--border);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+    }
+    .success-icon {
+      width: 72px; height: 72px;
+      background: rgba(34,197,94,0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      margin: 0 auto 18px;
+    }
+    .success-title {
+      font-family: 'Poppins', sans-serif;
+      font-size: 21px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .success-sub {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.65;
+      margin-bottom: 24px;
+    }
+
+    /* ── Credentials box ── */
+    .creds {
+      background: rgba(15,23,42,0.85);
+      border: 1px solid rgba(230,126,34,0.18);
+      border-radius: 14px;
+      padding: 18px 16px;
+      text-align: left;
+      margin-bottom: 22px;
+    }
+    .creds-header {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .cred-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      gap: 8px;
+    }
+    .cred-row:last-of-type { margin-bottom: 0; }
+    .cred-key { font-size: 12px; color: var(--muted); flex-shrink: 0; }
+    .cred-val {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      font-family: monospace;
+      background: rgba(255,255,255,0.07);
+      padding: 5px 10px;
+      border-radius: 7px;
+      cursor: pointer;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      border: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+    .cred-val:hover { background: rgba(255,255,255,0.12); }
+    .cred-hint {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 12px;
+      display: flex;
+      align-items: flex-start;
+      gap: 5px;
+      line-height: 1.5;
+    }
+
+    /* ── CTA buttons ── */
+    .btn-main {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      height: 52px;
+      background: var(--accent);
+      color: white;
+      border-radius: 14px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      text-decoration: none;
+      margin-bottom: 11px;
+      box-shadow: 0 6px 20px rgba(230,126,34,0.28);
+    }
+    .btn-ghost {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 48px;
+      background: transparent;
+      color: var(--text);
+      border-radius: 14px;
+      font-size: 14px;
+      font-weight: 500;
+      text-decoration: none;
+      border: 1.5px solid var(--border);
+    }
+
+    /* ── Footer ── */
+    .footer {
+      text-align: center;
+      padding: 36px 20px 24px;
+      font-size: 12px;
+      color: rgba(248,250,252,0.3);
+      line-height: 1.8;
+    }
+    .footer a { color: var(--accent); text-decoration: none; }
+
+    /* ── Responsive ── */
+    @media (max-width: 380px) {
+      .hero h1 { font-size: 23px; }
+      .row { grid-template-columns: 1fr; }
+      .stat-val { font-size: 19px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header class="header">
+  <div class="header-inner">
+    <a href="/" class="logo">
+      <img src="/logo.png" alt="FormelPro">
+      <span class="logo-text">FORMELPRO</span>
+    </a>
+    <a href="https://formelpro-app.vercel.app" class="header-link">Se connecter</a>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- ── Hero ── -->
+  <section class="hero">
+    <div class="hero-badge">
+      <span class="badge-dot"></span>
+      Inscription ouverte — Côte d'Ivoire &amp; Cameroun
+    </div>
+    <h1>Rejoignez <span>FormelPro</span><br>comme prestataire</h1>
+    <p>Accédez à des clients vérifiés, recevez des missions près de chez vous et développez votre activité en toute confiance.</p>
+  </section>
+
+  <!-- ── Stats ── -->
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-val">100%</div>
+      <div class="stat-lbl">Gratuit</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val">2</div>
+      <div class="stat-lbl">Pays</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val">5 min</div>
+      <div class="stat-lbl">Inscription</div>
+    </div>
+  </div>
+
+  <!-- ── Benefits ── -->
+  <div class="benefits">
+    <div class="benefit">
+      <div class="benefit-icon">📍</div>
+      <div>
+        <div class="benefit-title">Missions près de chez vous</div>
+        <div class="benefit-desc">Recevez des demandes de clients dans votre quartier</div>
+      </div>
+    </div>
+    <div class="benefit">
+      <div class="benefit-icon">💰</div>
+      <div>
+        <div class="benefit-title">Paiement sécurisé FCFA</div>
+        <div class="benefit-desc">Factures automatiques, historique complet de vos gains</div>
+      </div>
+    </div>
+    <div class="benefit">
+      <div class="benefit-icon">✅</div>
+      <div>
+        <div class="benefit-title">Profil vérifié &amp; visible</div>
+        <div class="benefit-desc">Badge de confiance, notes clients, mise en avant premium</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Form ── -->
+  <div id="form-section">
+    <div class="form-card">
+      <div class="form-heading">Créer mon compte prestataire</div>
+      <div class="form-sub">Inscription gratuite · 5 minutes</div>
+
+      <form id="reg-form" novalidate>
+
+        <!-- 1. Infos personnelles -->
+        <div class="sec-header">
+          <div class="sec-num">1</div>
+          <div class="sec-label">Informations personnelles</div>
+        </div>
+
+        <div class="field">
+          <label>Nom complet <span class="req">*</span></label>
+          <input type="text" id="nom_complet" placeholder="Ex : Kouamé Assi Bernardin" maxlength="80" autocomplete="name" required>
+        </div>
+
+        <div class="field">
+          <label>Pays <span class="req">*</span></label>
+          <div class="sel-wrap">
+            <select id="pays" required>
+              <option value="">Sélectionner votre pays</option>
+              <option value="CIV">🇨🇮 Côte d'Ivoire</option>
+              <option value="CMR">🇨🇲 Cameroun</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label>Email <span class="req">*</span></label>
+            <input type="email" id="email" placeholder="votre@email.com" autocomplete="email" required>
+          </div>
+          <div class="field">
+            <label>WhatsApp <span class="req">*</span></label>
+            <input type="tel" id="telephone" placeholder="+225 07 58 …" maxlength="20" autocomplete="tel">
+          </div>
+        </div>
+
+        <!-- 2. Localisation -->
+        <div class="sec-header">
+          <div class="sec-num">2</div>
+          <div class="sec-label">Votre localisation</div>
+        </div>
+
+        <!-- CIV -->
+        <div id="loc-civ" style="display:none">
+          <div class="field">
+            <label>Ville <span class="req">*</span></label>
+            <div class="sel-wrap">
+              <select id="ville-civ">
+                <option value="">Choisir votre ville</option>
+                <option>Abidjan</option>
+                <option>Bouaké</option>
+                <option>San-Pédro</option>
+                <option>Yamoussoukro</option>
+                <option>Korhogo</option>
+                <option>Man</option>
+                <option>Daloa</option>
+                <option>Abengourou</option>
+                <option>Soubré</option>
+                <option>Autre</option>
+              </select>
+            </div>
+          </div>
+          <div class="field" id="commune-wrap" style="display:none">
+            <label>Commune <span class="req">*</span></label>
+            <div class="sel-wrap">
+              <select id="commune-civ">
+                <option value="">Choisir la commune</option>
+                <option>Cocody</option>
+                <option>Yopougon</option>
+                <option>Plateau</option>
+                <option>Marcory</option>
+                <option>Treichville</option>
+                <option>Adjamé</option>
+                <option>Abobo</option>
+                <option>Port-Bouët</option>
+                <option>Koumassi</option>
+                <option>Attécoubé</option>
+                <option>Bingerville</option>
+                <option>Williamsville</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- CMR -->
+        <div id="loc-cmr" style="display:none">
+          <div class="field">
+            <label>Ville <span class="req">*</span></label>
+            <div class="sel-wrap">
+              <select id="ville-cmr">
+                <option value="">Choisir votre ville</option>
+                <option>Yaoundé</option>
+                <option>Douala</option>
+                <option>Bafoussam</option>
+                <option>Bamenda</option>
+                <option>Garoua</option>
+                <option>Maroua</option>
+                <option>Ngaoundéré</option>
+                <option>Ebolowa</option>
+                <option>Bertoua</option>
+                <option>Autre</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quartier & Repère (commun) -->
+        <div id="loc-common" style="display:none">
+          <div class="row">
+            <div class="field">
+              <label>Quartier <span class="req">*</span></label>
+              <input type="text" id="quartier" placeholder="Ex : Riviera 2, Bastos…" maxlength="80">
+            </div>
+            <div class="field">
+              <label>Point de repère</label>
+              <input type="text" id="repere" placeholder="Ex : Près du carrefour…" maxlength="120">
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Métier -->
+        <div class="sec-header">
+          <div class="sec-num">3</div>
+          <div class="sec-label">Votre métier</div>
+        </div>
+
+        <div class="field">
+          <label>Catégorie de service <span class="req">*</span></label>
+          <div class="sel-wrap">
+            <select id="categorie" required>
+              <option value="">Choisir une catégorie</option>
+              <option>Plomberie</option>
+              <option>Électricité</option>
+              <option>Climatisation / Froid</option>
+              <option>Menuiserie &amp; Ébénisterie</option>
+              <option>Peinture &amp; Décoration</option>
+              <option>Ménage &amp; Nettoyage</option>
+              <option>Informatique &amp; Réseaux</option>
+              <option>Maçonnerie &amp; Carrelage</option>
+              <option>Jardinage &amp; Espaces verts</option>
+              <option>Soudure &amp; Ferronnerie</option>
+              <option>Mécanique automobile</option>
+              <option>Coiffure &amp; Beauté</option>
+              <option>Couture &amp; Retouche</option>
+              <option>Autre</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Titre de votre métier <span class="req">*</span></label>
+          <input type="text" id="metier" placeholder="Ex : Plombier certifié, Électricienne industrielle…" maxlength="80" required>
+        </div>
+
+        <div class="field">
+          <label>Vos compétences principales <span class="req">*</span></label>
+          <textarea id="savoir_faire" rows="3" placeholder="Ex : Réparation fuites, installation sanitaires, débouchage canalisation, cumulus électriques…" maxlength="300" required></textarea>
+        </div>
+
+        <!-- Optionnel -->
+        <button type="button" class="opt-toggle" id="opt-btn" onclick="toggleOpt()">
+          <span id="opt-arrow">▸</span> Informations supplémentaires (optionnel)
+        </button>
+        <div class="opt-body" id="opt-body">
+          <div class="field">
+            <label>Années d'expérience</label>
+            <div class="sel-wrap">
+              <select id="experience">
+                <option value="">Non renseigné</option>
+                <option>Moins de 1 an</option>
+                <option>1 à 2 ans</option>
+                <option>3 à 5 ans</option>
+                <option>6 à 10 ans</option>
+                <option>Plus de 10 ans</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label>Courte présentation</label>
+            <textarea id="description" rows="2" placeholder="Présentez-vous en 1-2 phrases pour rassurer vos futurs clients…" maxlength="200"></textarea>
+          </div>
+        </div>
+
+        <div class="notice">
+          <span>🔒</span>
+          <span>Vos données sont sécurisées. Un compte vous sera créé immédiatement avec un mot de passe temporaire que vous pourrez changer à tout moment.</span>
+        </div>
+
+        <button type="submit" class="btn-submit" id="submit-btn">
+          <div class="spin" id="btn-spin"></div>
+          <span id="btn-txt">Créer mon compte gratuitement</span>
+        </button>
+
+        <div class="err-box" id="err-box"></div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- ── Success screen ── -->
+  <div id="success-screen">
+    <div class="success-card">
+      <div class="success-icon">🎉</div>
+      <div class="success-title">Bienvenue chez FormelPro !</div>
+      <div class="success-sub">Votre compte prestataire a été créé avec succès. Conservez précieusement vos identifiants ci-dessous.</div>
+
+      <div class="creds">
+        <div class="creds-header">Vos identifiants de connexion</div>
+        <div class="cred-row">
+          <span class="cred-key">Email</span>
+          <span class="cred-val" id="cred-email" title="Appuyer pour copier"></span>
+        </div>
+        <div class="cred-row">
+          <span class="cred-key">Mot de passe temp.</span>
+          <span class="cred-val" id="cred-pass" title="Appuyer pour copier"></span>
+        </div>
+        <div class="cred-hint">
+          <span>📸</span>
+          <span>Faites une capture d'écran maintenant — vous aurez besoin de ces informations pour vous connecter.</span>
+        </div>
+      </div>
+
+      <a href="https://formelpro-app.vercel.app" class="btn-main">
+        Accéder à mon tableau de bord
+      </a>
+      <a href="https://formelpro-app.vercel.app" class="btn-ghost">
+        Télécharger l'application mobile
+      </a>
+
+      <div class="notice" style="margin-top: 18px; text-align: left;">
+        <span>📧</span>
+        <span>Un email de confirmation a été envoyé à votre adresse. Cliquez sur le lien dans cet email pour activer complètement votre compte.</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  FormelPro &copy; 2026 — Côte d'Ivoire &amp; Cameroun<br>
+  <a href="https://formelpro-app.vercel.app">formelpro-app.vercel.app</a>
+</footer>
+
+<!-- Supabase JS v2 -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+  /* ── Supabase init ── */
+  const SUPA_URL = 'https://elsweibfytmvaeasekaf.supabase.co';
+  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVsc3dlaWJmeXRtdmFlYXNla2FmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMTA1NjIsImV4cCI6MjA4ODU4NjU2Mn0.jpmz7n0BXmEtneTvl2aHVhhqkfqC_vrvqJDe_NiDo4o';
+  const db = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+  /* ── Pays → affichage localisation ── */
+  document.getElementById('pays').addEventListener('change', function () {
+    var p = this.value;
+    document.getElementById('loc-civ').style.display     = p === 'CIV' ? 'block' : 'none';
+    document.getElementById('loc-cmr').style.display     = p === 'CMR' ? 'block' : 'none';
+    document.getElementById('loc-common').style.display  = p ? 'block' : 'none';
+  });
+
+  /* ── Abidjan → affichage commune ── */
+  document.getElementById('ville-civ').addEventListener('change', function () {
+    document.getElementById('commune-wrap').style.display = this.value === 'Abidjan' ? 'block' : 'none';
+  });
+
+  /* ── Section optionnelle ── */
+  function toggleOpt() {
+    var body  = document.getElementById('opt-body');
+    var arrow = document.getElementById('opt-arrow');
+    body.classList.toggle('open');
+    arrow.textContent = body.classList.contains('open') ? '▾' : '▸';
+  }
+
+  /* ── Copy au tap ── */
+  document.querySelectorAll('.cred-val').forEach(function (el) {
+    el.addEventListener('click', function () {
+      var self = this;
+      var txt  = self.textContent;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(txt).then(function () {
+          self.textContent = 'Copié !';
+          setTimeout(function () { self.textContent = txt; }, 1600);
+        });
+      }
+    });
+  });
+
+  /* ── Génération mot de passe lisible ── */
+  function genPassword() {
+    var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+    var p = 'FP';
+    for (var i = 0; i < 7; i++) {
+      p += chars[Math.floor(Math.random() * chars.length)];
+    }
+    return p + '!';
+  }
+
+  /* ── Soumission formulaire ── */
+  document.getElementById('reg-form').addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    var errBox   = document.getElementById('err-box');
+    var btn      = document.getElementById('submit-btn');
+    var spin     = document.getElementById('btn-spin');
+    var btnTxt   = document.getElementById('btn-txt');
+
+    errBox.style.display = 'none';
+
+    /* Récupération des valeurs */
+    var nomComplet  = document.getElementById('nom_complet').value.trim();
+    var pays        = document.getElementById('pays').value;
+    var email       = document.getElementById('email').value.trim().toLowerCase();
+    var telephone   = document.getElementById('telephone').value.trim();
+    var quartier    = document.getElementById('quartier').value.trim();
+    var repere      = document.getElementById('repere').value.trim();
+    var metier      = document.getElementById('metier').value.trim();
+    var savoirFaire = document.getElementById('savoir_faire').value.trim();
+    var categorie   = document.getElementById('categorie').value;
+    var experience  = document.getElementById('experience').value;
+    var description = document.getElementById('description').value.trim();
+
+    var ville   = '';
+    var commune = '';
+    if (pays === 'CIV') {
+      ville   = document.getElementById('ville-civ').value;
+      commune = document.getElementById('commune-civ').value;
+    } else if (pays === 'CMR') {
+      ville = document.getElementById('ville-cmr').value;
+    }
+
+    /* Validation */
+    if (!nomComplet)    return showErr('Veuillez saisir votre nom complet.');
+    if (!pays)          return showErr('Veuillez sélectionner votre pays.');
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showErr('Veuillez saisir un email valide.');
+    if (!telephone)     return showErr('Veuillez saisir votre numéro WhatsApp.');
+    if (!ville)         return showErr('Veuillez sélectionner votre ville.');
+    if (!quartier)      return showErr('Veuillez saisir votre quartier.');
+    if (!categorie)     return showErr('Veuillez choisir une catégorie de service.');
+    if (!metier)        return showErr('Veuillez saisir le titre de votre métier.');
+    if (!savoirFaire)   return showErr('Veuillez décrire vos compétences principales.');
+
+    /* Chargement */
+    btn.disabled = true;
+    spin.style.display = 'block';
+    btnTxt.textContent = 'Création en cours…';
+
+    var tempPwd = genPassword();
+    var prenom  = nomComplet.split(' ')[0];
+
+    /* Composition du champ savoir_faire enrichi */
+    var skillsText = savoirFaire;
+    if (description)  skillsText += '\n\n' + description;
+    if (experience)   skillsText += '\nExpérience : ' + experience;
+
+    try {
+      /* 1. Créer le compte Auth */
+      var authResp = await db.auth.signUp({
+        email:    email,
+        password: tempPwd,
+        options: {
+          emailRedirectTo: 'https://formelpro-app.vercel.app',
+          data: { nom_complet: nomComplet, role: 'technicien' }
+        }
+      });
+
+      if (authResp.error) {
+        var msg = authResp.error.message || '';
+        if (msg.toLowerCase().includes('already registered') || msg.toLowerCase().includes('already been registered')) {
+          throw new Error('Un compte existe déjà avec cet email. Connectez-vous directement sur l\'application FormelPro.');
+        }
+        throw new Error(msg || 'Erreur lors de la création du compte.');
+      }
+
+      var userId = authResp.data && authResp.data.user && authResp.data.user.id;
+      if (!userId) throw new Error('Erreur inattendue. Veuillez réessayer.');
+
+      /* 2. Insérer le profil (possible uniquement si la session est active) */
+      if (authResp.data.session) {
+        var profileData = {
+          id:                 userId,
+          role:               'technicien',
+          pays:               pays,
+          prenom:             prenom,
+          nom_complet:        nomComplet,
+          email:              email,
+          telephone:          telephone,
+          ville:              ville,
+          commune:            commune || null,
+          quartier:           quartier,
+          adresse_complete:   repere ? (quartier + ', ' + repere) : quartier,
+          metier_personnalise: metier,
+          savoir_faire:       skillsText,
+          disponible:         false,
+          a_complete_profil:  false,
+        };
+
+        var profileResp = await db.from('utilisateurs').insert(profileData);
+        if (profileResp.error) {
+          /* Non bloquant — l'app Flutter gère la complétion de profil */
+          console.warn('Profile insert:', profileResp.error.message);
+        }
+      }
+
+      /* 3. Succès */
+      document.getElementById('form-section').style.display   = 'none';
+      document.getElementById('success-screen').style.display = 'block';
+      document.getElementById('cred-email').textContent = email;
+      document.getElementById('cred-pass').textContent  = tempPwd;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    } catch (err) {
+      showErr(err.message || 'Une erreur est survenue. Vérifiez votre connexion internet et réessayez.');
+    } finally {
+      btn.disabled = false;
+      spin.style.display = 'none';
+      btnTxt.textContent = 'Créer mon compte gratuitement';
+    }
+  });
+
+  function showErr(msg) {
+    var el = document.getElementById('err-box');
+    el.textContent = msg;
+    el.style.display = 'block';
+    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+</script>
+</body>
+</html>

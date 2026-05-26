@@ -131,6 +131,12 @@ class _AccueilClientState extends State<AccueilClient>
           .eq('pays', pays);
 
       if (techIdsFiltres != null) query = query.inFilter('id', techIdsFiltres);
+      // Fallback: filtre par nom de catégorie quand categorieId absent (services rapides)
+      if (techIdsFiltres == null && _filtres.categorieNom != null && search.isEmpty) {
+        query = query.or(
+          'metier_personnalise.ilike.%${_filtres.categorieNom}%,savoir_faire.ilike.%${_filtres.categorieNom}%',
+        );
+      }
       if (_filtres.disponibleSeulement) query = query.eq('disponible', true);
       if (_filtres.noteMin > 0) query = query.gte('note_moyenne', _filtres.noteMin);
       if (search.isNotEmpty) {
@@ -260,13 +266,25 @@ class _AccueilClientState extends State<AccueilClient>
     final String flagPath =
         pays == 'CIV' ? "assets/images/ci.jpg" : "assets/images/cmr.jpg";
 
+    final String bgImage = pays == 'CIV'
+        ? 'assets/images/fond_ci.jpeg'
+        : 'assets/images/fond_cmr.jpeg';
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+      backgroundColor: const Color(0xFF0F172A),
+      body: Stack(
+        children: [
+          Positioned.fill(child: Image.asset(bgImage, fit: BoxFit.cover)),
+          Positioned.fill(
+            child: Container(
+              color: const Color(0xFFF8FAFC).withValues(alpha: 0.88),
+            ),
+          ),
+          SafeArea(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
               _buildHeader(prenom, flagPath, primaryColor),
               const SizedBox(height: 16),
               _buildHeroBanner(pays, primaryColor),
@@ -344,6 +362,8 @@ class _AccueilClientState extends State<AccueilClient>
             ],
           ),
         ),
+      ),
+        ],
       ),
     );
   }

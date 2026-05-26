@@ -69,6 +69,18 @@ class _CarteTechnicienState extends State<CarteTechnicien> {
     }
   }
 
+  Widget _buildAvatarFallback() {
+    return Container(
+      width: 76,
+      height: 76,
+      decoration: BoxDecoration(
+        color: widget.accentColor.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Icon(Icons.person_rounded, color: widget.accentColor, size: 36),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool isPremium = widget.tech['is_premium'] == true;
@@ -81,7 +93,7 @@ class _CarteTechnicienState extends State<CarteTechnicien> {
         onTap: widget.onTap,
         borderRadius: BorderRadius.circular(20),
         child: Container(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             color: isPremium
                 ? const Color(0xFFFFFDF5)
@@ -101,27 +113,32 @@ class _CarteTechnicienState extends State<CarteTechnicien> {
             ],
           ),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              // ── Avatar grand format ──
               Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  CircleAvatar(
-                    radius: 30,
-                    backgroundColor: widget.accentColor.withValues(alpha: 0.1),
-                    backgroundImage: widget.tech['photo_profil_url'] != null
-                        ? NetworkImage(widget.tech['photo_profil_url'])
-                        : null,
-                    child: widget.tech['photo_profil_url'] == null
-                        ? Icon(Icons.person, color: widget.accentColor)
-                        : null,
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(14),
+                    child: widget.tech['photo_profil_url'] != null
+                        ? Image.network(
+                            widget.tech['photo_profil_url'],
+                            width: 76,
+                            height: 76,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) =>
+                                _buildAvatarFallback(),
+                          )
+                        : _buildAvatarFallback(),
                   ),
                   if (isOnline)
                     Positioned(
-                      bottom: 1,
-                      right: 1,
+                      bottom: 4,
+                      right: 4,
                       child: Container(
-                        width: 12,
-                        height: 12,
+                        width: 13,
+                        height: 13,
                         decoration: BoxDecoration(
                           color: const Color(0xFF22C55E),
                           shape: BoxShape.circle,
@@ -136,6 +153,7 @@ class _CarteTechnicienState extends State<CarteTechnicien> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Nom + badges
                     Row(
                       children: [
                         Flexible(
@@ -163,7 +181,8 @@ class _CarteTechnicienState extends State<CarteTechnicien> {
                         ],
                       ],
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 3),
+                    // Métier
                     Text(
                       widget.tech['metier_personnalise'] ?? 'Prestataire',
                       style: GoogleFonts.inter(
@@ -185,12 +204,13 @@ class _CarteTechnicienState extends State<CarteTechnicien> {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ],
-                    const SizedBox(height: 5),
+                    const SizedBox(height: 7),
+                    // Note + localisation
                     Row(
                       children: [
                         const Icon(Icons.star_rounded,
-                            color: Colors.amber, size: 15),
-                        const SizedBox(width: 3),
+                            color: Colors.amber, size: 14),
+                        const SizedBox(width: 2),
                         Text(
                           "${widget.tech['score_global'] ?? '5.0'}",
                           style: GoogleFonts.inter(
@@ -201,7 +221,7 @@ class _CarteTechnicienState extends State<CarteTechnicien> {
                         ),
                         const SizedBox(width: 8),
                         const Icon(Icons.location_on_outlined,
-                            color: Color(0xFF94A3B8), size: 13),
+                            color: Color(0xFF94A3B8), size: 12),
                         Flexible(
                           child: Text(
                             " ${widget.tech['commune'] ?? widget.tech['ville'] ?? '—'}",
@@ -213,6 +233,12 @@ class _CarteTechnicienState extends State<CarteTechnicien> {
                           ),
                         ),
                       ],
+                    ),
+                    const SizedBox(height: 6),
+                    // Badge disponibilité
+                    _DisponibiliteBadge(
+                      disponible: widget.tech['disponible'] == true,
+                      isOnline: isOnline,
                     ),
                   ],
                 ),
@@ -245,6 +271,42 @@ class _CarteTechnicienState extends State<CarteTechnicien> {
                     color: Colors.black12, size: 16),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DisponibiliteBadge extends StatelessWidget {
+  final bool disponible;
+  final bool isOnline;
+  const _DisponibiliteBadge({required this.disponible, required this.isOnline});
+
+  @override
+  Widget build(BuildContext context) {
+    if (isOnline) {
+      return _chip(const Color(0xFF22C55E), 'En ligne maintenant');
+    }
+    if (disponible) {
+      return _chip(const Color(0xFF3B82F6), 'Disponible');
+    }
+    return _chip(const Color(0xFF94A3B8), 'Indisponible');
+  }
+
+  Widget _chip(Color color, String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w600,
+          color: color,
         ),
       ),
     );

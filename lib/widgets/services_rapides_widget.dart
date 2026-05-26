@@ -14,33 +14,33 @@ class ServicesRapidesWidget extends StatelessWidget {
   static const List<Map<String, dynamic>> _services = [
     {
       'label': 'Livraison\ngaz',
-      'icon': Icons.local_fire_department_rounded,
+      'image': 'assets/images/metiers/fond_lovraison_gaz.jpg',
       'color': Color(0xFFEF4444),
       'query': 'gaz',
     },
     {
-      'label': 'Courses',
-      'icon': Icons.shopping_basket_rounded,
-      'color': Color(0xFF10B981),
-      'query': 'courses',
-    },
-    {
       'label': 'Femme de\nménage',
-      'icon': Icons.cleaning_services_rounded,
+      'image': 'assets/images/metiers/fond_menagegère.jpg',
       'color': Color(0xFF8B5CF6),
       'query': 'ménage',
     },
     {
+      'label': 'Électricien',
+      'image': 'assets/images/metiers/Fond_electricité.jpg',
+      'color': Color(0xFFF59E0B),
+      'query': 'électricité',
+    },
+    {
       'label': 'Plombier',
-      'icon': Icons.plumbing_rounded,
+      'image': null,
       'color': Color(0xFF3B82F6),
       'query': 'plomberie',
     },
     {
-      'label': 'Électricien',
-      'icon': Icons.electrical_services_rounded,
-      'color': Color(0xFFF59E0B),
-      'query': 'électricité',
+      'label': 'Menuisier',
+      'image': null,
+      'color': Color(0xFF92400E),
+      'query': 'menuiserie',
     },
   ];
 
@@ -63,7 +63,8 @@ class ServicesRapidesWidget extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
                   color: accentColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(8),
@@ -82,7 +83,7 @@ class ServicesRapidesWidget extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         SizedBox(
-          height: 100,
+          height: 108,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -91,7 +92,7 @@ class ServicesRapidesWidget extends StatelessWidget {
               final s = _services[i];
               return _ServiceCard(
                 label: s['label'] as String,
-                icon: s['icon'] as IconData,
+                imagePath: s['image'] as String?,
                 color: s['color'] as Color,
                 onTap: () => onServiceTap(s['query'] as String),
               );
@@ -105,13 +106,13 @@ class ServicesRapidesWidget extends StatelessWidget {
 
 class _ServiceCard extends StatelessWidget {
   final String label;
-  final IconData icon;
+  final String? imagePath;
   final Color color;
   final VoidCallback onTap;
 
   const _ServiceCard({
     required this.label,
-    required this.icon,
+    required this.imagePath,
     required this.color,
     required this.onTap,
   });
@@ -121,47 +122,107 @@ class _ServiceCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 84,
+        width: 88,
         margin: const EdgeInsets.only(right: 10),
         decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: color.withValues(alpha: 0.20)),
+          border: Border.all(color: color.withValues(alpha: 0.15)),
           boxShadow: [
             BoxShadow(
-              color: color.withValues(alpha: 0.08),
+              color: color.withValues(alpha: 0.1),
               blurRadius: 8,
-              offset: const Offset(0, 2),
+              offset: const Offset(0, 3),
             ),
           ],
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.15),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: color, size: 22),
-            ),
-            const SizedBox(height: 6),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: Text(
-                label,
-                textAlign: TextAlign.center,
-                style: GoogleFonts.inter(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600,
-                  color: const Color(0xFF0F172A),
-                  height: 1.3,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // Fond image ou couleur
+              if (imagePath != null)
+                Image.asset(
+                  imagePath!,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    color: color.withValues(alpha: 0.12),
+                  ),
+                )
+              else
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        color.withValues(alpha: 0.15),
+                        color.withValues(alpha: 0.08),
+                      ],
+                    ),
+                  ),
+                ),
+
+              // Overlay sombre en bas
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withValues(alpha: imagePath != null ? 0.6 : 0.0),
+                    ],
+                    stops: const [0.3, 1.0],
+                  ),
                 ),
               ),
-            ),
-          ],
+
+              // Label
+              Positioned(
+                left: 6,
+                right: 6,
+                bottom: 10,
+                child: Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.inter(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: imagePath != null ? Colors.white : const Color(0xFF0F172A),
+                    height: 1.3,
+                    shadows: imagePath != null
+                        ? const [
+                            Shadow(
+                              color: Colors.black54,
+                              blurRadius: 4,
+                            ),
+                          ]
+                        : null,
+                  ),
+                ),
+              ),
+
+              // Dot couleur en haut si pas d'image
+              if (imagePath == null)
+                Positioned(
+                  top: 14,
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: color.withValues(alpha: 0.15),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.handyman_rounded, color: color, size: 18),
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );

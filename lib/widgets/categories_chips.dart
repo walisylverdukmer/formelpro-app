@@ -17,41 +17,66 @@ class CategoriesChips extends StatelessWidget {
     this.activeCatId,
   });
 
-  static IconData _iconFor(String nom) {
+  // Mapper catégorie → image asset
+  static String? _imageFor(String nom) {
     final n = nom.toLowerCase();
-    if (n.contains('plomb')) return Icons.water_drop;
-    if (n.contains('élec') || n.contains('electr')) return Icons.electric_bolt;
-    if (n.contains('maçon') ||
-        n.contains('macon') ||
-        n.contains('bâtiment') ||
-        n.contains('batiment')) {
-      return Icons.foundation;
+    if (n.contains('élec') || n.contains('electr') ||
+        n.contains('énergi') || n.contains('energi')) {
+      return 'assets/images/categories/fond_energie.jpg';
     }
-    if (n.contains('mécan') || n.contains('mecan') || n.contains('auto')) {
-      return Icons.settings_suggest;
+    if (n.contains('bâtiment') || n.contains('batiment') ||
+        n.contains('maçon') || n.contains('macon') ||
+        n.contains('menuis') || n.contains('soudure') ||
+        n.contains('métal') || n.contains('metal')) {
+      return 'assets/images/categories/fond_batiment.jpg';
     }
-    if (n.contains('froid') || n.contains('clima') || n.contains('frigori')) {
-      return Icons.ac_unit;
+    if (n.contains('livraison') || n.contains('transport') || n.contains('gaz')) {
+      return 'assets/images/categories/fond_livraison.jpg';
     }
-    if (n.contains('menuis') || n.contains('bois') || n.contains('carpen')) {
-      return Icons.handyman;
+    if (n.contains('ménage') || n.contains('menage') ||
+        n.contains('nettoyage') || n.contains('service') ||
+        n.contains('coiffure') || n.contains('beauté') ||
+        n.contains('beaute')) {
+      return 'assets/images/categories/fond_services.jpg';
     }
-    if (n.contains('peinture') || n.contains('déco') || n.contains('deco')) {
-      return Icons.format_paint;
+    if (n.contains('plomb') || n.contains('maison') ||
+        n.contains('jardin') || n.contains('serrur') ||
+        n.contains('froid') || n.contains('clima') ||
+        n.contains('peinture') || n.contains('déco') ||
+        n.contains('deco') || n.contains('chauffage') ||
+        n.contains('sanitaire')) {
+      return 'assets/images/categories/fond_maison.jpg';
     }
-    if (n.contains('jardin')) return Icons.park;
-    if (n.contains('soudure') || n.contains('métal') || n.contains('metal')) {
-      return Icons.hardware;
+    return null;
+  }
+
+  // Gradient de fallback par type de catégorie
+  static List<Color> _gradientFor(String nom, String pays) {
+    final n = nom.toLowerCase();
+    if (n.contains('élec') || n.contains('electr')) {
+      return [const Color(0xFFF59E0B), const Color(0xFFEF4444)];
     }
-    if (n.contains('inform') || n.contains('réseau') || n.contains('reseau')) {
-      return Icons.computer;
+    if (n.contains('plomb')) {
+      return [const Color(0xFF3B82F6), const Color(0xFF2563EB)];
     }
-    if (n.contains('chauffage') || n.contains('sanitaire')) {
-      return Icons.thermostat;
+    if (n.contains('bâtiment') || n.contains('maçon') || n.contains('menuis')) {
+      return [const Color(0xFF64748B), const Color(0xFF475569)];
     }
-    if (n.contains('toiture') || n.contains('couver')) return Icons.roofing;
-    if (n.contains('serrur')) return Icons.lock;
-    return Icons.build_rounded;
+    if (n.contains('ménage') || n.contains('menage') || n.contains('nettoyage')) {
+      return [const Color(0xFF8B5CF6), const Color(0xFF7C3AED)];
+    }
+    if (n.contains('jardin')) {
+      return [const Color(0xFF10B981), const Color(0xFF059669)];
+    }
+    if (n.contains('froid') || n.contains('clima')) {
+      return [const Color(0xFF06B6D4), const Color(0xFF0891B2)];
+    }
+    if (n.contains('peinture') || n.contains('déco')) {
+      return [const Color(0xFFEC4899), const Color(0xFFDB2777)];
+    }
+    return pays == 'CIV'
+        ? [const Color(0xFFE67E22), const Color(0xFFD35400)]
+        : [const Color(0xFFE74C3C), const Color(0xFFC0392B)];
   }
 
   @override
@@ -66,95 +91,145 @@ class CategoriesChips extends StatelessWidget {
         child: Row(
           children: List.generate(categories.length, (i) {
             final cat = categories[i];
-            return _buildChip(
-              cat['id'].toString(),
-              cat['nom'].toString(),
-              _iconFor(cat['nom'].toString()),
-              i,
-            );
+            return _buildCard(cat['id'].toString(), cat['nom'].toString());
           }),
         ),
       ),
     );
   }
 
-  Widget _buildChip(String id, String titre, IconData icon, int index) {
+  Widget _buildCard(String id, String nom) {
     final bool isSelected = activeCatId == id;
-    final List<Color> colors = pays == 'CIV'
-        ? (index % 2 == 0
-            ? [const Color(0xFF1E8449), const Color(0xFF2ECC71)]
-            : [const Color(0xFFD35400), const Color(0xFFF39C12)])
-        : (index % 2 == 0
-            ? [const Color(0xFF1B5E20), const Color(0xFF43A047)]
-            : [const Color(0xFFC0392B), const Color(0xFFE74C3C)]);
+    final String? imagePath = _imageFor(nom);
+    final List<Color> grad = _gradientFor(nom, pays);
+    final Color accentColor =
+        pays == 'CIV' ? const Color(0xFFE67E22) : const Color(0xFFE74C3C);
 
     return GestureDetector(
-      onTap: () => onSelect(id, titre),
+      onTap: () => onSelect(id, nom),
       child: Padding(
-        padding: const EdgeInsets.only(right: 16),
-        child: Column(
-          children: [
-            AnimatedBuilder(
-              animation: shimmerController,
-              builder: (context, _) {
-                final v = shimmerController.value;
-                return AnimatedContainer(
-                  duration: const Duration(milliseconds: 150),
-                  height: 58,
-                  width: 58,
+        padding: const EdgeInsets.only(right: 12),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          width: 96,
+          height: 116,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: isSelected
+                ? Border.all(color: accentColor, width: 2.5)
+                : Border.all(color: Colors.transparent, width: 2.5),
+            boxShadow: [
+              BoxShadow(
+                color: isSelected
+                    ? accentColor.withValues(alpha: 0.3)
+                    : Colors.black.withValues(alpha: 0.09),
+                blurRadius: isSelected ? 16 : 8,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(14),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                // Fond image ou gradient
+                if (imagePath != null)
+                  Image.asset(
+                    imagePath,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => _buildGradient(grad),
+                  )
+                else
+                  _buildGradient(grad),
+
+                // Overlay dégradé sombre en bas
+                Container(
                   decoration: BoxDecoration(
-                    shape: BoxShape.circle,
                     gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
                       colors: [
-                        colors[0],
-                        colors[1],
-                        Colors.white.withValues(alpha: 0.25),
-                        colors[0],
+                        Colors.transparent,
+                        Colors.black.withValues(alpha: 0.7),
                       ],
-                      stops: [
-                        0.0,
-                        (v - 0.2).clamp(0.01, 0.99),
-                        v.clamp(0.02, 1.0),
-                        (v + 0.2).clamp(0.03, 1.0),
+                      stops: const [0.25, 1.0],
+                    ),
+                  ),
+                ),
+
+                // Teinte sélection
+                if (isSelected)
+                  Container(
+                    color: accentColor.withValues(alpha: 0.22),
+                  ),
+
+                // Nom de la catégorie en bas
+                Positioned(
+                  left: 8,
+                  right: 8,
+                  bottom: 10,
+                  child: Text(
+                    nom,
+                    style: GoogleFonts.inter(
+                      fontSize: 10.5,
+                      fontWeight:
+                          isSelected ? FontWeight.w800 : FontWeight.w600,
+                      color: Colors.white,
+                      shadows: const [
+                        Shadow(
+                          color: Colors.black54,
+                          blurRadius: 6,
+                          offset: Offset(0, 1),
+                        ),
                       ],
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: colors[0].withValues(
-                          alpha: isSelected ? 0.45 : 0.22,
-                        ),
-                        blurRadius: isSelected ? 14 : 8,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                    border: isSelected
-                        ? Border.all(color: colors[0], width: 2.5)
-                        : null,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  child: Icon(icon, color: Colors.white, size: 24),
-                );
-              },
-            ),
-            const SizedBox(height: 8),
-            SizedBox(
-              width: 68,
-              child: Text(
-                titre,
-                style: GoogleFonts.inter(
-                  fontSize: 10,
-                  fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                  color: isSelected
-                      ? const Color(0xFF1E293B)
-                      : const Color(0xFF475569),
                 ),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
+
+                // Coche sélection en haut droite
+                if (isSelected)
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Container(
+                      width: 20,
+                      height: 20,
+                      decoration: BoxDecoration(
+                        color: accentColor,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.3),
+                            blurRadius: 4,
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.check_rounded,
+                        color: Colors.white,
+                        size: 12,
+                      ),
+                    ),
+                  ),
+              ],
             ),
-          ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGradient(List<Color> grad) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: grad,
         ),
       ),
     );

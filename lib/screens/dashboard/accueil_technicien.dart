@@ -67,8 +67,8 @@ class _AccueilTechnicienState extends State<AccueilTechnicien> {
     final Color accentColor =
         pays == 'CIV' ? const Color(0xFFE67E22) : const Color(0xFFE74C3C);
     final String bgImage = pays == 'CIV'
-        ? 'assets/images/tech_ci.jpg'
-        : 'assets/images/tech_cmr.jpg';
+        ? 'assets/images/fond_ci_T.jpeg'
+        : 'assets/images/fond_cmr_T.jpeg';
     final double scoreGlobal =
         (widget.userData['score_global'] ?? 5.0).toDouble();
 
