@@ -34,7 +34,17 @@
       "PowerShell(Select-String -Path \"c:\\\\Users\\\\HP\\\\Documents\\\\FormelPro\\\\pubspec.lock\" -Pattern \"version:\" -Context 0,0 | Where-Object { $_.LineNumber -gt 278 -and $_.LineNumber -lt 295 } | Select-Object -First 1)",
       "Bash(dir assets\\\\images /s /b)",
       "PowerShell(Get-ChildItem \"c:\\\\Users\\\\HP\\\\Documents\\\\FormelPro\\\\assets\" -Recurse -Force | ForEach-Object { $_.FullName.Replace\\(\"c:\\\\Users\\\\HP\\\\Documents\\\\FormelPro\\\\\", \"\"\\) })",
-      "PowerShell(\\(Get-Content \"c:\\\\Users\\\\HP\\\\Documents\\\\FormelPro\\\\docs\\\\supabase\\\\migrations.sql\" | Measure-Object -Line\\).Lines)"
+      "PowerShell(\\(Get-Content \"c:\\\\Users\\\\HP\\\\Documents\\\\FormelPro\\\\docs\\\\supabase\\\\migrations.sql\" | Measure-Object -Line\\).Lines)",
+      "Bash(vercel --version)",
+      "Bash(vercel --prod)",
+      "Bash(vercel ls *)",
+      "Bash(vercel promote *)",
+      "Bash(vercel domains *)",
+      "Bash(vercel inspect *)",
+      "Bash(vercel \"build/web\" --prod --yes)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)"
     ]
   }
 }
