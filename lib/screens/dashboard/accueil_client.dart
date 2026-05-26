@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:formelpro/services/technicien_service.dart';
 import 'package:formelpro/widgets/carte_technicien.dart';
 import 'package:formelpro/widgets/categories_chips.dart';
 import 'package:formelpro/widgets/filtres_techniciens.dart';
@@ -55,114 +56,24 @@ class _AccueilClientState extends State<AccueilClient>
 
   Future<void> _loadTopCategories() async {
     try {
-      final cats = await supabase
-          .from('categories_services')
-          .select('id, nom')
-          .eq('est_valide', true)
-          .order('ordre_affichage')
-          .limit(8);
-      if (mounted) {
-        setState(() => _topCategories = List<Map<String, dynamic>>.from(cats));
-      }
+      final cats = await TechnicienService.fetchTopCategories();
+      if (mounted) setState(() => _topCategories = cats);
     } catch (e) {
-      debugPrint('Erreur chargement catégories chips: $e');
+      debugPrint('Erreur chargement catégories: $e');
     }
   }
 
   Future<void> _fetchTechniciens() async {
     setState(() => _isFetching = true);
     try {
-      final String pays = widget.userData['pays'] ?? 'CIV';
-      final String search = _searchController.text.trim();
-
-      List<String>? techIdsFiltres;
-      if (_filtres.categorieId != null) {
-        final techCats = await supabase
-            .from('technicien_categories')
-            .select('technicien_id')
-            .eq('categorie_id', _filtres.categorieId!);
-        techIdsFiltres =
-            techCats.map<String>((t) => t['technicien_id'].toString()).toList();
-        if (techIdsFiltres.isEmpty) {
-          if (mounted) {
-            setState(() {
-              _techniciens = [];
-              _isFetching = false;
-            });
-          }
-          return;
-        }
-      } else if (_filtres.categorieNom != null) {
-        final cats = await supabase
-            .from('categories_services')
-            .select('id')
-            .ilike('nom', '%${_filtres.categorieNom}%')
-            .eq('est_valide', true);
-        if (cats.isEmpty) {
-          if (mounted) {
-            setState(() {
-              _techniciens = [];
-              _isFetching = false;
-            });
-          }
-          return;
-        }
-        final catIds = cats.map<String>((c) => c['id'].toString()).toList();
-        final techCats = await supabase
-            .from('technicien_categories')
-            .select('technicien_id')
-            .inFilter('categorie_id', catIds);
-        techIdsFiltres =
-            techCats.map<String>((t) => t['technicien_id'].toString()).toList();
-        if (techIdsFiltres.isEmpty) {
-          if (mounted) {
-            setState(() {
-              _techniciens = [];
-              _isFetching = false;
-            });
-          }
-          return;
-        }
-      }
-
-      var query = supabase
-          .from('utilisateurs')
-          .select(
-            'id, nom_complet, metier_personnalise, savoir_faire, photo_profil_url, score_global, note_moyenne, ville, commune, quartier, disponible, is_premium, premium_level, est_en_ligne, telephone, is_identite_verifiee',
-          )
-          .eq('role', 'technicien')
-          .eq('pays', pays);
-
-      if (techIdsFiltres != null) query = query.inFilter('id', techIdsFiltres);
-      // Fallback: filtre par nom de catégorie quand categorieId absent (services rapides)
-      if (techIdsFiltres == null && _filtres.categorieNom != null && search.isEmpty) {
-        query = query.or(
-          'metier_personnalise.ilike.%${_filtres.categorieNom}%,savoir_faire.ilike.%${_filtres.categorieNom}%',
-        );
-      }
-      if (_filtres.disponibleSeulement) query = query.eq('disponible', true);
-      if (_filtres.noteMin > 0) query = query.gte('note_moyenne', _filtres.noteMin);
-      if (_filtres.commune != null && _filtres.commune!.isNotEmpty) {
-        query = query.ilike('commune', '%${_filtres.commune}%');
-      }
-      if (_filtres.quartier != null && _filtres.quartier!.isNotEmpty) {
-        query = query.ilike('quartier', '%${_filtres.quartier}%');
-      }
-      if (search.isNotEmpty) {
-        query = query.or(
-          'nom_complet.ilike.%$search%,metier_personnalise.ilike.%$search%',
-        );
-      }
-
-      final response = await query
-          .order('is_premium', ascending: false)
-          .order('est_en_ligne', ascending: false)
-          .order('score_global', ascending: false)
-          .limit(50);
-
+      final techs = await TechnicienService.fetchTechniciens(
+        pays: widget.userData['pays'] ?? 'CIV',
+        filtres: _filtres,
+        search: _searchController.text.trim(),
+      );
       if (mounted) {
         setState(() {
-          _techniciens = List<Map<String, dynamic>>.from(response);
+          _techniciens = techs;
           _isFetching = false;
         });
       }

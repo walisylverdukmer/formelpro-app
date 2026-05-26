@@ -14,13 +14,31 @@ class LandingPage extends StatelessWidget {
   static const _kSlate = Color(0xFF94A3B8);
   static const _kMuted = Color(0xFF64748B);
 
-  static const _services = <_ServiceDef>[
-    _ServiceDef(Icons.electrical_services_rounded, 'Électricien', Color(0xFFF59E0B)),
-    _ServiceDef(Icons.water_drop_outlined, 'Plombier', Color(0xFF3B82F6)),
-    _ServiceDef(Icons.cleaning_services_rounded, 'Ménage', Color(0xFF8B5CF6)),
-    _ServiceDef(Icons.local_fire_department_rounded, 'Livraison gaz', Color(0xFFEF4444)),
-    _ServiceDef(Icons.build_rounded, 'Menuisier', Color(0xFF92400E)),
-    _ServiceDef(Icons.phone_android_rounded, 'Électronique', Color(0xFF0EA5E9)),
+  static const _mainServices = <_ServiceData>[
+    _ServiceData(
+      icon: Icons.handyman_rounded,
+      label: 'Homme à\ntout faire',
+      sub: 'Bricolage, montage, réparations',
+      color: Color(0xFFF59E0B),
+    ),
+    _ServiceData(
+      icon: Icons.local_fire_department_rounded,
+      label: 'Livraison\ngaz',
+      sub: 'Rapide & sécurisé',
+      color: Color(0xFFEF4444),
+    ),
+    _ServiceData(
+      icon: Icons.water_drop_outlined,
+      label: 'Plombier\nurgent',
+      sub: 'Disponible maintenant',
+      color: Color(0xFF3B82F6),
+    ),
+    _ServiceData(
+      icon: Icons.cleaning_services_rounded,
+      label: 'Ménage\n& maison',
+      sub: 'Nettoyage professionnel',
+      color: Color(0xFF8B5CF6),
+    ),
   ];
 
   void _goToLogin(BuildContext context) {
@@ -38,7 +56,8 @@ class LandingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isWide = MediaQuery.of(context).size.width > 640;
+    final w = MediaQuery.of(context).size.width;
+    final isWide = w > 640;
     return Scaffold(
       backgroundColor: _kDark,
       body: SingleChildScrollView(
@@ -47,7 +66,8 @@ class LandingPage extends StatelessWidget {
           children: [
             _buildHeader(context),
             _buildHero(context, isWide),
-            _buildServices(),
+            _buildServiceCards(context, isWide),
+            _buildStats(),
             _buildHowItWorks(),
             _buildFooter(context),
           ],
@@ -58,30 +78,30 @@ class LandingPage extends StatelessWidget {
 
   Widget _buildHeader(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
       color: _kNavy,
       child: Row(
         children: [
           Image.asset(
             'assets/images/logo.png',
-            width: 36,
-            height: 36,
+            width: 34,
+            height: 34,
             errorBuilder: (_, __, ___) =>
-                const Icon(Icons.handyman_rounded, color: _kAccent, size: 36),
+                const Icon(Icons.handyman_rounded, color: _kAccent, size: 34),
           ),
           const SizedBox(width: 10),
           Text(
             'FormelPro',
             style: GoogleFonts.poppins(
-                fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                fontSize: 17, fontWeight: FontWeight.bold, color: Colors.white),
           ),
           const Spacer(),
           TextButton(
             onPressed: () => _goToLogin(context),
             child: Text(
-              'Se connecter',
+              'Entrer dans l\'app',
               style: GoogleFonts.inter(
-                  fontSize: 14, fontWeight: FontWeight.w600, color: _kAccent),
+                  fontSize: 13, fontWeight: FontWeight.w600, color: _kAccent),
             ),
           ),
         ],
@@ -91,7 +111,7 @@ class LandingPage extends StatelessWidget {
 
   Widget _buildHero(BuildContext context, bool isWide) {
     return Container(
-      padding: EdgeInsets.fromLTRB(24, isWide ? 80 : 48, 24, 64),
+      padding: EdgeInsets.fromLTRB(24, isWide ? 72 : 44, 24, 56),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
@@ -109,65 +129,69 @@ class LandingPage extends StatelessWidget {
               border: Border.all(color: _kAccent.withValues(alpha: 0.3)),
             ),
             child: Text(
-              'Côte d\'Ivoire · Cameroun',
+              '🇨🇮 Côte d\'Ivoire  ·  🇨🇲 Cameroun',
               style: GoogleFonts.inter(
                   fontSize: 12, fontWeight: FontWeight.w600, color: _kAccent),
             ),
           ),
-          const SizedBox(height: 28),
+          const SizedBox(height: 24),
           Text(
-            'Trouvez un professionnel\nde confiance',
+            'Le pro qu\'il vous faut,\nquand il vous faut.',
             textAlign: TextAlign.center,
             style: GoogleFonts.poppins(
-              fontSize: isWide ? 42 : 30,
+              fontSize: isWide ? 40 : 28,
               fontWeight: FontWeight.bold,
               color: Colors.white,
               height: 1.2,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
           Text(
-            'Électriciens, plombiers, techniciens certifiés.\nDisponibles près de vous en quelques minutes.',
+            'Électriciens, plombiers, hommes à tout faire.\nDisponibles près de vous en quelques minutes.',
             textAlign: TextAlign.center,
-            style: GoogleFonts.inter(fontSize: 15, color: _kSlate, height: 1.6),
+            style: GoogleFonts.inter(fontSize: 14, color: _kSlate, height: 1.6),
           ),
-          const SizedBox(height: 40),
+          const SizedBox(height: 36),
           ConstrainedBox(
             constraints:
                 BoxConstraints(maxWidth: isWide ? 360 : double.infinity),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                ElevatedButton(
+                ElevatedButton.icon(
                   onPressed: () => _goToLogin(context),
+                  icon: const Icon(Icons.search_rounded, size: 20),
+                  label: Text(
+                    'Rechercher un technicien',
+                    style: GoogleFonts.inter(
+                        fontSize: 15, fontWeight: FontWeight.w700),
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _kAccent,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 18),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16)),
                     elevation: 0,
                   ),
-                  child: Text(
-                    'Trouver un technicien',
-                    style: GoogleFonts.inter(
-                        fontSize: 16, fontWeight: FontWeight.w700),
-                  ),
                 ),
-                const SizedBox(height: 12),
-                OutlinedButton(
+                const SizedBox(height: 10),
+                OutlinedButton.icon(
                   onPressed: _openPrestataire,
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    side: const BorderSide(color: Color(0xFF475569), width: 1.5),
-                    padding: const EdgeInsets.symmetric(vertical: 18),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16)),
-                  ),
-                  child: Text(
+                  icon:
+                      const Icon(Icons.badge_outlined, size: 18),
+                  label: Text(
                     'Devenir prestataire',
                     style: GoogleFonts.inter(
-                        fontSize: 16, fontWeight: FontWeight.w600),
+                        fontSize: 15, fontWeight: FontWeight.w600),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    side:
+                        const BorderSide(color: Color(0xFF475569), width: 1.5),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
                   ),
                 ),
               ],
@@ -178,28 +202,57 @@ class LandingPage extends StatelessWidget {
     );
   }
 
-  Widget _buildServices() {
+  Widget _buildServiceCards(BuildContext context, bool isWide) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
+      padding: const EdgeInsets.fromLTRB(20, 44, 20, 44),
       color: _kDark,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Nos services',
+            'Services disponibles',
             style: GoogleFonts.poppins(
-                fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
+                fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
           ),
           const SizedBox(height: 4),
-          Text(
-            'Tous les métiers de votre quotidien',
-            style: GoogleFonts.inter(fontSize: 14, color: _kMuted),
+          Text('Trouvez le bon professionnel en 1 clic',
+              style: GoogleFonts.inter(fontSize: 13, color: _kMuted)),
+          const SizedBox(height: 20),
+          GridView.count(
+            crossAxisCount: 2,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 1.05,
+            children: _mainServices
+                .map((s) => _ServiceCard(data: s, onTap: () => _goToLogin(context)))
+                .toList(),
           ),
-          const SizedBox(height: 24),
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: _services.map((s) => _ServiceChip(def: s)).toList(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStats() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 36),
+      color: _kNavy,
+      child: Column(
+        children: [
+          Text(
+            'Déjà actif en Afrique',
+            style: GoogleFonts.poppins(
+                fontSize: 17, fontWeight: FontWeight.bold, color: Colors.white),
+          ),
+          const SizedBox(height: 20),
+          const Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _StatChip(value: '500+', label: 'Experts'),
+              _StatChip(value: '2', label: 'Pays'),
+              _StatChip(value: '10+', label: 'Métiers'),
+            ],
           ),
         ],
       ),
@@ -208,34 +261,25 @@ class LandingPage extends StatelessWidget {
 
   Widget _buildHowItWorks() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
-      color: _kNavy,
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 44),
+      color: _kDark,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Comment ça marche ?',
             style: GoogleFonts.poppins(
-                fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
+                fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
           ),
-          const SizedBox(height: 32),
-          const _StepRow(
-            number: '1',
-            title: 'Créez votre compte',
-            subtitle: 'Inscription rapide en 2 minutes',
-          ),
-          const SizedBox(height: 20),
-          const _StepRow(
-            number: '2',
-            title: 'Trouvez un professionnel',
-            subtitle: 'Filtrez par métier, note et disponibilité',
-          ),
-          const SizedBox(height: 20),
-          const _StepRow(
-            number: '3',
-            title: 'Échangez et planifiez',
-            subtitle: 'Proforma, devis, suivi en temps réel',
-          ),
+          const SizedBox(height: 28),
+          const _StepRow(number: '1', title: 'Créez votre compte',
+              subtitle: 'Inscription rapide en 2 minutes'),
+          const SizedBox(height: 18),
+          const _StepRow(number: '2', title: 'Trouvez un expert',
+              subtitle: 'Filtrez par métier, commune et disponibilité'),
+          const SizedBox(height: 18),
+          const _StepRow(number: '3', title: 'Discutez & planifiez',
+              subtitle: 'Chat sécurisé, proforma, suivi en temps réel'),
         ],
       ),
     );
@@ -243,67 +287,130 @@ class LandingPage extends StatelessWidget {
 
   Widget _buildFooter(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+      padding: const EdgeInsets.fromLTRB(24, 40, 24, 40),
       color: const Color(0xFF020617),
       child: Column(
         children: [
           Text(
-            '© 2025 FormelPro. Tous droits réservés.',
-            style: GoogleFonts.inter(fontSize: 12, color: _kMuted),
+            'Prêt à trouver un professionnel ?',
+            style: GoogleFonts.poppins(
+                fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+            textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 8),
-          TextButton(
-            onPressed: () => _goToLogin(context),
-            child: Text(
-              'Connexion / Inscription',
-              style: GoogleFonts.inter(
-                  fontSize: 13,
-                  color: _kAccent,
-                  fontWeight: FontWeight.w600),
+          const SizedBox(height: 20),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () => _goToLogin(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _kAccent,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
+                elevation: 0,
+              ),
+              child: Text('Commencer maintenant',
+                  style: GoogleFonts.inter(
+                      fontSize: 15, fontWeight: FontWeight.w700)),
             ),
           ),
+          const SizedBox(height: 24),
+          Text('© 2025 FormelPro. Tous droits réservés.',
+              style: GoogleFonts.inter(fontSize: 12, color: _kMuted),
+              textAlign: TextAlign.center),
         ],
       ),
     );
   }
 }
 
-// ── Data ───────────────────────────────────────────────────────────────────────
+// ── Data ──────────────────────────────────────────────────────────────────────
 
-class _ServiceDef {
+class _ServiceData {
   final IconData icon;
   final String label;
+  final String sub;
   final Color color;
-  const _ServiceDef(this.icon, this.label, this.color);
+  const _ServiceData(
+      {required this.icon,
+      required this.label,
+      required this.sub,
+      required this.color});
 }
 
 // ── Sub-widgets ────────────────────────────────────────────────────────────────
 
-class _ServiceChip extends StatelessWidget {
-  final _ServiceDef def;
-  const _ServiceChip({required this.def});
+class _ServiceCard extends StatelessWidget {
+  final _ServiceData data;
+  final VoidCallback onTap;
+  const _ServiceCard({required this.data, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: def.color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: def.color.withValues(alpha: 0.2)),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: data.color.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: data.color.withValues(alpha: 0.2)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: data.color.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(data.icon, color: data.color, size: 24),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              data.label,
+              style: GoogleFonts.poppins(
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  height: 1.3),
+            ),
+            const SizedBox(height: 4),
+            Text(data.sub,
+                style: GoogleFonts.inter(
+                    fontSize: 11,
+                    color: const Color(0xFF94A3B8),
+                    height: 1.4),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis),
+          ],
+        ),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(def.icon, color: def.color, size: 18),
-          const SizedBox(width: 8),
-          Text(
-            def.label,
+    );
+  }
+}
+
+class _StatChip extends StatelessWidget {
+  final String value;
+  final String label;
+  const _StatChip({required this.value, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(value,
+            style: GoogleFonts.poppins(
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFFE67E22))),
+        Text(label,
             style: GoogleFonts.inter(
-                fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white),
-          ),
-        ],
-      ),
+                fontSize: 12, color: const Color(0xFF94A3B8))),
+      ],
     );
   }
 }
@@ -312,11 +419,8 @@ class _StepRow extends StatelessWidget {
   final String number;
   final String title;
   final String subtitle;
-  const _StepRow({
-    required this.number,
-    required this.title,
-    required this.subtitle,
-  });
+  const _StepRow(
+      {required this.number, required this.title, required this.subtitle});
 
   @override
   Widget build(BuildContext context) {
@@ -324,40 +428,35 @@ class _StepRow extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          width: 40,
-          height: 40,
+          width: 38,
+          height: 38,
           decoration: BoxDecoration(
             color: const Color(0xFFE67E22).withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Center(
-            child: Text(
-              number,
-              style: GoogleFonts.poppins(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFFE67E22)),
-            ),
+            child: Text(number,
+                style: GoogleFonts.poppins(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFFE67E22))),
           ),
         ),
-        const SizedBox(width: 16),
+        const SizedBox(width: 14),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                title,
-                style: GoogleFonts.inter(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white),
-              ),
+              Text(title,
+                  style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white)),
               const SizedBox(height: 2),
-              Text(
-                subtitle,
-                style: GoogleFonts.inter(
-                    fontSize: 13, color: const Color(0xFF64748B)),
-              ),
+              Text(subtitle,
+                  style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: const Color(0xFF64748B))),
             ],
           ),
         ),
