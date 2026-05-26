@@ -20,17 +20,17 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 }
 
 Future<void> main() async {
-  const supabaseUrl = String.fromEnvironment('SUPABASE_URL');
-  const supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
+  const supabaseUrl = String.fromEnvironment(
+    'SUPABASE_URL',
+    defaultValue: 'https://elsweibfytmvaeasekaf.supabase.co',
+  );
+  const supabaseAnonKey = String.fromEnvironment(
+    'SUPABASE_ANON_KEY',
+    defaultValue: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVsc3dlaWJmeXRtdmFlYXNla2FmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMTA1NjIsImV4cCI6MjA4ODU4NjU2Mn0.jpmz7n0BXmEtneTvl2aHVhhqkfqC_vrvqJDe_NiDo4o',
+  );
 
-  assert(
-    supabaseUrl.isNotEmpty,
-    'SUPABASE_URL non défini — lancer avec : flutter run --dart-define-from-file=dart_defines.json',
-  );
-  assert(
-    supabaseAnonKey.isNotEmpty,
-    'SUPABASE_ANON_KEY non défini — lancer avec : flutter run --dart-define-from-file=dart_defines.json',
-  );
+  debugPrint('[Config] Supabase URL: $supabaseUrl');
+  debugPrint('[Config] Clé anon: ${supabaseAnonKey.substring(0, 20)}...');
 
   WidgetsFlutterBinding.ensureInitialized();
 
