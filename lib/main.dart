@@ -10,6 +10,7 @@ import 'package:formelpro/screens/auth/google_onboarding_page.dart';
 import 'package:formelpro/screens/auth/page_connexion_principale.dart';
 import 'package:formelpro/screens/complete_profil_page.dart';
 import 'package:formelpro/screens/dashboard/main_dashboard.dart';
+import 'package:formelpro/screens/public/landing_page.dart';
 import 'package:formelpro/services/notification_router.dart';
 
 // Handler des messages reçus quand l'app est en arrière-plan / fermée
@@ -59,6 +60,20 @@ class FormelProApp extends StatefulWidget {
 }
 
 class _FormelProAppState extends State<FormelProApp> {
+  // Resolves the initial widget based on the web URL path.
+  // On mobile, always returns AuthGate (no URL routing).
+  Widget get _home {
+    if (!kIsWeb) return const AuthGate();
+    final session = Supabase.instance.client.auth.currentSession;
+    if (session != null) return const AuthGate();
+    final path = Uri.base.path;
+    return switch (path) {
+      '/' || '' => const LandingPage(),
+      '/login' => const PageConnexionPrincipale(),
+      _ => const AuthGate(),
+    };
+  }
+
   @override
   void initState() {
     super.initState();
@@ -102,7 +117,7 @@ class _FormelProAppState extends State<FormelProApp> {
         ),
         scaffoldBackgroundColor: const Color(0xFFF8FAFC),
       ),
-      home: const AuthGate(),
+      home: _home,
     );
   }
 }
