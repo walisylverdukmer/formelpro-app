@@ -7,7 +7,8 @@ class TechnicienService {
   static const _cols =
       'id, nom_complet, metier_personnalise, savoir_faire, photo_profil_url, '
       'score_global, note_moyenne, ville, commune, quartier, disponible, '
-      'is_premium, premium_level, est_en_ligne, telephone, is_identite_verifiee';
+      'is_premium, premium_level, est_en_ligne, telephone, is_identite_verifiee, '
+      'latitude, longitude';
 
   static const int pageSize = 20;
 

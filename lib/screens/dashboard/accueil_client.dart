@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:formelpro/services/technicien_service.dart';
+import 'package:formelpro/utils/distance_utils.dart';
 import 'package:formelpro/widgets/carte_technicien.dart';
 import 'package:formelpro/widgets/categories_chips.dart';
 import 'package:formelpro/widgets/filtres_techniciens.dart';
@@ -221,6 +222,8 @@ class _AccueilClientState extends State<AccueilClient>
                     accentColor: primaryColor,
                     commune: widget.userData['commune'] as String?,
                     clientId: widget.userData['id']?.toString(),
+                    clientLat: (widget.userData['latitude'] as num?)?.toDouble(),
+                    clientLng: (widget.userData['longitude'] as num?)?.toDouble(),
                   ),
                   const SizedBox(height: 28),
                   Padding(
@@ -245,6 +248,8 @@ class _AccueilClientState extends State<AccueilClient>
                               pays: pays,
                               accentColor: primaryColor,
                               clientId: widget.userData['id']?.toString(),
+                              clientLat: (widget.userData['latitude'] as num?)?.toDouble(),
+                              clientLng: (widget.userData['longitude'] as num?)?.toDouble(),
                             ),
                           ),
                         );
@@ -347,6 +352,11 @@ class _AccueilClientState extends State<AccueilClient>
             tech: _techniciens[i],
             accentColor: primaryColor,
             clientId: widget.userData['id']?.toString(),
+            distanceKm: DistanceUtils.fromTechData(
+              (widget.userData['latitude'] as num?)?.toDouble(),
+              (widget.userData['longitude'] as num?)?.toDouble(),
+              _techniciens[i],
+            ),
             onTap: () => _ouvrirFiche(_techniciens[i], primaryColor),
           ),
         ),

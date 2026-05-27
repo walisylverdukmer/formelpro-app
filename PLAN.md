@@ -23,7 +23,7 @@ Ce document définit :
 
 ## Niveau MVP estimé :
 
-90% — Phases 1, 2, 3 (chat) et 6 (admin) complètes. Blocs restants : localisation avancée, paiements Mobile Money.
+95% — Phases 1, 2, 3 (chat), 5 (localisation) et 6 (admin) complètes. Bloc restant : paiements Mobile Money.
 
 ## Forces actuelles
 
@@ -319,12 +319,12 @@ Le quartier reste libre.
 
 | #   | Tâche                 | Statut |
 | --- | --------------------- | ------ |
-| 5.1 | Modale map finale     | 🔲     |
-| 5.2 | GPS + géolocalisation | 🔲     |
-| 5.3 | Distance techniciens  | 🔲     |
-| 5.4 | Communes prédéfinies  | 🔲     |
-| 5.5 | Reverse geocoding     | 🔲     |
-| 5.6 | Matching proximité    | 🔲     |
+| 5.1 | Modale map finale     | ✅ LocationPickerWidget — flutter_map OSM + mode map/manuel |
+| 5.2 | GPS + géolocalisation | ✅ geolocator + Geolocator.getCurrentPosition() |
+| 5.3 | Distance techniciens  | ✅ DistanceUtils.haversineKm — badge distance sur CarteTechnicien + ExpertCard |
+| 5.4 | Communes prédéfinies  | ✅ LocationManualForm — regionsCIV (10 régions) + villesCMR (15 villes) |
+| 5.5 | Reverse geocoding     | ✅ Nominatim API reverse geocode dans LocationPickerWidget |
+| 5.6 | Matching proximité    | ✅ Tri client-side par distance dans ExpertsPresWidget + TechnicianSelectionPage |
 
 ---
 
@@ -493,7 +493,7 @@ Les démarches marchandes doivent commencer tôt.
 5. ✅ Filtres avancés (2.5) + Fiches premium (2.6)
 6. ✅ Chat sécurisé — Phase 3 (blocage appel, proforma, typing, messages système)
 7. ✅ Dashboard admin minimal — Phase 6 (KPIs + 3 modules)
-8. 🔲 Localisation stable — Phase 5
+8. ✅ Localisation stable — Phase 5 (map, GPS, communes, reverse geocoding, distance, matching)
 9. 🔲 Recrutement terrain
 
 ---

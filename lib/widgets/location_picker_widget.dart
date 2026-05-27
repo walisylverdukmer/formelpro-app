@@ -8,6 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 
 import 'location_picker_subwidgets.dart';
+import 'location_manual_form.dart';
 
 class LocationPickerWidget extends StatefulWidget {
   final Color accentColor;

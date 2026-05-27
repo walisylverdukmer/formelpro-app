@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'carte_technicien_badges.dart';
+
 class CarteTechnicien extends StatefulWidget {
   final Map<String, dynamic> tech;
   final VoidCallback onTap;
   final Color accentColor;
   final String? clientId;
+  final double? distanceKm;
 
   const CarteTechnicien({
     super.key,
@@ -14,6 +17,7 @@ class CarteTechnicien extends StatefulWidget {
     required this.onTap,
     required this.accentColor,
     this.clientId,
+    this.distanceKm,
   });
 
   @override
@@ -177,7 +181,7 @@ class _CarteTechnicienState extends State<CarteTechnicien> {
                         ],
                         if (isPremium) ...[
                           const SizedBox(width: 4),
-                          _PremiumBadge(level: premiumLevel),
+                          TechnicianPremiumBadge(level: premiumLevel),
                         ],
                       ],
                     ),
@@ -205,7 +209,7 @@ class _CarteTechnicienState extends State<CarteTechnicien> {
                       ),
                     ],
                     const SizedBox(height: 7),
-                    // Note + localisation
+                    // Note + localisation + distance
                     Row(
                       children: [
                         const Icon(Icons.star_rounded,
@@ -232,11 +236,15 @@ class _CarteTechnicienState extends State<CarteTechnicien> {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
+                        if (widget.distanceKm != null) ...[
+                          const SizedBox(width: 6),
+                          TechnicianDistanceBadge(km: widget.distanceKm!),
+                        ],
                       ],
                     ),
                     const SizedBox(height: 6),
                     // Badge disponibilité
-                    _DisponibiliteBadge(
+                    TechnicianDisponibiliteBadge(
                       disponible: widget.tech['disponible'] == true,
                       isOnline: isOnline,
                     ),
@@ -277,76 +285,3 @@ class _CarteTechnicienState extends State<CarteTechnicien> {
   }
 }
 
-class _DisponibiliteBadge extends StatelessWidget {
-  final bool disponible;
-  final bool isOnline;
-  const _DisponibiliteBadge({required this.disponible, required this.isOnline});
-
-  @override
-  Widget build(BuildContext context) {
-    if (isOnline) {
-      return _chip(const Color(0xFF22C55E), 'En ligne maintenant');
-    }
-    if (disponible) {
-      return _chip(const Color(0xFF3B82F6), 'Disponible');
-    }
-    return _chip(const Color(0xFF94A3B8), 'Indisponible');
-  }
-
-  Widget _chip(Color color, String label) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withValues(alpha: 0.25)),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 10,
-          fontWeight: FontWeight.w600,
-          color: color,
-        ),
-      ),
-    );
-  }
-}
-
-class _PremiumBadge extends StatelessWidget {
-  final int level;
-  const _PremiumBadge({required this.level});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFFD4AF37), Color(0xFFFFD700)],
-        ),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            level >= 2
-                ? Icons.workspace_premium_rounded
-                : Icons.star_rounded,
-            color: Colors.white,
-            size: 9,
-          ),
-          const SizedBox(width: 2),
-          Text(
-            level >= 2 ? "Pro" : "Premium",
-            style: const TextStyle(
-                color: Colors.white,
-                fontSize: 8,
-                fontWeight: FontWeight.bold),
-          ),
-        ],
-      ),
-    );
-  }
-}

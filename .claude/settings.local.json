@@ -44,7 +44,9 @@
       "Bash(vercel \"build/web\" --prod --yes)",
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(Get-ChildItem lib/screens/chat/)",
+      "Bash(Select-Object Name, Length)"
     ]
   }
 }

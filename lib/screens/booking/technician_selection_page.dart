@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:formelpro/widgets/carte_technicien.dart';
 import 'package:formelpro/screens/dashboard/details_technicien.dart';
+import 'package:formelpro/utils/distance_utils.dart';
 
 class TechnicianSelectionPage extends StatefulWidget {
   final String categoryName;
@@ -11,6 +12,8 @@ class TechnicianSelectionPage extends StatefulWidget {
   final String pays;
   final Color accentColor;
   final String? clientId;
+  final double? clientLat;
+  final double? clientLng;
 
   const TechnicianSelectionPage({
     super.key,
@@ -19,6 +22,8 @@ class TechnicianSelectionPage extends StatefulWidget {
     required this.pays,
     required this.accentColor,
     this.clientId,
+    this.clientLat,
+    this.clientLng,
   });
 
   @override
@@ -44,7 +49,8 @@ class _TechnicianSelectionPageState extends State<TechnicianSelectionPage> {
           .select(
             'id, nom_complet, metier_personnalise, savoir_faire, photo_profil_url, '
             'score_global, note_moyenne, ville, commune, quartier, disponible, '
-            'is_premium, premium_level, est_en_ligne, telephone, is_identite_verifiee',
+            'is_premium, premium_level, est_en_ligne, telephone, is_identite_verifiee, '
+            'latitude, longitude',
           )
           .eq('role', 'technicien')
           .eq('pays', widget.pays);
@@ -63,7 +69,6 @@ class _TechnicianSelectionPageState extends State<TechnicianSelectionPage> {
         }
         query = query.inFilter('id', ids);
       } else {
-        // Cas "Disponibles maintenant" — pas de filtre catégorie
         query = query.or('est_en_ligne.eq.true,disponible.eq.true');
       }
 
@@ -73,9 +78,26 @@ class _TechnicianSelectionPageState extends State<TechnicianSelectionPage> {
           .order('score_global', ascending: false)
           .limit(50);
 
+      List<Map<String, dynamic>> techs =
+          List<Map<String, dynamic>>.from(response);
+
+      // 5.6 — Matching proximité
+      if (widget.clientLat != null && widget.clientLng != null) {
+        techs.sort((a, b) {
+          final da = DistanceUtils.fromTechData(
+              widget.clientLat, widget.clientLng, a);
+          final db = DistanceUtils.fromTechData(
+              widget.clientLat, widget.clientLng, b);
+          if (da == null && db == null) return 0;
+          if (da == null) return 1;
+          if (db == null) return -1;
+          return da.compareTo(db);
+        });
+      }
+
       if (mounted) {
         setState(() {
-          _technicians = List<Map<String, dynamic>>.from(response);
+          _technicians = techs;
           _isLoading = false;
         });
       }
@@ -171,6 +193,8 @@ class _TechnicianSelectionPageState extends State<TechnicianSelectionPage> {
         tech: _technicians[index],
         accentColor: widget.accentColor,
         clientId: widget.clientId,
+        distanceKm: DistanceUtils.fromTechData(
+            widget.clientLat, widget.clientLng, _technicians[index]),
         onTap: () => _ouvrirFiche(_technicians[index]),
       ),
     );

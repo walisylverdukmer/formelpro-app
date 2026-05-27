@@ -3,12 +3,16 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:formelpro/screens/dashboard/details_technicien.dart';
 import 'package:formelpro/screens/booking/technician_selection_page.dart';
+import 'package:formelpro/utils/distance_utils.dart';
+import 'package:formelpro/widgets/expert_card.dart';
 
 class ExpertsPresWidget extends StatefulWidget {
   final String pays;
   final String? commune;
   final Color accentColor;
   final String? clientId;
+  final double? clientLat;
+  final double? clientLng;
 
   const ExpertsPresWidget({
     super.key,
@@ -16,6 +20,8 @@ class ExpertsPresWidget extends StatefulWidget {
     required this.accentColor,
     this.commune,
     this.clientId,
+    this.clientLat,
+    this.clientLng,
   });
 
   @override
@@ -48,7 +54,8 @@ class _ExpertsPresWidgetState extends State<ExpertsPresWidget> {
           .from('utilisateurs')
           .select(
             'id, nom_complet, metier_personnalise, photo_profil_url, score_global, '
-            'commune, ville, disponible, est_en_ligne, is_premium, is_identite_verifiee',
+            'commune, ville, disponible, est_en_ligne, is_premium, is_identite_verifiee, '
+            'latitude, longitude',
           )
           .eq('role', 'technicien')
           .eq('pays', widget.pays)
@@ -62,10 +69,33 @@ class _ExpertsPresWidgetState extends State<ExpertsPresWidget> {
           .order('est_en_ligne', ascending: false)
           .order('is_premium', ascending: false)
           .order('score_global', ascending: false)
-          .limit(12);
+          .limit(20);
+
+      List<Map<String, dynamic>> experts =
+          List<Map<String, dynamic>>.from(data);
+
+      // 5.6 — Matching proximité : trier par distance quand coords client disponibles
+      if (widget.clientLat != null && widget.clientLng != null) {
+        experts.sort((a, b) {
+          final da = DistanceUtils.fromTechData(
+              widget.clientLat, widget.clientLng, a);
+          final db = DistanceUtils.fromTechData(
+              widget.clientLat, widget.clientLng, b);
+          // Online toujours en premier
+          final aOnline = a['est_en_ligne'] == true ? 0 : 1;
+          final bOnline = b['est_en_ligne'] == true ? 0 : 1;
+          if (aOnline != bOnline) return aOnline.compareTo(bOnline);
+          // Puis par distance (sans coordonnées → fin de liste)
+          if (da == null && db == null) return 0;
+          if (da == null) return 1;
+          if (db == null) return -1;
+          return da.compareTo(db);
+        });
+      }
+
       if (mounted) {
         setState(() {
-          _experts = List<Map<String, dynamic>>.from(data);
+          _experts = experts;
           _loading = false;
         });
       }
@@ -118,6 +148,8 @@ class _ExpertsPresWidgetState extends State<ExpertsPresWidget> {
                         pays: widget.pays,
                         accentColor: widget.accentColor,
                         clientId: widget.clientId,
+                        clientLat: widget.clientLat,
+                        clientLng: widget.clientLng,
                       ),
                     ),
                   ),
@@ -149,9 +181,11 @@ class _ExpertsPresWidgetState extends State<ExpertsPresWidget> {
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       physics: const BouncingScrollPhysics(),
                       itemCount: _experts.length,
-                      itemBuilder: (context, i) => _ExpertCard(
+                      itemBuilder: (context, i) => ExpertCard(
                         tech: _experts[i],
                         accentColor: widget.accentColor,
+                        distanceKm: DistanceUtils.fromTechData(
+                            widget.clientLat, widget.clientLng, _experts[i]),
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -217,193 +251,3 @@ class _ExpertsPresWidgetState extends State<ExpertsPresWidget> {
   }
 }
 
-class _ExpertCard extends StatelessWidget {
-  final Map<String, dynamic> tech;
-  final Color accentColor;
-  final VoidCallback onTap;
-
-  const _ExpertCard({
-    required this.tech,
-    required this.accentColor,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final bool isOnline = tech['est_en_ligne'] == true;
-    final bool dispo = tech['disponible'] == true;
-    final bool isPremium = tech['is_premium'] == true;
-    final bool isVerified = tech['is_identite_verifiee'] == true;
-    final String? photoUrl = tech['photo_profil_url'] as String?;
-    final String nom = tech['nom_complet'] ?? 'Expert';
-    final String metier = tech['metier_personnalise'] ?? 'Prestataire';
-    final String lieu = tech['commune'] ?? tech['ville'] ?? '';
-    final double note =
-        (tech['score_global'] as num?)?.toDouble() ?? 5.0;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 148,
-        margin: const EdgeInsets.only(right: 12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: isPremium
-              ? Border.all(color: const Color(0xFFD4AF37), width: 1.5)
-              : null,
-          boxShadow: [
-            BoxShadow(
-              color: isPremium
-                  ? const Color(0xFFD4AF37).withValues(alpha: 0.15)
-                  : Colors.black.withValues(alpha: 0.06),
-              blurRadius: isPremium ? 16 : 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Photo
-            Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(20)),
-                  child: photoUrl != null
-                      ? Image.network(
-                          photoUrl,
-                          height: 108,
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          errorBuilder: (_, __, ___) =>
-                              _buildAvatarPlaceholder(),
-                        )
-                      : _buildAvatarPlaceholder(),
-                ),
-                // Badge en ligne / dispo
-                Positioned(
-                  top: 8,
-                  left: 8,
-                  child: _StatusBadge(isOnline: isOnline, dispo: dispo),
-                ),
-                // Badge vérifié
-                if (isVerified)
-                  const Positioned(
-                    top: 8,
-                    right: 8,
-                    child: Icon(Icons.verified_rounded,
-                        color: Color(0xFF3B82F6), size: 16),
-                  ),
-              ],
-            ),
-            // Infos
-            Padding(
-              padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    nom,
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFF0F172A),
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    metier,
-                    style: GoogleFonts.inter(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                      color: accentColor,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      const Icon(Icons.star_rounded,
-                          color: Colors.amber, size: 12),
-                      const SizedBox(width: 2),
-                      Text(
-                        note.toStringAsFixed(1),
-                        style: GoogleFonts.inter(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF1E293B),
-                        ),
-                      ),
-                      if (lieu.isNotEmpty) ...[
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            lieu,
-                            style: GoogleFonts.inter(
-                              fontSize: 10,
-                              color: const Color(0xFF94A3B8),
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAvatarPlaceholder() {
-    return Container(
-      height: 108,
-      color: accentColor.withValues(alpha: 0.08),
-      child: Center(
-        child: Icon(Icons.person_rounded,
-            color: accentColor.withValues(alpha: 0.4), size: 44),
-      ),
-    );
-  }
-}
-
-class _StatusBadge extends StatelessWidget {
-  final bool isOnline;
-  final bool dispo;
-  const _StatusBadge({required this.isOnline, required this.dispo});
-
-  @override
-  Widget build(BuildContext context) {
-    final Color color = isOnline
-        ? const Color(0xFF22C55E)
-        : dispo
-            ? const Color(0xFF3B82F6)
-            : const Color(0xFF94A3B8);
-    final String label = isOnline ? 'En ligne' : dispo ? 'Dispo' : '';
-    if (label.isEmpty) return const SizedBox.shrink();
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        label,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 9,
-          fontWeight: FontWeight.w700,
-        ),
-      ),
-    );
-  }
-}
