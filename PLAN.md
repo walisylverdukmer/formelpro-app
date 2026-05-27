@@ -218,7 +218,7 @@ Landing
 | 2.2 | Ajouter experts proches scroll horizontal | ✅ ExpertsPresWidget — cartes 148px, badge statut, scroll horizontal |
 | 2.3 | Finaliser flow “Rechercher un technicien” | ✅ TechnicianSelectionPage — fix categoryId vide (“Disponibles maintenant”) |
 | 2.4 | États vides premium                       | ✅ TechnicienEmptyState contextuel (filtres, catégorie, zone) |
-| 2.5 | Filtres métiers/localisation              | 🔲 filtres_techniciens.dart existe — à enrichir |
+| 2.5 | Filtres métiers/localisation              | ✅ Section Commune/Zone + Type mission (Ponctuel/Journalier/Résidentiel) + badge numéroté filtres actifs |
 | 2.6 | Fiches techniciens premium                | 🔲     |
 
 ---

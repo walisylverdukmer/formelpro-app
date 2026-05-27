@@ -9,7 +9,7 @@ class AccueilHeader extends StatelessWidget {
   final Color primaryColor;
   final String paysCode;
   final String? commune;
-  final bool filtresActif;
+  final int filtresCount;
   final TextEditingController searchController;
   final VoidCallback onSearch;
   final VoidCallback onOpenFiltres;
@@ -25,7 +25,7 @@ class AccueilHeader extends StatelessWidget {
     required this.onSearch,
     required this.onOpenFiltres,
     this.commune,
-    this.filtresActif = false,
+    this.filtresCount = 0,
     this.onLocationPicked,
   });
 
@@ -99,21 +99,31 @@ class AccueilHeader extends StatelessWidget {
               children: [
                 Icon(
                   Icons.tune_rounded,
-                  color: filtresActif
+                  color: filtresCount > 0
                       ? primaryColor
                       : const Color(0xFF94A3B8),
                   size: 20,
                 ),
-                if (filtresActif)
+                if (filtresCount > 0)
                   Positioned(
-                    top: 12,
-                    right: 12,
+                    top: 10,
+                    right: 10,
                     child: Container(
-                      width: 7,
-                      height: 7,
+                      width: 16,
+                      height: 16,
                       decoration: BoxDecoration(
                         color: primaryColor,
-                        shape: BoxShape.circle,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Center(
+                        child: Text(
+                          filtresCount.toString(),
+                          style: const TextStyle(
+                            fontSize: 9,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ),
                   ),

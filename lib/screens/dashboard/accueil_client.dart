@@ -173,7 +173,7 @@ class _AccueilClientState extends State<AccueilClient>
                     paysCode: pays,
                     commune: _filtres.commune ??
                         widget.userData['commune'] as String?,
-                    filtresActif: _filtres.actif,
+                    filtresCount: _filtres.count,
                     searchController: _searchController,
                     onSearch: _fetchTechniciens,
                     onOpenFiltres: () => _openFiltres(primaryColor),
