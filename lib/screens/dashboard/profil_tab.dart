@@ -15,6 +15,7 @@ import 'package:formelpro/widgets/profil/profil_header.dart';
 import 'package:formelpro/widgets/profil/edit_profile_sheet.dart';
 import 'package:formelpro/widgets/profil/profil_widgets.dart';
 import 'package:formelpro/widgets/competences_editor_sheet.dart';
+import 'package:formelpro/screens/dashboard/main_dashboard.dart';
 
 class ProfilTab extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -120,22 +121,58 @@ class _ProfilTabState extends State<ProfilTab> {
   }
 
   Future<void> _basculerRole() async {
+    final actuelRole = _localUserData['role'] ?? 'client';
+    final nouveauRole = actuelRole == 'client' ? 'technicien' : 'client';
+    final label = nouveauRole == 'technicien' ? 'Technicien' : 'Client';
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF1E293B),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text("Changer de rôle ?",
+            style: GoogleFonts.poppins(
+                color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+        content: Text(
+          "Vous passerez en mode $label. L'application se rechargera.",
+          style: GoogleFonts.inter(color: Colors.white60, fontSize: 13, height: 1.5),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text("Annuler",
+                style: GoogleFonts.inter(color: Colors.white38)),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: widget.accentColor,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
+            ),
+            child: Text("Confirmer",
+                style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
     setState(() => _isLoading = true);
-    final actuelRole = _localUserData['role'];
-    final nouveauRole = (actuelRole == 'client') ? 'technicien' : 'client';
     try {
       await supabase
           .from('utilisateurs')
           .update({'role': nouveauRole}).eq('id', _localUserData['id']);
       if (mounted) {
-        Navigator.pushNamedAndRemoveUntil(
-            context, '/main_dashboard', (route) => false);
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => const MainDashboardPage()),
+          (route) => false,
+        );
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Erreur : ${e.toString()}")));
-      }
+      if (mounted) _showSnackBar("Erreur lors du changement de rôle.");
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -166,6 +203,7 @@ class _ProfilTabState extends State<ProfilTab> {
       builder: (_) => EditProfileSheet(
         localUserData: _localUserData,
         accentColor: widget.accentColor,
+        role: _localUserData['role'] ?? 'client',
         onSave: (updates) async {
           await supabase
               .from('utilisateurs')

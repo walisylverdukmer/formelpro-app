@@ -1,12 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart' show kIsWeb, kReleaseMode;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'choix_profil.dart';
+import 'google_onboarding_page.dart';
 import 'reset_password_page.dart';
 import 'package:formelpro/screens/dashboard/main_dashboard.dart';
 import 'package:formelpro/screens/complete_profil_page.dart';
+import 'package:formelpro/screens/public/landing_page.dart';
 import 'package:formelpro/widgets/google_sign_in_button.dart';
 
 final supabase = Supabase.instance.client;
@@ -26,9 +30,56 @@ class _PageConnexionPrincipaleState extends State<PageConnexionPrincipale> {
   bool _isLoadingGoogle = false;
   bool _showPassword = false;
   String? _errorMessage;
+  bool _hasNavigated = false;
+  late final StreamSubscription<AuthState> _authSub;
+
+  @override
+  void initState() {
+    super.initState();
+    _authSub = supabase.auth.onAuthStateChange.listen(_onAuthChange);
+  }
+
+  Future<void> _onAuthChange(AuthState data) async {
+    if (!mounted || _hasNavigated) return;
+    if (data.event != AuthChangeEvent.signedIn) return;
+    final user = data.session?.user;
+    if (user == null) return;
+    _hasNavigated = true;
+
+    try {
+      final response = await supabase
+          .from('utilisateurs')
+          .select('role, pays, a_complete_profil')
+          .eq('id', user.id)
+          .maybeSingle();
+
+      if (!mounted) return;
+      if (response == null) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const GoogleOnboardingPage()),
+        );
+      } else if (response['a_complete_profil'] == true) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const MainDashboardPage()),
+        );
+      } else {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) => CompleteProfilPage(
+              role: response['role'] ?? 'client',
+              paysCode: response['pays'] ?? 'CIV',
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('Post-auth navigation error: $e');
+    }
+  }
 
   @override
   void dispose() {
+    _authSub.cancel();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -57,7 +108,8 @@ class _PageConnexionPrincipaleState extends State<PageConnexionPrincipale> {
         final bool aCompleteProfil = response['a_complete_profil'] ?? false;
         final String role = response['role'] ?? 'client';
         final String paysCode = response['pays'] ?? 'CIV';
-        if (mounted) {
+        if (mounted && !_hasNavigated) {
+          _hasNavigated = true;
           if (aCompleteProfil) {
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(builder: (_) => const MainDashboardPage()),
@@ -151,6 +203,20 @@ class _PageConnexionPrincipaleState extends State<PageConnexionPrincipale> {
                   end: Alignment.bottomCenter,
                   colors: [Color(0x77000000), Color(0xDD0F172A)],
                 ),
+              ),
+            ),
+          ),
+          // Bouton retour vers la page d'accueil
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 8,
+            left: 8,
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                  color: Colors.white70, size: 20),
+              tooltip: "Retour à l'accueil",
+              onPressed: () => Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const LandingPage()),
               ),
             ),
           ),

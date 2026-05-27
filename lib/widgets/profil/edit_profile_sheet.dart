@@ -4,12 +4,14 @@ import 'package:google_fonts/google_fonts.dart';
 class EditProfileSheet extends StatefulWidget {
   final Map<String, dynamic> localUserData;
   final Color accentColor;
+  final String role;
   final Future<void> Function(Map<String, String> updates) onSave;
 
   const EditProfileSheet({
     super.key,
     required this.localUserData,
     required this.accentColor,
+    required this.role,
     required this.onSave,
   });
 
@@ -81,7 +83,8 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
                     fontWeight: FontWeight.bold,
                     color: Colors.white)),
             const SizedBox(height: 25),
-            _field(_metierCtrl, "Votre Métier / Spécialité", Icons.handyman),
+            if (widget.role == 'technicien')
+              _field(_metierCtrl, "Votre Métier / Spécialité", Icons.handyman),
             _field(_phoneCtrl, "Numéro de téléphone", Icons.phone),
             _field(_villeCtrl, "Ville", Icons.location_city),
             _field(_communeCtrl, "Commune", Icons.business),
@@ -96,7 +99,8 @@ class _EditProfileSheetState extends State<EditProfileSheet> {
                     'ville': _villeCtrl.text.trim(),
                     'commune': _communeCtrl.text.trim(),
                     'quartier': _quartierCtrl.text.trim(),
-                    'metier_personnalise': _metierCtrl.text.trim(),
+                    if (widget.role == 'technicien')
+                      'metier_personnalise': _metierCtrl.text.trim(),
                     'a_complete_profil': 'true',
                   };
                   final navigator = Navigator.of(context);
