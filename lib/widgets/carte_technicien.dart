@@ -248,6 +248,39 @@ class _CarteTechnicienState extends State<CarteTechnicien> {
                       disponible: widget.tech['disponible'] == true,
                       isOnline: isOnline,
                     ),
+                    // Badges compétences (max 3)
+                    Builder(builder: (_) {
+                      final comps = (widget.tech['competences'] as List?)
+                              ?.cast<String>() ??
+                          [];
+                      if (comps.isEmpty) return const SizedBox.shrink();
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 6),
+                        child: Wrap(
+                          spacing: 4,
+                          runSpacing: 4,
+                          children: comps.take(3).map((c) {
+                            return Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 7, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: widget.accentColor
+                                    .withValues(alpha: 0.09),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                c,
+                                style: GoogleFonts.inter(
+                                  fontSize: 10,
+                                  color: widget.accentColor,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      );
+                    }),
                   ],
                 ),
               ),

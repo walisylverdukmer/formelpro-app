@@ -812,3 +812,21 @@ CREATE POLICY "dsd_admin_all" ON public.demandes_service_domestique
 -- Index pour admin dashboard
 CREATE INDEX IF NOT EXISTS idx_dsd_statut ON public.demandes_service_domestique(statut, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_dsd_type ON public.demandes_service_domestique(type_service, statut);
+
+
+-- =============================================================================
+-- 17. COMPÉTENCES TECHNICIEN [À EXÉCUTER]
+-- =============================================================================
+-- Profil polyvalent "Homme à tout faire" — champ tableau texte libre
+-- Index GIN pour recherche rapide par overlap (&&)
+
+ALTER TABLE public.utilisateurs
+ADD COLUMN IF NOT EXISTS competences TEXT[] DEFAULT '{}';
+
+CREATE INDEX IF NOT EXISTS idx_utilisateurs_competences
+ON public.utilisateurs USING GIN (competences);
+
+-- Catégorie "Homme à tout faire" (idempotente via ON CONFLICT)
+INSERT INTO public.categories_services (nom, slug, groupe_parent, est_valide, ordre_affichage)
+VALUES ('Homme à tout faire', 'homme-a-tout-faire', 'general', true, 0)
+ON CONFLICT (slug) DO NOTHING;

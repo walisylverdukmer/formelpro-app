@@ -193,7 +193,7 @@ lib/
 
 | Fonctionnalité | Description | Priorité |
 |----------------|-------------|----------|
-| **Système de paiement** | Intégration Mobile Money (Orange Money, MTN) | 🔴 HAUTE |
+| **Système de paiement** | Paiement manuel assisté ✅ — API Mobile Money (Orange Money, MTN) à intégrer | 🔴 HAUTE |
 | ~~**Onboarding technicien**~~ | ✅ Page vérif docs + espace admin validation — SQL §13+§14 à exécuter | ✅ |
 | ~~**Recherche & filtres avancés**~~ | ✅ Implémenté — disponibilité, note min, catégorie DB, recherche texte | ✅ |
 | ~~**Historique & rapports**~~ | ✅ Stats technicien implémentées (revenus FCFA, missions, en cours, graphique mensuel) | ✅ |
@@ -317,6 +317,10 @@ Lancement app
 
 ---
 
-*Dernière mise à jour : 2026-05-26 — Session 11 : Services domestiques sensibles (ménagère/servante/serveuse) — DemandServiceDomestiquePage (3 étapes : sélection type → formulaire → confirmation), blocage contact direct dans details_technicien (`_isServiceSensible` checker), badge "Sécurisé" sur card services rapides, routing ménagère vers nouvelle page (suppression _MenagereSheet/_TypeOption), migration SQL §16 `demandes_service_domestique` + RLS + index, flutter analyze 0 issues.*
+*Dernière mise à jour : 2026-05-27 — Session 13 : Phase 5.7 Homme à tout faire + Phase 4.3 Admin demandes domestiques — SQL §17 colonne `competences TEXT[]` + index GIN + catégorie DB, `TechnicienService` filtre `ov` overlap, `FiltresTechniciens` champ `competences`, `FiltresSheet` section multi-select 12 compétences, `CarteTechnicien` badges chips max 3, `CompetencesEditorSheet` modal édition tech, `ProfilTab` section "Mes Compétences" + lien admin, `AdminDemandesDomestiquesPage` gestion workflow (prendre en charge/enquête/affecter/annuler), flutter analyze 0 issues. SQL §17 à exécuter dans Supabase SQL Editor.*
+
+*Dernière mise à jour : 2026-05-27 — Session 12 : Phase 7 paiements — `PaiementPage` (sélection opérateur CIV/CMR, instructions, saisie référence, insert `transactions`), `mes_interventions_page.dart` refactorisé (bouton "Payer" client → PaiementPage, bouton "Confirmer réception" tech → UPDATE transactions.statut='confirme', badges état paiement), RLS `transactions_update_tech` ajouté dans rls_policies.sql, flutter analyze 0 issues. Table `transactions` SQL §11 à exécuter dans Supabase SQL Editor.*
+
+*Dernière mise à jour précédente : 2026-05-26 — Session 11 : Services domestiques sensibles (ménagère/servante/serveuse) — DemandServiceDomestiquePage (3 étapes : sélection type → formulaire → confirmation), blocage contact direct dans details_technicien (`_isServiceSensible` checker), badge "Sécurisé" sur card services rapides, routing ménagère vers nouvelle page (suppression _MenagereSheet/_TypeOption), migration SQL §16 `demandes_service_domestique` + RLS + index, flutter analyze 0 issues.*
 
 *Session 10 — Ajustement stratégique majeur — Flow chat sécurisé. Chat devient centre du système : stream unique (StreamSubscription), proforma enrichi (service/prix/lieu/date), appel conditionnel (déblocage après 3 messages OU proforma), alerte sécurité avant confirmation offre, `receiverPhone` passé depuis `details_technicien`. Suppression appel direct depuis profil tech (bouton "Contacter" unique + note explicative). Flow ménagère 3-étapes : choix type → formulaire adresse/message → confirmation automatique (sans routing vers liste techs). flutter analyze 0 issues*

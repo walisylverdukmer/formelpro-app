@@ -275,8 +275,11 @@ CREATE POLICY "transactions_insert_client"
     ON public.transactions FOR INSERT
     WITH CHECK (auth.uid() = client_id);
 
--- Mise à jour du statut via service_role uniquement (webhook Mobile Money)
--- Pas de policy UPDATE côté client
+-- Le tech confirme la réception du paiement (statut → 'confirme')
+CREATE POLICY "transactions_update_tech"
+    ON public.transactions FOR UPDATE
+    USING (auth.uid() = tech_id)
+    WITH CHECK (auth.uid() = tech_id);
 
 
 -- =============================================================================

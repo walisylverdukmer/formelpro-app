@@ -27,6 +27,7 @@ class _FiltresSheetState extends State<FiltresSheet> {
   List<Map<String, dynamic>> _categories = [];
   bool _loadingCats = true;
   final _communeCtrl = TextEditingController();
+  late List<String> _competences;
 
   @override
   void initState() {
@@ -37,6 +38,7 @@ class _FiltresSheetState extends State<FiltresSheet> {
     _categorieNom = widget.current.categorieNom;
     _typePrestation = widget.current.typePrestation;
     _communeCtrl.text = widget.current.commune ?? '';
+    _competences = List<String>.from(widget.current.competences ?? []);
     _loadCategories();
   }
 
@@ -103,7 +105,7 @@ class _FiltresSheetState extends State<FiltresSheet> {
             ),
             const SizedBox(height: 24),
 
-            // ── Disponibilité ─────────────────────────────────────────────
+            // ── Disponibilité ────────────────────────────────────────────
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -122,7 +124,7 @@ class _FiltresSheetState extends State<FiltresSheet> {
             ),
             const SizedBox(height: 20),
 
-            // ── Note minimum ──────────────────────────────────────────────
+            // ── Note minimum ─────────────────────────────────────────────
             Text(
               _noteMin == 0
                   ? 'Note minimum : Toutes'
@@ -141,7 +143,7 @@ class _FiltresSheetState extends State<FiltresSheet> {
             ),
             const SizedBox(height: 16),
 
-            // ── Catégorie ─────────────────────────────────────────────────
+            // ── Catégorie ────────────────────────────────────────────────
             _sectionLabel('Catégorie'),
             const SizedBox(height: 12),
             _loadingCats
@@ -164,7 +166,7 @@ class _FiltresSheetState extends State<FiltresSheet> {
                   ),
             const SizedBox(height: 20),
 
-            // ── Localisation ──────────────────────────────────────────────
+            // ── Localisation ─────────────────────────────────────────────
             _sectionLabel('Commune / Zone'),
             const SizedBox(height: 10),
             TextField(
@@ -192,8 +194,7 @@ class _FiltresSheetState extends State<FiltresSheet> {
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
                   borderSide: BorderSide(
-                      color:
-                          widget.accentColor.withValues(alpha: 0.6)),
+                      color: widget.accentColor.withValues(alpha: 0.6)),
                 ),
                 contentPadding: const EdgeInsets.symmetric(
                     horizontal: 14, vertical: 12),
@@ -201,7 +202,7 @@ class _FiltresSheetState extends State<FiltresSheet> {
             ),
             const SizedBox(height: 20),
 
-            // ── Type de mission ───────────────────────────────────────────
+            // ── Type de mission ──────────────────────────────────────────
             _sectionLabel('Type de mission'),
             const SizedBox(height: 10),
             Wrap(
@@ -214,9 +215,27 @@ class _FiltresSheetState extends State<FiltresSheet> {
                 _buildTypeChip('résidente', 'Résidentiel'),
               ],
             ),
+            const SizedBox(height: 20),
+
+            // ── Compétences (Homme à tout faire) ─────────────────────────
+            _sectionLabel('Compétences — Homme à tout faire'),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: kCompetences.map((c) {
+                final sel = _competences.contains(c);
+                return GestureDetector(
+                  onTap: () => setState(() {
+                    sel ? _competences.remove(c) : _competences.add(c);
+                  }),
+                  child: _chip(c, sel),
+                );
+              }).toList(),
+            ),
             const SizedBox(height: 28),
 
-            // ── Boutons ───────────────────────────────────────────────────
+            // ── Boutons ──────────────────────────────────────────────────
             Row(
               children: [
                 Expanded(
@@ -249,6 +268,8 @@ class _FiltresSheetState extends State<FiltresSheet> {
                           categorieNom: _categorieNom,
                           commune: commune.isEmpty ? null : commune,
                           typePrestation: _typePrestation,
+                          competences:
+                              _competences.isEmpty ? null : List.from(_competences),
                         ),
                       );
                     },

@@ -287,11 +287,11 @@ Client
 
 | #   | Tâche                           | Statut |
 | --- | ------------------------------- | ------ |
-| 4.1 | Flow spécial services sensibles | 🔲     |
-| 4.2 | Désactiver contact direct       | 🔲     |
-| 4.3 | Workflow validation admin       | 🔲     |
-| 4.4 | Historique enquêtes             | 🔲     |
-| 4.5 | Badge service sécurisé          | 🔲     |
+| 4.1 | Flow spécial services sensibles | ✅ DemandServiceDomestiquePage (3 étapes) |
+| 4.2 | Désactiver contact direct       | ✅ _isServiceSensible dans details_technicien |
+| 4.3 | Workflow validation admin       | ✅ AdminDemandesDomestiquesPage — prendre en charge, enquête, affecter, annuler |
+| 4.4 | Historique enquêtes             | ✅ onglets statuts dans AdminDemandesDomestiquesPage |
+| 4.5 | Badge service sécurisé          | 🔲 (badge sur fiche tech si service sensible) |
 
 ---
 
@@ -366,12 +366,12 @@ Créer :
 
 | #     | Tâche                                 | Statut |
 | ----- | ------------------------------------- | ------ |
-| 5.7.1 | Catégorie spéciale homme à tout faire | 🔲     |
-| 5.7.2 | Sélection multi-compétences           | 🔲     |
-| 5.7.3 | Badges compétences                    | 🔲     |
-| 5.7.4 | Filtres compétences                   | 🔲     |
-| 5.7.5 | Matching intelligent                  | 🔲     |
-| 5.7.6 | Ajout homepage publique               | 🔲     |
+| 5.7.1 | Catégorie spéciale homme à tout faire | ✅ SQL §17 — INSERT categories_services 'homme-a-tout-faire' |
+| 5.7.2 | Sélection multi-compétences           | ✅ competences_editor_sheet.dart + profil_tab "Mes Compétences" |
+| 5.7.3 | Badges compétences                    | ✅ carte_technicien.dart — chips accentColor max 3 |
+| 5.7.4 | Filtres compétences                   | ✅ filtres_sheet.dart section "Homme à tout faire" multi-select |
+| 5.7.5 | Matching intelligent                  | ✅ TechnicienService — filtre ov (overlap) sur TEXT[] |
+| 5.7.6 | Ajout homepage publique               | ✅ catégorie DB-driven → chips accueil_client automatique |
 
 ---
 
@@ -419,11 +419,11 @@ Paiement sécurisé intégré FormelPro.
 
 | #   | Tâche                   | Statut |
 | --- | ----------------------- | ------ |
-| 7.1 | Paiement manuel assisté | 🔲     |
-| 7.2 | Table transactions      | 🔲     |
+| 7.1 | Paiement manuel assisté | ✅ PaiementPage — sélection opérateur (CIV/CMR), instructions, saisie référence, insert transactions |
+| 7.2 | Table transactions      | ✅ SQL §11 migrations.sql + RLS rls_policies.sql (select/insert client + update tech) |
 | 7.3 | Edge Functions paiement | 🔲     |
-| 7.4 | Orange Money            | 🔲     |
-| 7.5 | MTN MoMo                | 🔲     |
+| 7.4 | Orange Money API        | 🔲     |
+| 7.5 | MTN MoMo API            | 🔲     |
 | 7.6 | Historique transactions | 🔲     |
 | 7.7 | Escrow FormelPro        | 🔲     |
 

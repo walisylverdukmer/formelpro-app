@@ -9,9 +9,11 @@ import 'package:formelpro/screens/dashboard/verification_documents_page.dart';
 import 'package:formelpro/screens/admin/admin_documents_page.dart';
 import 'package:formelpro/screens/admin/admin_signalements_page.dart';
 import 'package:formelpro/screens/admin/admin_users_page.dart';
+import 'package:formelpro/screens/admin/admin_demandes_domestiques_page.dart';
 import 'package:formelpro/widgets/profil/profil_header.dart';
 import 'package:formelpro/widgets/profil/edit_profile_sheet.dart';
 import 'package:formelpro/widgets/profil/profil_widgets.dart';
+import 'package:formelpro/widgets/competences_editor_sheet.dart';
 
 class ProfilTab extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -135,6 +137,23 @@ class _ProfilTabState extends State<ProfilTab> {
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  void _ouvrirCompetences() async {
+    final comps = (_localUserData['competences'] as List?)?.cast<String>() ?? [];
+    final result = await showModalBottomSheet<List<String>>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => CompetencesEditorSheet(
+        current: comps,
+        accentColor: widget.accentColor,
+      ),
+    );
+    if (result != null && mounted) {
+      setState(() => _localUserData['competences'] = result);
+      _showSnackBar("Compétences mises à jour !");
     }
   }
 
@@ -270,6 +289,31 @@ class _ProfilTabState extends State<ProfilTab> {
                             ),
                           ),
                         ]),
+                        if (role == 'technicien') ...[
+                          const SizedBox(height: 25),
+                          const ProfilSectionTitle(title: "Mes Compétences"),
+                          ProfilGlassCard(children: [
+                            ProfilActionTile(
+                              icon: Icons.construction_rounded,
+                              title: "Homme à tout faire",
+                              subtitle: () {
+                                final c = (_localUserData['competences']
+                                        as List?)
+                                    ?.cast<String>() ??
+                                    [];
+                                if (c.isEmpty) {
+                                  return "Ajoutez vos savoir-faire polyvalents";
+                                }
+                                final preview = c.take(3).join(' · ');
+                                return c.length > 3
+                                    ? '$preview +${c.length - 3}'
+                                    : preview;
+                              }(),
+                              accentColor: widget.accentColor,
+                              onTap: _ouvrirCompetences,
+                            ),
+                          ]),
+                        ],
                         if (role == 'client') ...[
                           const SizedBox(height: 25),
                           const ProfilSectionTitle(title: "Mes Favoris"),
@@ -323,6 +367,15 @@ class _ProfilTabState extends State<ProfilTab> {
                               accentColor: widget.accentColor,
                               onTap: () => Navigator.push(context,
                                   MaterialPageRoute(builder: (_) => AdminUsersPage(accentColor: widget.accentColor))),
+                            ),
+                            const ProfilDivider(),
+                            ProfilActionTile(
+                              icon: Icons.home_work_rounded,
+                              title: "Demandes domestiques",
+                              subtitle: "Ménagère, servante, serveuse — en attente",
+                              accentColor: widget.accentColor,
+                              onTap: () => Navigator.push(context,
+                                  MaterialPageRoute(builder: (_) => AdminDemandesDomestiquesPage(accentColor: widget.accentColor))),
                             ),
                           ]),
                         ],

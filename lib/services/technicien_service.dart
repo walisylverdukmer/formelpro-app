@@ -8,7 +8,7 @@ class TechnicienService {
       'id, nom_complet, metier_personnalise, savoir_faire, photo_profil_url, '
       'score_global, note_moyenne, ville, commune, quartier, disponible, '
       'is_premium, premium_level, est_en_ligne, telephone, is_identite_verifiee, '
-      'latitude, longitude';
+      'latitude, longitude, competences';
 
   static const int pageSize = 20;
 
@@ -50,6 +50,11 @@ class TechnicienService {
     }
     if (filtres.quartier?.isNotEmpty ?? false) {
       query = query.ilike('quartier', '%${filtres.quartier}%');
+    }
+    if (filtres.competences != null && filtres.competences!.isNotEmpty) {
+      final quoted =
+          filtres.competences!.map((c) => '"$c"').join(',');
+      query = query.filter('competences', 'ov', '{$quoted}');
     }
     if (search.isNotEmpty) {
       query = query.or(

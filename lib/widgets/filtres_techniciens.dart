@@ -2,6 +2,22 @@ import 'package:flutter/material.dart';
 
 import 'filtres_sheet.dart';
 
+/// Compétences disponibles pour le profil "Homme à tout faire"
+const kCompetences = [
+  'Petite plomberie',
+  'Petite électricité',
+  'Peinture',
+  'Bricolage',
+  'Montage meubles',
+  'Manutention',
+  'Jardinage',
+  'Nettoyage',
+  'Dépannage simple',
+  'Soudure légère',
+  'Carrelage',
+  'Menuiserie',
+];
+
 class FiltresTechniciens {
   final bool disponibleSeulement;
   final double noteMin;
@@ -10,6 +26,7 @@ class FiltresTechniciens {
   final String? commune;
   final String? quartier;
   final String? typePrestation;
+  final List<String>? competences;
 
   const FiltresTechniciens({
     this.disponibleSeulement = false,
@@ -19,6 +36,7 @@ class FiltresTechniciens {
     this.commune,
     this.quartier,
     this.typePrestation,
+    this.competences,
   });
 
   bool get actif =>
@@ -28,14 +46,16 @@ class FiltresTechniciens {
       categorieNom != null ||
       commune != null ||
       quartier != null ||
-      typePrestation != null;
+      typePrestation != null ||
+      (competences?.isNotEmpty ?? false);
 
   int get count =>
       (disponibleSeulement ? 1 : 0) +
       (noteMin > 0 ? 1 : 0) +
       (categorieId != null || categorieNom != null ? 1 : 0) +
       (commune != null ? 1 : 0) +
-      (typePrestation != null ? 1 : 0);
+      (typePrestation != null ? 1 : 0) +
+      ((competences?.isNotEmpty ?? false) ? 1 : 0);
 
   FiltresTechniciens copyWith({
     bool? disponibleSeulement,
@@ -45,6 +65,7 @@ class FiltresTechniciens {
     String? commune,
     String? quartier,
     String? typePrestation,
+    List<String>? competences,
   }) {
     return FiltresTechniciens(
       disponibleSeulement: disponibleSeulement ?? this.disponibleSeulement,
@@ -54,6 +75,7 @@ class FiltresTechniciens {
       commune: commune ?? this.commune,
       quartier: quartier ?? this.quartier,
       typePrestation: typePrestation ?? this.typePrestation,
+      competences: competences ?? this.competences,
     );
   }
 }
