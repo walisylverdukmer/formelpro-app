@@ -23,7 +23,7 @@ Ce document définit :
 
 ## Niveau MVP estimé :
 
-75% — Phase 1 (refactoring + architecture) et Phase 2 (UX client principale) en grande partie terminées. Blocs restants : filtres avancés, fiches premium, chat sécurisé, admin, paiements.
+80% — Phase 1 (refactoring + architecture) et Phase 2 (UX client principale) complètes. Blocs restants : chat sécurisé, admin, localisation, paiements.
 
 ## Forces actuelles
 
@@ -219,7 +219,7 @@ Landing
 | 2.3 | Finaliser flow “Rechercher un technicien” | ✅ TechnicianSelectionPage — fix categoryId vide (“Disponibles maintenant”) |
 | 2.4 | États vides premium                       | ✅ TechnicienEmptyState contextuel (filtres, catégorie, zone) |
 | 2.5 | Filtres métiers/localisation              | ✅ Section Commune/Zone + Type mission (Ponctuel/Journalier/Résidentiel) + badge numéroté filtres actifs |
-| 2.6 | Fiches techniciens premium                | 🔲     |
+| 2.6 | Fiches techniciens premium                | ✅ Favori cœur, statut 3e stat, bannière premium, avis clients |
 
 ---
 
@@ -490,7 +490,7 @@ Les démarches marchandes doivent commencer tôt.
 2. ✅ Landing publique stable
 3. ✅ Devenir prestataire stable
 4. ✅ Flow recherche technicien (pagination + sélection catégorie)
-5. 🔲 Filtres avancés (2.5) + Fiches premium (2.6)
+5. ✅ Filtres avancés (2.5) + Fiches premium (2.6)
 6. 🔲 Chat sécurisé — Phase 3 (blocage appel, proforma, lus/non lus)
 7. 🔲 Dashboard admin minimal — Phase 6
 8. 🔲 Localisation stable — Phase 5
