@@ -11,6 +11,7 @@ import 'package:formelpro/widgets/zone_stats_widget.dart';
 import 'package:formelpro/widgets/experts_pres_widget.dart';
 import 'package:formelpro/widgets/accueil_header.dart';
 import 'package:formelpro/widgets/accueil_hero_banner.dart';
+import 'package:formelpro/widgets/homme_tout_faire_section.dart';
 import 'package:formelpro/widgets/technicien_empty_state.dart';
 import 'package:formelpro/widgets/shimmer_card.dart';
 import 'package:formelpro/widgets/country_welcome_modal.dart';
@@ -190,7 +191,46 @@ class _AccueilClientState extends State<AccueilClient>
                     },
                   ),
                   const SizedBox(height: 16),
-                  AccueilHeroBanner(pays: pays, primaryColor: primaryColor),
+                  AccueilHeroBanner(
+                    pays: pays,
+                    primaryColor: primaryColor,
+                    onExplore: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => TechnicianSelectionPage(
+                          categoryName: 'Tous les experts',
+                          categoryId: '',
+                          pays: pays,
+                          accentColor: primaryColor,
+                          clientId: widget.userData['id']?.toString(),
+                          clientLat: (widget.userData['latitude'] as num?)
+                              ?.toDouble(),
+                          clientLng: (widget.userData['longitude'] as num?)
+                              ?.toDouble(),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  HommeToutFaireSection(
+                    accentColor: primaryColor,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => TechnicianSelectionPage(
+                          categoryName: 'Homme à tout faire',
+                          categoryId: '',
+                          pays: pays,
+                          accentColor: primaryColor,
+                          clientId: widget.userData['id']?.toString(),
+                          clientLat: (widget.userData['latitude'] as num?)
+                              ?.toDouble(),
+                          clientLng: (widget.userData['longitude'] as num?)
+                              ?.toDouble(),
+                        ),
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: 20),
                   ServicesRapidesWidget(
                     accentColor: primaryColor,

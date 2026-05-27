@@ -25,6 +25,7 @@ class ServicesRapidesWidget extends StatelessWidget {
     {
       'label': 'Livraison\ngaz',
       'image': 'assets/images/metiers/fond_lovraison_gaz.jpg',
+      'icon': Icons.local_fire_department_rounded,
       'color': Color(0xFFEF4444),
       'query': 'gaz',
       'type': 'gaz',
@@ -32,6 +33,7 @@ class ServicesRapidesWidget extends StatelessWidget {
     {
       'label': 'Femme de\nménage',
       'image': 'assets/images/metiers/fond_menagegère.jpg',
+      'icon': Icons.cleaning_services_rounded,
       'color': Color(0xFF8B5CF6),
       'query': 'ménage',
       'type': 'menage',
@@ -40,6 +42,7 @@ class ServicesRapidesWidget extends StatelessWidget {
     {
       'label': 'Électricien',
       'image': 'assets/images/metiers/Fond_electricité.jpg',
+      'icon': Icons.electrical_services_rounded,
       'color': Color(0xFFF59E0B),
       'query': 'électricité',
       'type': 'standard',
@@ -47,6 +50,7 @@ class ServicesRapidesWidget extends StatelessWidget {
     {
       'label': 'Plombier',
       'image': null,
+      'icon': Icons.plumbing_rounded,
       'color': Color(0xFF3B82F6),
       'query': 'plomberie',
       'type': 'standard',
@@ -54,6 +58,7 @@ class ServicesRapidesWidget extends StatelessWidget {
     {
       'label': 'Menuisier',
       'image': null,
+      'icon': Icons.carpenter_rounded,
       'color': Color(0xFF92400E),
       'query': 'menuiserie',
       'type': 'standard',
@@ -134,7 +139,7 @@ class ServicesRapidesWidget extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         SizedBox(
-          height: 108,
+          height: 128,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -144,6 +149,7 @@ class ServicesRapidesWidget extends StatelessWidget {
               return _ServiceCard(
                 label: s['label'] as String,
                 imagePath: s['image'] as String?,
+                iconData: s['icon'] as IconData,
                 color: s['color'] as Color,
                 securise: s['securise'] as bool? ?? false,
                 onTap: () => _handleTap(context, s),
@@ -319,6 +325,7 @@ class _GazSheetState extends State<_GazSheet> {
 class _ServiceCard extends StatelessWidget {
   final String label;
   final String? imagePath;
+  final IconData iconData;
   final Color color;
   final bool securise;
   final VoidCallback onTap;
@@ -326,6 +333,7 @@ class _ServiceCard extends StatelessWidget {
   const _ServiceCard({
     required this.label,
     required this.imagePath,
+    required this.iconData,
     required this.color,
     required this.onTap,
     this.securise = false,
@@ -336,7 +344,7 @@ class _ServiceCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 88,
+        width: 96,
         margin: const EdgeInsets.only(right: 10),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
@@ -410,18 +418,20 @@ class _ServiceCard extends StatelessWidget {
               ),
               if (imagePath == null)
                 Positioned(
-                  top: 14,
+                  top: 16,
                   left: 0,
                   right: 0,
                   child: Center(
                     child: Container(
-                      width: 36,
-                      height: 36,
+                      width: 40,
+                      height: 40,
                       decoration: BoxDecoration(
-                        color: color.withValues(alpha: 0.15),
+                        color: color.withValues(alpha: 0.18),
                         shape: BoxShape.circle,
+                        border: Border.all(
+                            color: color.withValues(alpha: 0.25), width: 1),
                       ),
-                      child: Icon(Icons.handyman_rounded, color: color, size: 18),
+                      child: Icon(iconData, color: color, size: 20),
                     ),
                   ),
                 ),
