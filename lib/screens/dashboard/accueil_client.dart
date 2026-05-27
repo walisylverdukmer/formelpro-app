@@ -8,7 +8,7 @@ import 'package:formelpro/widgets/categories_chips.dart';
 import 'package:formelpro/widgets/filtres_techniciens.dart';
 import 'package:formelpro/widgets/services_rapides_widget.dart';
 import 'package:formelpro/widgets/zone_stats_widget.dart';
-import 'package:formelpro/widgets/experts_pres_widget.dart';
+import 'package:formelpro/widgets/techniciens_pres_widget.dart';
 import 'package:formelpro/widgets/accueil_header.dart';
 import 'package:formelpro/widgets/accueil_hero_banner.dart';
 import 'package:formelpro/widgets/homme_tout_faire_section.dart';
@@ -198,7 +198,7 @@ class _AccueilClientState extends State<AccueilClient>
                       context,
                       MaterialPageRoute(
                         builder: (_) => TechnicianSelectionPage(
-                          categoryName: 'Tous les experts',
+                          categoryName: 'Tous les techniciens',
                           categoryId: '',
                           pays: pays,
                           accentColor: primaryColor,
@@ -257,7 +257,7 @@ class _AccueilClientState extends State<AccueilClient>
                     ),
                   ),
                   const SizedBox(height: 28),
-                  ExpertsPresWidget(
+                  TechniciensPresWidget(
                     pays: pays,
                     accentColor: primaryColor,
                     commune: widget.userData['commune'] as String?,

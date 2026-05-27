@@ -25,7 +25,7 @@ class _AccueilHeroBannerState extends State<AccueilHeroBanner> {
 
   static const _slides = [
     _HeroSlide(
-      title: 'Trouvez un expert\nprès de chez vous',
+      title: 'Trouvez un technicien\nprès de chez vous',
       subtitle: 'Techniciens certifiés disponibles maintenant',
       cta: 'Explorer',
       icon: Icons.search_rounded,

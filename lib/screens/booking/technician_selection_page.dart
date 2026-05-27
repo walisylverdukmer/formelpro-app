@@ -150,7 +150,7 @@ class _TechnicianSelectionPageState extends State<TechnicianSelectionPage> {
             ),
             if (!_isLoading)
               Text(
-                "${_technicians.length} expert${_technicians.length > 1 ? 's' : ''}",
+                "${_technicians.length} technicien${_technicians.length > 1 ? 's' : ''}",
                 style: GoogleFonts.inter(
                   fontSize: 12,
                   color: const Color(0xFF94A3B8),
@@ -219,7 +219,7 @@ class _TechnicianSelectionPageState extends State<TechnicianSelectionPage> {
             ),
             const SizedBox(height: 24),
             Text(
-              "Aucun expert trouvé\npour ce métier",
+              "Aucun technicien trouvé\npour ce métier",
               textAlign: TextAlign.center,
               style: GoogleFonts.poppins(
                 fontSize: 17,

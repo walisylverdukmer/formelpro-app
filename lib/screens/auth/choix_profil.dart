@@ -40,7 +40,7 @@ class ChoixProfilPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    "Votre réseau d'experts certifiés",
+                    "Votre réseau de techniciens certifiés",
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       color: const Color(0xFF64748B),
@@ -294,7 +294,7 @@ class _ChoixRolePageState extends State<ChoixRolePage> {
               _buildRoleCard(
                 'client',
                 Icons.person_rounded,
-                "Je cherche un expert",
+                "Je cherche un technicien",
                 "Trouvez des professionnels certifiés pour vos travaux.",
                 accent,
               ),

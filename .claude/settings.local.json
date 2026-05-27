@@ -46,7 +46,10 @@
       "Bash(git commit -m ' *)",
       "Bash(git push *)",
       "Bash(Get-ChildItem lib/screens/chat/)",
-      "Bash(Select-Object Name, Length)"
+      "Bash(Select-Object Name, Length)",
+      "Bash(Remove-Item \"c:\\\\Users\\\\HP\\\\Documents\\\\FormelPro\\\\lib\\\\widgets\\\\expert_card.dart\" -Force)",
+      "Bash(Remove-Item \"c:\\\\Users\\\\HP\\\\Documents\\\\FormelPro\\\\lib\\\\widgets\\\\experts_pres_widget.dart\" -Force)",
+      "Bash(Write-Output \"Anciens fichiers supprimés\")"
     ]
   }
 }

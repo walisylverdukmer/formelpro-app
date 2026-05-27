@@ -26,7 +26,7 @@ class TechnicienEmptyState extends StatelessWidget {
     final IconData icon;
 
     if (hasCat) {
-      title = "Aucun expert trouvé pour ce métier";
+      title = "Aucun technicien trouvé pour ce métier";
       subtitle =
           "Aucun prestataire certifié n'est encore référencé pour ce service dans votre zone.";
       icon = Icons.person_search_rounded;

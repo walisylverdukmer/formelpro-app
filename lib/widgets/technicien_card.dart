@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:formelpro/utils/distance_utils.dart';
 
-class ExpertCard extends StatelessWidget {
+class TechnicienCard extends StatelessWidget {
   final Map<String, dynamic> tech;
   final Color accentColor;
   final VoidCallback onTap;
   final double? distanceKm;
 
-  const ExpertCard({
+  const TechnicienCard({
     super.key,
     required this.tech,
     required this.accentColor,
@@ -23,7 +23,7 @@ class ExpertCard extends StatelessWidget {
     final bool isPremium = tech['is_premium'] == true;
     final bool isVerified = tech['is_identite_verifiee'] == true;
     final String? photoUrl = tech['photo_profil_url'] as String?;
-    final String nom = tech['nom_complet'] ?? 'Expert';
+    final String nom = tech['nom_complet'] ?? 'Technicien';
     final String metier = tech['metier_personnalise'] ?? 'Prestataire';
     final String lieu = tech['commune'] ?? tech['ville'] ?? '';
     final double note = (tech['score_global'] as num?)?.toDouble() ?? 5.0;
@@ -71,7 +71,7 @@ class ExpertCard extends StatelessWidget {
                 Positioned(
                   top: 8,
                   left: 8,
-                  child: ExpertStatusBadge(isOnline: isOnline, dispo: dispo),
+                  child: TechnicienStatusBadge(isOnline: isOnline, dispo: dispo),
                 ),
                 if (isVerified)
                   const Positioned(
@@ -175,11 +175,11 @@ class ExpertCard extends StatelessWidget {
   }
 }
 
-class ExpertStatusBadge extends StatelessWidget {
+class TechnicienStatusBadge extends StatelessWidget {
   final bool isOnline;
   final bool dispo;
 
-  const ExpertStatusBadge({
+  const TechnicienStatusBadge({
     super.key,
     required this.isOnline,
     required this.dispo,

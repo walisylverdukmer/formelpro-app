@@ -4,9 +4,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:formelpro/screens/dashboard/details_technicien.dart';
 import 'package:formelpro/screens/booking/technician_selection_page.dart';
 import 'package:formelpro/utils/distance_utils.dart';
-import 'package:formelpro/widgets/expert_card.dart';
+import 'package:formelpro/widgets/technicien_card.dart';
 
-class ExpertsPresWidget extends StatefulWidget {
+class TechniciensPresWidget extends StatefulWidget {
   final String pays;
   final String? commune;
   final Color accentColor;
@@ -14,7 +14,7 @@ class ExpertsPresWidget extends StatefulWidget {
   final double? clientLat;
   final double? clientLng;
 
-  const ExpertsPresWidget({
+  const TechniciensPresWidget({
     super.key,
     required this.pays,
     required this.accentColor,
@@ -25,29 +25,29 @@ class ExpertsPresWidget extends StatefulWidget {
   });
 
   @override
-  State<ExpertsPresWidget> createState() => _ExpertsPresWidgetState();
+  State<TechniciensPresWidget> createState() => _TechniciensPresWidgetState();
 }
 
-class _ExpertsPresWidgetState extends State<ExpertsPresWidget> {
+class _TechniciensPresWidgetState extends State<TechniciensPresWidget> {
   final _supabase = Supabase.instance.client;
-  List<Map<String, dynamic>> _experts = [];
+  List<Map<String, dynamic>> _techniciens = [];
   bool _loading = true;
 
   @override
   void initState() {
     super.initState();
-    _fetchExperts();
+    _fetchTechniciens();
   }
 
   @override
-  void didUpdateWidget(ExpertsPresWidget old) {
+  void didUpdateWidget(TechniciensPresWidget old) {
     super.didUpdateWidget(old);
     if (old.commune != widget.commune || old.pays != widget.pays) {
-      _fetchExperts();
+      _fetchTechniciens();
     }
   }
 
-  Future<void> _fetchExperts() async {
+  Future<void> _fetchTechniciens() async {
     setState(() => _loading = true);
     try {
       var filterQuery = _supabase
@@ -71,21 +71,18 @@ class _ExpertsPresWidgetState extends State<ExpertsPresWidget> {
           .order('score_global', ascending: false)
           .limit(20);
 
-      List<Map<String, dynamic>> experts =
+      List<Map<String, dynamic>> techniciens =
           List<Map<String, dynamic>>.from(data);
 
-      // 5.6 — Matching proximité : trier par distance quand coords client disponibles
       if (widget.clientLat != null && widget.clientLng != null) {
-        experts.sort((a, b) {
+        techniciens.sort((a, b) {
           final da = DistanceUtils.fromTechData(
               widget.clientLat, widget.clientLng, a);
           final db = DistanceUtils.fromTechData(
               widget.clientLat, widget.clientLng, b);
-          // Online toujours en premier
           final aOnline = a['est_en_ligne'] == true ? 0 : 1;
           final bOnline = b['est_en_ligne'] == true ? 0 : 1;
           if (aOnline != bOnline) return aOnline.compareTo(bOnline);
-          // Puis par distance (sans coordonnées → fin de liste)
           if (da == null && db == null) return 0;
           if (da == null) return 1;
           if (db == null) return -1;
@@ -95,12 +92,12 @@ class _ExpertsPresWidgetState extends State<ExpertsPresWidget> {
 
       if (mounted) {
         setState(() {
-          _experts = experts;
+          _techniciens = techniciens;
           _loading = false;
         });
       }
     } catch (e) {
-      debugPrint('ExpertsPresWidget error: $e');
+      debugPrint('TechniciensPresWidget error: $e');
       if (mounted) setState(() => _loading = false);
     }
   }
@@ -119,7 +116,7 @@ class _ExpertsPresWidgetState extends State<ExpertsPresWidget> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Experts près de vous',
+                    'Techniciens près de vous',
                     style: GoogleFonts.poppins(
                       fontSize: 17,
                       fontWeight: FontWeight.w700,
@@ -137,7 +134,7 @@ class _ExpertsPresWidgetState extends State<ExpertsPresWidget> {
                     ),
                 ],
               ),
-              if (!_loading && _experts.isNotEmpty)
+              if (!_loading && _techniciens.isNotEmpty)
                 TextButton(
                   onPressed: () => Navigator.push(
                     context,
@@ -174,23 +171,23 @@ class _ExpertsPresWidgetState extends State<ExpertsPresWidget> {
           height: 210,
           child: _loading
               ? _buildShimmer()
-              : _experts.isEmpty
+              : _techniciens.isEmpty
                   ? _buildEmpty()
                   : ListView.builder(
                       scrollDirection: Axis.horizontal,
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       physics: const BouncingScrollPhysics(),
-                      itemCount: _experts.length,
-                      itemBuilder: (context, i) => ExpertCard(
-                        tech: _experts[i],
+                      itemCount: _techniciens.length,
+                      itemBuilder: (context, i) => TechnicienCard(
+                        tech: _techniciens[i],
                         accentColor: widget.accentColor,
                         distanceKm: DistanceUtils.fromTechData(
-                            widget.clientLat, widget.clientLng, _experts[i]),
+                            widget.clientLat, widget.clientLng, _techniciens[i]),
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (_) => DetailsTechnicien(
-                              tech: _experts[i],
+                              tech: _techniciens[i],
                               accentColor: widget.accentColor,
                             ),
                           ),
@@ -236,7 +233,7 @@ class _ExpertsPresWidgetState extends State<ExpertsPresWidget> {
                 size: 36, color: widget.accentColor.withValues(alpha: 0.4)),
             const SizedBox(height: 10),
             Text(
-              'Aucun expert disponible\ndans votre zone',
+              'Aucun technicien disponible\ndans votre zone',
               textAlign: TextAlign.center,
               style: GoogleFonts.inter(
                 fontSize: 13,
@@ -250,4 +247,3 @@ class _ExpertsPresWidgetState extends State<ExpertsPresWidget> {
     );
   }
 }
-

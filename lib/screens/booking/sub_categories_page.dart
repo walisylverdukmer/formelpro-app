@@ -328,7 +328,7 @@ class _SubCategoriesPageState extends State<SubCategoriesPage> {
               Row(
                 children: [
                   Text(
-                    'Voir les experts',
+                    'Voir les techniciens',
                     style: GoogleFonts.inter(
                       fontSize: 10,
                       fontWeight: FontWeight.w600,
