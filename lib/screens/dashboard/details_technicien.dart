@@ -257,6 +257,39 @@ class _DetailsTechnicienState extends State<DetailsTechnicien> {
                             child: Icon(Icons.verified,
                                 color: Color(0xFF3B82F6), size: 28),
                           ),
+                        if (_isServiceSensible) ...[
+                          const SizedBox(width: 8),
+                          Tooltip(
+                            message: "Mise en relation encadrée par FormelPro",
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.green.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                    color:
+                                        Colors.green.withValues(alpha: 0.35)),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.security_rounded,
+                                      color: Colors.green, size: 13),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    "Sécurisé",
+                                    style: GoogleFonts.inter(
+                                      color: Colors.green,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                     const SizedBox(height: 20),

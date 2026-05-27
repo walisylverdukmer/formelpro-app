@@ -73,6 +73,14 @@ class _CarteTechnicienState extends State<CarteTechnicien> {
     }
   }
 
+  static const _sensibleKeywords = ['ménag', 'servante', 'serveuse', 'femme de'];
+
+  bool get _isServiceSensible {
+    final metier =
+        (widget.tech['metier_personnalise'] ?? '').toString().toLowerCase();
+    return _sensibleKeywords.any((kw) => metier.contains(kw));
+  }
+
   Widget _buildAvatarFallback() {
     return Container(
       width: 76,
@@ -182,6 +190,14 @@ class _CarteTechnicienState extends State<CarteTechnicien> {
                         if (isPremium) ...[
                           const SizedBox(width: 4),
                           TechnicianPremiumBadge(level: premiumLevel),
+                        ],
+                        if (_isServiceSensible) ...[
+                          const SizedBox(width: 4),
+                          const Tooltip(
+                            message: "Mise en relation sécurisée",
+                            child: Icon(Icons.security_rounded,
+                                color: Colors.green, size: 14),
+                          ),
                         ],
                       ],
                     ),

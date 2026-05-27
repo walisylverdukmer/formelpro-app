@@ -11,6 +11,7 @@ import 'package:formelpro/screens/auth/page_connexion_principale.dart';
 import 'package:formelpro/screens/complete_profil_page.dart';
 import 'package:formelpro/screens/dashboard/main_dashboard.dart';
 import 'package:formelpro/screens/public/landing_page.dart';
+import 'package:formelpro/screens/splash_screen.dart';
 import 'package:formelpro/services/notification_router.dart';
 
 // Handler des messages reçus quand l'app est en arrière-plan / fermée
@@ -63,7 +64,7 @@ class _FormelProAppState extends State<FormelProApp> {
   // Resolves the initial widget based on the web URL path.
   // On mobile, always returns AuthGate (no URL routing).
   Widget get _home {
-    if (!kIsWeb) return const AuthGate();
+    if (!kIsWeb) return const SplashScreen();
     final session = Supabase.instance.client.auth.currentSession;
     if (session != null) return const AuthGate();
     final path = Uri.base.path;

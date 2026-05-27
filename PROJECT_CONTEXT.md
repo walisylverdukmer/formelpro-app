@@ -77,8 +77,12 @@ lib/
 │   │   ├── details_technicien.dart  → Modal profil tech + démarrer conversation
 │   │   ├── profil_tab.dart          → Profil éditable + toggle rôle + section admin
 │   │   └── verification_documents_page.dart → Upload docs identité, statut par document
+│   ├── splash_screen.dart              → Animation logo + tagline → AuthGate (mobile uniquement)
 │   ├── admin/
-│   │   └── admin_documents_page.dart → Validation/rejet docs (accès is_admin=true)
+│   │   ├── admin_documents_page.dart   → Validation/rejet docs (accès is_admin=true)
+│   │   ├── admin_signalements_page.dart → Gestion signalements utilisateurs
+│   │   ├── admin_users_page.dart       → Suspension/réactivation comptes
+│   │   └── admin_demandes_domestiques_page.dart → Workflow demandes ménagère/servante/serveuse
 │   ├── interventions/
 │   │   ├── demande_intervention_page.dart   → Créer intervention (client)
 │   │   ├── mes_interventions_page.dart      → Liste + suivi statuts + itinéraire
@@ -101,7 +105,8 @@ lib/
     ├── services_rapides_widget.dart → 5 boutons 1-clic avec images métiers — typedef OnServiceTap, bottom sheets Gaz + Ménagère
     ├── experts_pres_widget.dart     → Liste horizontale experts dispo (est_en_ligne/disponible) — cartes 148px, filtre commune
     ├── location_picker_widget.dart  → Carte flutter_map + GPS + Nominatim — retourne ville/commune/quartier
-    ├── carte_technicien.dart        → Card technicien — avatar 76×76px arrondi + badge disponibilité
+    ├── carte_technicien.dart        → Card technicien — avatar 76×76px, compétences chips, badge sécurisé
+    ├── competences_editor_sheet.dart → Sélection multi-compétences "Homme à tout faire" (technicien)
     └── category_picker.dart         → Dropdown métiers
 ```
 
@@ -146,7 +151,7 @@ lib/
 
 ---
 
-## 5. ÉTAT ACTUEL DU PROJET (au 2026-05-26, mis à jour session 8)
+## 5. ÉTAT ACTUEL DU PROJET (au 2026-05-27, mis à jour session 14)
 
 ### ✅ FONCTIONNEL ET COMPLET
 
@@ -193,7 +198,7 @@ lib/
 
 | Fonctionnalité | Description | Priorité |
 |----------------|-------------|----------|
-| **Système de paiement** | Paiement manuel assisté ✅ — API Mobile Money (Orange Money, MTN) à intégrer | 🔴 HAUTE |
+| **Système de paiement** | Paiement manuel assisté ✅, historique transactions ✅ — API Mobile Money (Orange Money, MTN) à intégrer | 🔴 HAUTE |
 | ~~**Onboarding technicien**~~ | ✅ Page vérif docs + espace admin validation — SQL §13+§14 à exécuter | ✅ |
 | ~~**Recherche & filtres avancés**~~ | ✅ Implémenté — disponibilité, note min, catégorie DB, recherche texte | ✅ |
 | ~~**Historique & rapports**~~ | ✅ Stats technicien implémentées (revenus FCFA, missions, en cours, graphique mensuel) | ✅ |
@@ -202,7 +207,7 @@ lib/
 | **Signalement / modération** | Signaler un utilisateur (✅ bouton fait), panel admin complet | 🟡 MOYENNE |
 | ~~**Restrictions missions non vérifiés**~~ | ✅ Limite 3 missions actives si non vérifié — dialog CTA vers vérification (`mission_detail_page.dart`) | ✅ |
 | ~~**Notifications admin**~~ | ✅ Triggers SQL §15 SECURITY DEFINER — admins notifiés au soumission doc, tech notifié à la validation | ✅ |
-| **Écran d'accueil (splash)** | Animation logo + onboarding 1ère ouverture | 🟢 BASSE |
+| ~~**Écran d'accueil (splash)**~~ | ✅ `SplashScreen` — logo fade+scale, tagline, auto-navigate vers AuthGate | ✅ |
 | **Mode hors-ligne** | Cache local minimal, retry si connexion perdue | 🟢 BASSE |
 | **Tests automatisés** | Widget tests + integration tests | 🟢 BASSE |
 
@@ -272,8 +277,8 @@ lib/
 | 3.1 | Recherche & filtres avancés (catégorie, disponibilité, note min, recherche texte) | ✅ Fait |
 | 3.2 | Dashboard stats technicien (revenus, nb missions, graphiques) | ✅ Fait |
 | 3.3 | Profil premium — badge, mise en avant, abonnement mensuel | 🔲 À faire |
-| 3.4 | Espace admin léger (validation documents, gestion signalements) | 🔲 À faire |
-| 3.5 | Écran splash + onboarding 1ère ouverture | 🔲 À faire |
+| 3.4 | Espace admin léger (validation documents, gestion signalements, demandes domestiques) | ✅ Fait (AdminDocumentsPage, AdminSignalementsPage + RLS admin fix, AdminDemandesDomestiquesPage) |
+| 3.5 | Écran splash + onboarding 1ère ouverture | ✅ Fait (SplashScreen mobile) |
 | 3.6 | Reset mot de passe | 🔲 À faire |
 
 ---

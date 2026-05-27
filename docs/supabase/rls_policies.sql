@@ -298,6 +298,16 @@ CREATE POLICY "signalements_insert_auth"
     ON public.signalements FOR INSERT
     WITH CHECK (auth.uid() = signale_par);
 
+-- Admins : accès complet (SELECT + UPDATE statut)
+CREATE POLICY "signalements_admin_all"
+    ON public.signalements FOR ALL
+    USING (
+        EXISTS (
+            SELECT 1 FROM public.utilisateurs
+            WHERE id = auth.uid() AND is_admin = true
+        )
+    );
+
 
 -- =============================================================================
 -- VÉRIFICATION — requête de contrôle post-application

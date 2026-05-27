@@ -291,7 +291,7 @@ Client
 | 4.2 | Désactiver contact direct       | ✅ _isServiceSensible dans details_technicien |
 | 4.3 | Workflow validation admin       | ✅ AdminDemandesDomestiquesPage — prendre en charge, enquête, affecter, annuler |
 | 4.4 | Historique enquêtes             | ✅ onglets statuts dans AdminDemandesDomestiquesPage |
-| 4.5 | Badge service sécurisé          | 🔲 (badge sur fiche tech si service sensible) |
+| 4.5 | Badge service sécurisé          | ✅ badge "Sécurisé" vert sur CarteTechnicien + DetailsTechnicien si _isServiceSensible |
 
 ---
 
@@ -400,7 +400,7 @@ Créer :
 | 6.1 | KPIs admin           | ✅ AccueilAdmin — users, techniciens, docs, signalements |
 | 6.2 | Gestion prestataires | ✅ AdminUsersPage — suspension/réactivation               |
 | 6.3 | Validation documents | ✅ AdminDocumentsPage — approuver/rejeter + signed URLs   |
-| 6.4 | Gestion litiges      | ✅ AdminSignalementsPage — signalements en attente        |
+| 6.4 | Gestion litiges      | ✅ AdminSignalementsPage + RLS policy signalements_admin_all (accès admin complet) |
 | 6.5 | Support utilisateurs | ✅ câblé via is_admin → AccueilAdmin                     |
 | 6.6 | Analytics business   | 🔲 Phase future                                          |
 | 6.7 | Heatmap activité     | 🔲 Phase future                                          |
@@ -424,7 +424,7 @@ Paiement sécurisé intégré FormelPro.
 | 7.3 | Edge Functions paiement | 🔲     |
 | 7.4 | Orange Money API        | 🔲     |
 | 7.5 | MTN MoMo API            | 🔲     |
-| 7.6 | Historique transactions | 🔲     |
+| 7.6 | Historique transactions | ✅ HistoriqueTransactionsPage — résumé FCFA + cartes statut + join interventions |
 | 7.7 | Escrow FormelPro        | 🔲     |
 
 IMPORTANT :
@@ -441,7 +441,7 @@ Les démarches marchandes doivent commencer tôt.
 | 8.3 | Lazy loading              | 🔲     |
 | 8.4 | Compression WebP          | 🔲     |
 | 8.5 | Cache offline minimal     | 🔲     |
-| 8.6 | Splash screen premium     | 🔲     |
+| 8.6 | Splash screen premium     | ✅ SplashScreen — logo + tagline fade-in + scale + auto-navigate vers AuthGate |
 | 8.7 | Onboarding slides         | 🔲     |
 
 ---

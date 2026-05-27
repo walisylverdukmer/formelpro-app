@@ -10,6 +10,7 @@ import 'package:formelpro/screens/admin/admin_documents_page.dart';
 import 'package:formelpro/screens/admin/admin_signalements_page.dart';
 import 'package:formelpro/screens/admin/admin_users_page.dart';
 import 'package:formelpro/screens/admin/admin_demandes_domestiques_page.dart';
+import 'package:formelpro/screens/payment/historique_transactions_page.dart';
 import 'package:formelpro/widgets/profil/profil_header.dart';
 import 'package:formelpro/widgets/profil/edit_profile_sheet.dart';
 import 'package:formelpro/widgets/profil/profil_widgets.dart';
@@ -266,6 +267,20 @@ class _ProfilTabState extends State<ProfilTab> {
                             title: "Modifier mon profil",
                             accentColor: widget.accentColor,
                             onTap: _showEditProfileModal,
+                          ),
+                          const ProfilDivider(),
+                          ProfilActionTile(
+                            icon: Icons.receipt_long_rounded,
+                            title: "Historique des paiements",
+                            subtitle: "Transactions Mobile Money",
+                            accentColor: widget.accentColor,
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => HistoriqueTransactionsPage(
+                                    accentColor: widget.accentColor),
+                              ),
+                            ),
                           ),
                           const ProfilDivider(),
                           ProfilActionTile(
