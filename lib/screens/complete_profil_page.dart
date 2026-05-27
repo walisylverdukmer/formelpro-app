@@ -186,8 +186,14 @@ class _CompleteProfilPageState extends State<CompleteProfilPage> {
       await supabase.from('utilisateurs').update(updateData).eq('id', user.id);
 
       if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const MainDashboardPage()),
+        Navigator.of(context).pushAndRemoveUntil(
+          PageRouteBuilder(
+            pageBuilder: (_, __, ___) => const MainDashboardPage(),
+            transitionDuration: const Duration(milliseconds: 400),
+            transitionsBuilder: (_, animation, __, child) =>
+                FadeTransition(opacity: animation, child: child),
+          ),
+          (route) => false,
         );
       }
     } on PostgrestException catch (error) {
@@ -206,12 +212,15 @@ class _CompleteProfilPageState extends State<CompleteProfilPage> {
         isCI ? const Color(0xFFE67E22) : const Color(0xFFE74C3C);
     final bool isTech = widget.role == 'technicien';
 
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
+        automaticallyImplyLeading: false,
         bottom: const PreferredSize(
           preferredSize: Size.fromHeight(1),
           child: Divider(height: 1, color: Color(0xFFE2E8F0)),
@@ -426,7 +435,8 @@ class _CompleteProfilPageState extends State<CompleteProfilPage> {
           ),
         ),
       ),
-    );
+    ), // Scaffold
+    ); // PopScope
   }
 
   Widget _buildSectionHeader(String title, IconData icon, Color accent) {

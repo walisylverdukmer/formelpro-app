@@ -55,21 +55,18 @@ class _PageConnexionPrincipaleState extends State<PageConnexionPrincipale> {
 
       if (!mounted) return;
       if (response == null) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const GoogleOnboardingPage()),
-        );
+        Navigator.of(context).pushAndRemoveUntil(
+          _fadeRoute(const GoogleOnboardingPage()), (r) => false);
       } else if (response['a_complete_profil'] == true) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const MainDashboardPage()),
-        );
+        Navigator.of(context).pushAndRemoveUntil(
+          _fadeRoute(const MainDashboardPage()), (r) => false);
       } else {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (_) => CompleteProfilPage(
-              role: response['role'] ?? 'client',
-              paysCode: response['pays'] ?? 'CIV',
-            ),
-          ),
+        Navigator.of(context).pushAndRemoveUntil(
+          _fadeRoute(CompleteProfilPage(
+            role: response['role'] ?? 'client',
+            paysCode: response['pays'] ?? 'CIV',
+          )),
+          (r) => false,
         );
       }
     } catch (e) {
@@ -111,15 +108,12 @@ class _PageConnexionPrincipaleState extends State<PageConnexionPrincipale> {
         if (mounted && !_hasNavigated) {
           _hasNavigated = true;
           if (aCompleteProfil) {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (_) => const MainDashboardPage()),
-            );
+            Navigator.of(context).pushAndRemoveUntil(
+              _fadeRoute(const MainDashboardPage()), (r) => false);
           } else {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (_) =>
-                    CompleteProfilPage(role: role, paysCode: paysCode),
-              ),
+            Navigator.of(context).pushAndRemoveUntil(
+              _fadeRoute(CompleteProfilPage(role: role, paysCode: paysCode)),
+              (r) => false,
             );
           }
         }
@@ -135,14 +129,19 @@ class _PageConnexionPrincipaleState extends State<PageConnexionPrincipale> {
     }
   }
 
+  static Route<void> _fadeRoute(Widget page) => PageRouteBuilder(
+        pageBuilder: (_, __, ___) => page,
+        transitionDuration: const Duration(milliseconds: 350),
+        transitionsBuilder: (_, animation, __, child) =>
+            FadeTransition(opacity: animation, child: child),
+      );
+
   static const _mobileRedirectUrl = 'formelpro://login-callback/';
 
-  // Compile-time constant — set via --dart-define=SUPABASE_REDIRECT_URL=https://...
-  // defaultValue = production URL : web ne redirige JAMAIS vers localhost sans config explicite
-  static const _webRedirectUrl = String.fromEnvironment(
-    'SUPABASE_REDIRECT_URL',
-    defaultValue: 'https://formelpro-app.vercel.app',
-  );
+  // Runtime getter — lit l'origine réelle du navigateur, immune aux dart-defines
+  // En prod : https://formelpro-app.vercel.app  /  En dev : http://localhost:PORT
+  static String get _webRedirectUrl =>
+      kIsWeb ? Uri.base.origin : 'https://formelpro-app.vercel.app';
 
   String get _oauthRedirectUrl =>
       kIsWeb ? _webRedirectUrl : _mobileRedirectUrl;

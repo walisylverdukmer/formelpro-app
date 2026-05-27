@@ -62,13 +62,17 @@ class _GoogleOnboardingPageState extends State<GoogleOnboardingPage> {
       );
 
       if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (_) => CompleteProfilPage(
+        Navigator.of(context).pushAndRemoveUntil(
+          PageRouteBuilder(
+            pageBuilder: (_, __, ___) => CompleteProfilPage(
               role: _selectedRole!,
               paysCode: _selectedPays!,
             ),
+            transitionDuration: const Duration(milliseconds: 350),
+            transitionsBuilder: (_, animation, __, child) =>
+                FadeTransition(opacity: animation, child: child),
           ),
+          (route) => false,
         );
       }
     } on PostgrestException catch (e) {
@@ -83,7 +87,9 @@ class _GoogleOnboardingPageState extends State<GoogleOnboardingPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
       backgroundColor: const Color(0xFF0F172A),
       body: SafeArea(
         child: Center(
@@ -172,7 +178,8 @@ class _GoogleOnboardingPageState extends State<GoogleOnboardingPage> {
           ),
         ),
       ),
-    );
+    ), // Scaffold
+    ); // PopScope
   }
 
   Widget _buildAvatar() {

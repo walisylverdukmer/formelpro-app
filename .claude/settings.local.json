@@ -49,7 +49,10 @@
       "Bash(Select-Object Name, Length)",
       "Bash(Remove-Item \"c:\\\\Users\\\\HP\\\\Documents\\\\FormelPro\\\\lib\\\\widgets\\\\expert_card.dart\" -Force)",
       "Bash(Remove-Item \"c:\\\\Users\\\\HP\\\\Documents\\\\FormelPro\\\\lib\\\\widgets\\\\experts_pres_widget.dart\" -Force)",
-      "Bash(Write-Output \"Anciens fichiers supprimés\")"
+      "Bash(Write-Output \"Anciens fichiers supprimés\")",
+      "Bash(Select-String -Path \"c:\\\\Users\\\\HP\\\\Documents\\\\FormelPro\\\\lib\\\\screens\\\\complete_profil_page.dart\" -Pattern \"^\\\\s*\\\\}\")",
+      "Bash(Select-Object -Last 5)",
+      "Bash(Format-Table LineNumber, Line)"
     ]
   }
 }

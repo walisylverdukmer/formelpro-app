@@ -39,6 +39,13 @@ class _AuthEmailMdpPageState extends State<AuthEmailMdpPage> {
     super.dispose();
   }
 
+  static Route<void> _fadeRoute(Widget page) => PageRouteBuilder(
+        pageBuilder: (_, __, ___) => page,
+        transitionDuration: const Duration(milliseconds: 350),
+        transitionsBuilder: (_, animation, __, child) =>
+            FadeTransition(opacity: animation, child: child),
+      );
+
   Future<void> _signUp() async {
     if (_passwordController.text != _confirmPasswordController.text) {
       setState(() => _errorMessage = "Les mots de passe ne correspondent pas.");
@@ -72,13 +79,12 @@ class _AuthEmailMdpPageState extends State<AuthEmailMdpPage> {
         }, onConflict: 'id');
 
         if (mounted) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (_) => CompleteProfilPage(
-                role: widget.role,
-                paysCode: widget.paysCode,
-              ),
-            ),
+          Navigator.of(context).pushAndRemoveUntil(
+            _fadeRoute(CompleteProfilPage(
+              role: widget.role,
+              paysCode: widget.paysCode,
+            )),
+            (route) => false,
           );
         }
       }

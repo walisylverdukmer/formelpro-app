@@ -1,7 +1,7 @@
 {
   "outputDirectory": "build/web",
   "cleanUrls": true,
-  "buildCommand": "flutter pub get && flutter build web --release --dart-define=SUPABASE_REDIRECT_URL=https://formelpro-app.vercel.app",
+  "buildCommand": "flutter pub get && flutter build web --release",
   "rewrites": [
     {
       "source": "/(.*)",

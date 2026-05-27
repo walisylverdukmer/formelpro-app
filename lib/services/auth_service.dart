@@ -74,16 +74,14 @@ class AuthService {
 
   static const _mobileRedirectUrl = 'formelpro://login-callback/';
 
-  // Compile-time constant — identique à page_connexion_principale.dart
-  // defaultValue = production URL pour garantir aucune fuite localhost
-  static const _webRedirectUrl = String.fromEnvironment(
-    'SUPABASE_REDIRECT_URL',
-    defaultValue: 'https://formelpro-app.vercel.app',
-  );
+  // Runtime getter — lit l'origine réelle du navigateur, immune aux dart-defines
+  // En prod : https://formelpro-app.vercel.app  /  En dev : http://localhost:PORT
+  static String get _webRedirectUrl =>
+      kIsWeb ? Uri.base.origin : 'https://formelpro-app.vercel.app';
 
   // 5. Connexion via Google OAuth (Supabase Auth)
   Future<void> signInWithGoogle() async {
-    const redirectTo = kIsWeb ? _webRedirectUrl : _mobileRedirectUrl;
+    final redirectTo = kIsWeb ? _webRedirectUrl : _mobileRedirectUrl;
     debugPrint('[OAuth] signInWithGoogle — redirect: $redirectTo');
     await _supabase.auth.signInWithOAuth(
       OAuthProvider.google,
