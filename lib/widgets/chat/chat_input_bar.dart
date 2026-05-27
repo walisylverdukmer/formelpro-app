@@ -6,6 +6,7 @@ class ChatInputBar extends StatelessWidget {
   final Color accentColor;
   final VoidCallback onSend;
   final VoidCallback onProforma;
+  final ValueChanged<String>? onChanged;
 
   const ChatInputBar({
     super.key,
@@ -13,6 +14,7 @@ class ChatInputBar extends StatelessWidget {
     required this.accentColor,
     required this.onSend,
     required this.onProforma,
+    this.onChanged,
   });
 
   @override
@@ -51,10 +53,11 @@ class ChatInputBar extends StatelessWidget {
               child: TextField(
                 controller: controller,
                 maxLines: null,
+                onChanged: onChanged,
                 decoration: InputDecoration(
                   hintText: 'Écrivez votre message...',
-                  hintStyle:
-                      GoogleFonts.inter(color: const Color(0xFF94A3B8)),
+                  hintStyle: GoogleFonts.inter(
+                      color: const Color(0xFF94A3B8)),
                   border: InputBorder.none,
                 ),
               ),
