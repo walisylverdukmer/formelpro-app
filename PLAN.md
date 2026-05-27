@@ -23,7 +23,7 @@ Ce document définit :
 
 ## Niveau MVP estimé :
 
-85% — Phases 1, 2 et 3 (chat sécurisé) complètes. Blocs restants : admin, localisation, paiements.
+90% — Phases 1, 2, 3 (chat) et 6 (admin) complètes. Blocs restants : localisation avancée, paiements Mobile Money.
 
 ## Forces actuelles
 
@@ -397,13 +397,13 @@ Créer :
 
 | #   | Tâche                | Statut |
 | --- | -------------------- | ------ |
-| 6.1 | KPIs admin           | 🔲     |
-| 6.2 | Gestion prestataires | 🔲     |
-| 6.3 | Validation documents | 🔲     |
-| 6.4 | Gestion litiges      | 🔲     |
-| 6.5 | Support utilisateurs | 🔲     |
-| 6.6 | Analytics business   | 🔲     |
-| 6.7 | Heatmap activité     | 🔲     |
+| 6.1 | KPIs admin           | ✅ AccueilAdmin — users, techniciens, docs, signalements |
+| 6.2 | Gestion prestataires | ✅ AdminUsersPage — suspension/réactivation               |
+| 6.3 | Validation documents | ✅ AdminDocumentsPage — approuver/rejeter + signed URLs   |
+| 6.4 | Gestion litiges      | ✅ AdminSignalementsPage — signalements en attente        |
+| 6.5 | Support utilisateurs | ✅ câblé via is_admin → AccueilAdmin                     |
+| 6.6 | Analytics business   | 🔲 Phase future                                          |
+| 6.7 | Heatmap activité     | 🔲 Phase future                                          |
 
 ---
 
@@ -492,7 +492,7 @@ Les démarches marchandes doivent commencer tôt.
 4. ✅ Flow recherche technicien (pagination + sélection catégorie)
 5. ✅ Filtres avancés (2.5) + Fiches premium (2.6)
 6. ✅ Chat sécurisé — Phase 3 (blocage appel, proforma, typing, messages système)
-7. 🔲 Dashboard admin minimal — Phase 6
+7. ✅ Dashboard admin minimal — Phase 6 (KPIs + 3 modules)
 8. 🔲 Localisation stable — Phase 5
 9. 🔲 Recrutement terrain
 
