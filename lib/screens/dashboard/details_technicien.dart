@@ -22,12 +22,87 @@ class DetailsTechnicien extends StatefulWidget {
 class _DetailsTechnicienState extends State<DetailsTechnicien> {
   final _supabase = Supabase.instance.client;
 
-  static const _sensibleKeywords = ['ménag', 'servante', 'serveuse', 'femme de'];
+  List<Map<String, dynamic>> _avis = [];
+  bool _loadingAvis = true;
+  bool _isFavori = false;
+  bool _toggling = false;
+
+  static const _sensibleKeywords = [
+    'ménag', 'servante', 'serveuse', 'femme de'
+  ];
 
   bool get _isServiceSensible {
     final metier =
         (widget.tech['metier_personnalise'] ?? '').toString().toLowerCase();
     return _sensibleKeywords.any((kw) => metier.contains(kw));
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAvis();
+    _checkFavori();
+  }
+
+  Future<void> _loadAvis() async {
+    try {
+      final data = await _supabase
+          .from('avis')
+          .select('note, commentaire, date_avis')
+          .eq('tech_id', widget.tech['id'])
+          .order('date_avis', ascending: false)
+          .limit(5);
+      if (mounted) {
+        setState(() {
+          _avis = List<Map<String, dynamic>>.from(data);
+          _loadingAvis = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _loadingAvis = false);
+    }
+  }
+
+  Future<void> _checkFavori() async {
+    final uid = _supabase.auth.currentUser?.id;
+    if (uid == null) return;
+    try {
+      final row = await _supabase
+          .from('favoris')
+          .select('id')
+          .eq('client_id', uid)
+          .eq('tech_id', widget.tech['id'])
+          .maybeSingle();
+      if (mounted) setState(() => _isFavori = row != null);
+    } catch (_) {}
+  }
+
+  Future<void> _toggleFavori() async {
+    if (_toggling) return;
+    final uid = _supabase.auth.currentUser?.id;
+    if (uid == null) return;
+    setState(() => _toggling = true);
+    try {
+      if (_isFavori) {
+        await _supabase
+            .from('favoris')
+            .delete()
+            .eq('client_id', uid)
+            .eq('tech_id', widget.tech['id']);
+      } else {
+        await _supabase
+            .from('favoris')
+            .insert({'client_id': uid, 'tech_id': widget.tech['id']});
+      }
+      if (mounted) {
+        setState(() {
+          _isFavori = !_isFavori;
+          _toggling = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _toggling = false);
+    }
   }
 
   Future<void> _startConversation() async {
@@ -36,7 +111,7 @@ class _DetailsTechnicienState extends State<DetailsTechnicien> {
     try {
       final existingConv = await _supabase
           .from('conversations')
-          .select()
+          .select('id')
           .eq('client_id', currentUser.id)
           .eq('tech_id', widget.tech['id'])
           .maybeSingle();
@@ -47,7 +122,7 @@ class _DetailsTechnicienState extends State<DetailsTechnicien> {
           'client_id': currentUser.id,
           'tech_id': widget.tech['id'],
           'dernier_message': 'Nouvelle discussion...',
-        }).select().single();
+        }).select('id').single();
         conversationId = newConv['id'];
       } else {
         conversationId = existingConv['id'];
@@ -72,8 +147,7 @@ class _DetailsTechnicienState extends State<DetailsTechnicien> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text("Erreur : $e"), backgroundColor: Colors.red),
+          SnackBar(content: Text("Erreur : $e"), backgroundColor: Colors.red),
         );
       }
     }
@@ -96,14 +170,17 @@ class _DetailsTechnicienState extends State<DetailsTechnicien> {
 
   @override
   Widget build(BuildContext context) {
-    final String nom = widget.tech['nom_complet'] ??
-        widget.tech['prenom'] ??
-        'Prestataire';
+    final String nom =
+        widget.tech['nom_complet'] ?? widget.tech['prenom'] ?? 'Prestataire';
     final String metier = widget.tech['metier_personnalise'] ?? 'Technicien';
     final String ville = widget.tech['ville'] ?? 'N/A';
     final String quartier = widget.tech['quartier'] ?? '';
     final String? photo = widget.tech['photo_profil_url'];
     final double note = (widget.tech['score_global'] ?? 5.0).toDouble();
+    final bool estEnLigne = widget.tech['est_en_ligne'] == true;
+    final bool disponible = widget.tech['disponible'] == true;
+    final int premiumLevel = (widget.tech['premium_level'] ?? 0) as int;
+    final bool isPremium = premiumLevel > 0;
     final currentUserId = _supabase.auth.currentUser?.id;
     final bool isOwnProfile = currentUserId == widget.tech['id'];
 
@@ -123,8 +200,7 @@ class _DetailsTechnicienState extends State<DetailsTechnicien> {
                   ),
           ),
           Positioned(
-            top: 50,
-            left: 20,
+            top: 50, left: 20,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: BackdropFilter(
@@ -147,24 +223,13 @@ class _DetailsTechnicienState extends State<DetailsTechnicien> {
               return Container(
                 decoration: const BoxDecoration(
                   color: Colors.white,
-                  borderRadius:
-                      BorderRadius.vertical(top: Radius.circular(28)),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
                 ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24),
+                padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: ListView(
                   controller: scrollController,
                   children: [
-                    Center(
-                      child: Container(
-                        width: 40, height: 4,
-                        margin: const EdgeInsets.only(bottom: 24),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFCBD5E1),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                    ),
+                    _buildDragRow(isOwnProfile),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -194,97 +259,54 @@ class _DetailsTechnicienState extends State<DetailsTechnicien> {
                           ),
                       ],
                     ),
-                    const SizedBox(height: 25),
+                    const SizedBox(height: 20),
                     TechnicienStatCard(
-                        rating: note,
-                        jobs: widget.tech['total_transactions'] ?? 0),
-                    const SizedBox(height: 30),
+                      rating: note,
+                      jobs: widget.tech['total_transactions'] ?? 0,
+                      estEnLigne: estEnLigne,
+                      disponible: disponible,
+                    ),
+                    if (isPremium) ...[
+                      const SizedBox(height: 14),
+                      TechnicienPremiumBanner(premiumLevel: premiumLevel),
+                    ],
+                    const SizedBox(height: 24),
                     _buildSectionTitle("À propos du prestataire"),
                     Text(
                       widget.tech['savoir_faire'] ??
-                          "Ce professionnel n'a pas encore ajouté de description détaillée de son expertise.",
+                          "Ce professionnel n'a pas encore ajouté de "
+                              "description détaillée de son expertise.",
                       style: GoogleFonts.inter(
                           color: const Color(0xFF475569),
                           height: 1.6,
                           fontSize: 14),
                     ),
-                    const SizedBox(height: 25),
+                    const SizedBox(height: 20),
                     _buildSectionTitle("Localisation"),
                     TechnicienInfoChip(
                       icon: Icons.location_on,
-                      text:
-                          "$quartier${quartier.isNotEmpty ? ', ' : ''}$ville",
+                      text: "$quartier${quartier.isNotEmpty ? ', ' : ''}$ville",
                       accentColor: widget.accentColor,
                     ),
-                    const SizedBox(height: 35),
-                    if (_isServiceSensible) ...[
-                      Container(
-                        padding: const EdgeInsets.all(14),
-                        margin: const EdgeInsets.only(bottom: 14),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF22C55E)
-                              .withValues(alpha: 0.06),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                              color: const Color(0xFF22C55E)
-                                  .withValues(alpha: 0.2)),
-                        ),
-                        child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Icon(Icons.verified_user_rounded,
-                                  color: Color(0xFF22C55E), size: 18),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Text(
-                                  'Ce profil nécessite une validation FormelPro. Faites une demande encadrée pour être mis en relation.',
-                                  style: GoogleFonts.inter(
-                                      fontSize: 12,
-                                      color: const Color(0xFF166534),
-                                      height: 1.4),
-                                ),
-                              ),
-                            ]),
-                      ),
-                      TechnicienActionButton(
-                        label: 'Faire une demande encadrée',
-                        icon: Icons.assignment_ind_rounded,
-                        backgroundColor: const Color(0xFF22C55E),
-                        textColor: Colors.white,
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => DemandServiceDomestiquePage(
-                                accentColor: widget.accentColor),
-                          ),
+                    const SizedBox(height: 28),
+                    TechnicienContactSection(
+                      isSensible: _isServiceSensible,
+                      accentColor: widget.accentColor,
+                      onContact: _startConversation,
+                      onDemande: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => DemandServiceDomestiquePage(
+                              accentColor: widget.accentColor),
                         ),
                       ),
-                    ] else ...[
-                      TechnicienActionButton(
-                        label: 'Contacter par message',
-                        icon: Icons.chat_bubble_rounded,
-                        backgroundColor: widget.accentColor,
-                        textColor: Colors.white,
-                        onTap: _startConversation,
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(Icons.lock_rounded,
-                              size: 13, color: Color(0xFF94A3B8)),
-                          const SizedBox(width: 6),
-                          Text(
-                            "L'appel se débloque après échange dans le chat",
-                            style: GoogleFonts.inter(
-                                fontSize: 12,
-                                color: const Color(0xFF94A3B8)),
-                          ),
-                        ],
-                      ),
-                    ],
+                    ),
+                    const SizedBox(height: 28),
+                    _buildSectionTitle("Avis clients"),
+                    TechnicienAvisSection(
+                        avis: _avis, loading: _loadingAvis),
                     if (!isOwnProfile) ...[
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 16),
                       Center(
                         child: TextButton.icon(
                           onPressed: _showSignalerModal,
@@ -311,6 +333,32 @@ class _DetailsTechnicienState extends State<DetailsTechnicien> {
     );
   }
 
+  Widget _buildDragRow(bool isOwnProfile) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: Row(
+        children: [
+          const Expanded(child: Center(child: _DragHandle())),
+          if (!isOwnProfile)
+            GestureDetector(
+              onTap: _toggleFavori,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                child: Icon(
+                  _isFavori
+                      ? Icons.favorite_rounded
+                      : Icons.favorite_border_rounded,
+                  key: ValueKey(_isFavori),
+                  color: _isFavori ? Colors.red : const Color(0xFFCBD5E1),
+                  size: 26,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -319,6 +367,22 @@ class _DetailsTechnicienState extends State<DetailsTechnicien> {
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: const Color(0xFF0F172A))),
+    );
+  }
+}
+
+class _DragHandle extends StatelessWidget {
+  const _DragHandle();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 40,
+      height: 4,
+      decoration: BoxDecoration(
+        color: const Color(0xFFCBD5E1),
+        borderRadius: BorderRadius.circular(10),
+      ),
     );
   }
 }
