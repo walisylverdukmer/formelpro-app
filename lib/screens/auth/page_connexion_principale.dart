@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart' show kIsWeb, kReleaseMode;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -136,15 +136,16 @@ class _PageConnexionPrincipaleState extends State<PageConnexionPrincipale> {
   }
 
   static const _mobileRedirectUrl = 'formelpro://login-callback/';
-  static const _productionWebUrl = 'https://formelpro-app.vercel.app';
 
-  String get _webRedirectUrl {
-    if (!kIsWeb) return _mobileRedirectUrl;
-    // En release (build web Vercel) : URL de production fixe
-    if (kReleaseMode) return _productionWebUrl;
-    // En dev local : origine dynamique (localhost:xxxx)
-    return Uri.base.origin;
-  }
+  // Compile-time constant — set via --dart-define=SUPABASE_REDIRECT_URL=https://...
+  // defaultValue = production URL : web ne redirige JAMAIS vers localhost sans config explicite
+  static const _webRedirectUrl = String.fromEnvironment(
+    'SUPABASE_REDIRECT_URL',
+    defaultValue: 'https://formelpro-app.vercel.app',
+  );
+
+  String get _oauthRedirectUrl =>
+      kIsWeb ? _webRedirectUrl : _mobileRedirectUrl;
 
   Future<void> _signInWithGoogle() async {
     setState(() {
@@ -154,7 +155,7 @@ class _PageConnexionPrincipaleState extends State<PageConnexionPrincipale> {
     try {
       await supabase.auth.signInWithOAuth(
         OAuthProvider.google,
-        redirectTo: _webRedirectUrl,
+        redirectTo: _oauthRedirectUrl,
         authScreenLaunchMode: kIsWeb
             ? LaunchMode.platformDefault
             : LaunchMode.externalApplication,
@@ -206,23 +207,9 @@ class _PageConnexionPrincipaleState extends State<PageConnexionPrincipale> {
               ),
             ),
           ),
-          // Bouton retour vers la page d'accueil
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 8,
-            left: 8,
-            child: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                  color: Colors.white70, size: 20),
-              tooltip: "Retour à l'accueil",
-              onPressed: () => Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (_) => const LandingPage()),
-              ),
-            ),
-          ),
           SafeArea(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
+              padding: const EdgeInsets.fromLTRB(24, 56, 24, 32),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -239,6 +226,20 @@ class _PageConnexionPrincipaleState extends State<PageConnexionPrincipale> {
                   const SizedBox(height: 28),
                   _buildSignUpLink(),
                 ],
+              ),
+            ),
+          ),
+          // Bouton retour — en dernier pour être au-dessus de tout
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 4,
+            left: 4,
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                  color: Colors.white70, size: 20),
+              tooltip: "Retour à l'accueil",
+              onPressed: () => Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const LandingPage()),
               ),
             ),
           ),

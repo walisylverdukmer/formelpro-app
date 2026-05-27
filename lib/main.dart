@@ -60,7 +60,7 @@ class FormelProApp extends StatefulWidget {
   State<FormelProApp> createState() => _FormelProAppState();
 }
 
-class _FormelProAppState extends State<FormelProApp> {
+class _FormelProAppState extends State<FormelProApp> with WidgetsBindingObserver {
   // Resolves the initial widget based on the web URL path.
   // On mobile, always returns AuthGate (no URL routing).
   Widget get _home {
@@ -78,7 +78,19 @@ class _FormelProAppState extends State<FormelProApp> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     if (!kIsWeb) _setupFCMRouting();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) setState(() {});
   }
 
   Future<void> _setupFCMRouting() async {
@@ -183,7 +195,8 @@ class AuthGate extends StatelessWidget {
           return const _LoadingScreen();
         }
 
-        final session = snapshot.data?.session;
+        final session = snapshot.data?.session ??
+            Supabase.instance.client.auth.currentSession;
 
         if (session == null) {
           return const PageConnexionPrincipale();

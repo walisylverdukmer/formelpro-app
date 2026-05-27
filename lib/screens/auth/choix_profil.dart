@@ -4,7 +4,8 @@ import 'auth_email_mdp.dart';
 
 // --- ÉTAPE 1 : SÉLECTION DU PAYS ---
 class ChoixProfilPage extends StatelessWidget {
-  const ChoixProfilPage({super.key});
+  final String? preselectedRole;
+  const ChoixProfilPage({super.key, this.preselectedRole});
 
   @override
   Widget build(BuildContext context) {
@@ -115,7 +116,12 @@ class ChoixProfilPage extends StatelessWidget {
       child: GestureDetector(
         onTap: () => Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => ChoixRolePage(paysCode: code)),
+          MaterialPageRoute(
+            builder: (_) => ChoixRolePage(
+              paysCode: code,
+              preselectedRole: preselectedRole,
+            ),
+          ),
         ),
         child: Container(
           decoration: BoxDecoration(
@@ -211,7 +217,8 @@ class ChoixProfilPage extends StatelessWidget {
 // --- ÉTAPE 2 : SÉLECTION DU RÔLE ---
 class ChoixRolePage extends StatefulWidget {
   final String paysCode;
-  const ChoixRolePage({super.key, required this.paysCode});
+  final String? preselectedRole;
+  const ChoixRolePage({super.key, required this.paysCode, this.preselectedRole});
 
   @override
   State<ChoixRolePage> createState() => _ChoixRolePageState();
@@ -219,6 +226,12 @@ class ChoixRolePage extends StatefulWidget {
 
 class _ChoixRolePageState extends State<ChoixRolePage> {
   String? _roleSelectionne;
+
+  @override
+  void initState() {
+    super.initState();
+    _roleSelectionne = widget.preselectedRole;
+  }
 
   @override
   Widget build(BuildContext context) {

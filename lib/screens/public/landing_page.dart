@@ -1,8 +1,7 @@
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:url_launcher/url_launcher.dart';
 
+import '../auth/choix_profil.dart';
 import '../auth/page_connexion_principale.dart';
 
 class LandingPage extends StatefulWidget {
@@ -76,10 +75,13 @@ class _LandingPageState extends State<LandingPage> {
     );
   }
 
-  Future<void> _openPrestataire() async {
-    if (!kIsWeb) return;
-    final uri = Uri.base.resolve('/devenir-prestataire');
-    await launchUrl(uri, mode: LaunchMode.platformDefault);
+  void _inscrireTechnicien(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const ChoixProfilPage(preselectedRole: 'technicien'),
+      ),
+    );
   }
 
   @override
@@ -172,7 +174,7 @@ class _LandingPageState extends State<LandingPage> {
           ),
           const SizedBox(width: 6),
           ElevatedButton(
-            onPressed: _openPrestataire,
+            onPressed: () => _inscrireTechnicien(context),
             style: ElevatedButton.styleFrom(
               backgroundColor: _dark,
               foregroundColor: Colors.white,
@@ -183,7 +185,7 @@ class _LandingPageState extends State<LandingPage> {
               elevation: 0,
             ),
             child: Text(
-              'Devenir prestataire',
+              'Postuler comme technicien',
               style: GoogleFonts.inter(
                   fontSize: 12, fontWeight: FontWeight.w600),
             ),
@@ -300,9 +302,9 @@ class _LandingPageState extends State<LandingPage> {
                       ),
                     ),
                     OutlinedButton.icon(
-                      onPressed: _openPrestataire,
+                      onPressed: () => _inscrireTechnicien(context),
                       icon: const Icon(Icons.badge_outlined, size: 16),
-                      label: Text('Devenir prestataire',
+                      label: Text('Postuler comme technicien',
                           style: GoogleFonts.inter(
                               fontSize: 13, fontWeight: FontWeight.w600)),
                       style: OutlinedButton.styleFrom(
@@ -882,16 +884,16 @@ class _LandingPageState extends State<LandingPage> {
           ),
           const SizedBox(height: 16),
           Text(
-            'Développez votre activité\navec FormelPro',
+            'Postulez pour devenir\ntechnicien de FormelPro',
             style: GoogleFonts.poppins(
-                fontSize: 20,
+                fontSize: 24,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
-                height: 1.25),
+                height: 1.2),
           ),
           const SizedBox(height: 10),
           Text(
-            'Rejoignez notre réseau, recevez des missions qualifiées et développez votre clientèle en Afrique.',
+            'Rejoignez notre réseau, recevez des missions qualifiées et développez votre clientèle en Côte d\'Ivoire et au Cameroun.',
             style: GoogleFonts.inter(
                 fontSize: 13,
                 color: Colors.white.withValues(alpha: 0.85),
@@ -930,19 +932,20 @@ class _LandingPageState extends State<LandingPage> {
           const SizedBox(height: 20),
           SizedBox(
             width: double.infinity,
-            child: ElevatedButton(
-              onPressed: _openPrestataire,
+            child: ElevatedButton.icon(
+              onPressed: () => _inscrireTechnicien(context),
+              icon: const Icon(Icons.how_to_reg_rounded, size: 18),
+              label: Text('Postuler maintenant',
+                  style: GoogleFonts.inter(
+                      fontSize: 15, fontWeight: FontWeight.w700)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
                 foregroundColor: _accent,
-                padding: const EdgeInsets.symmetric(vertical: 14),
+                padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14)),
                 elevation: 0,
               ),
-              child: Text('Rejoindre FormelPro',
-                  style: GoogleFonts.inter(
-                      fontSize: 14, fontWeight: FontWeight.w700)),
             ),
           ),
         ],
@@ -997,9 +1000,9 @@ class _LandingPageState extends State<LandingPage> {
               Expanded(
                 child: _FooterCol(
                   title: 'LIENS',
-                  items: const ['À propos', 'Devenir prestataire', 'Support', 'Contact'],
-                  onTap: (s) => s == 'Devenir prestataire'
-                      ? _openPrestataire()
+                  items: const ['À propos', 'Postuler technicien', 'Support', 'Contact'],
+                  onTap: (s) => s == 'Postuler technicien'
+                      ? _inscrireTechnicien(context)
                       : _goToLogin(context),
                 ),
               ),

@@ -1,4 +1,5 @@
 {
   "SUPABASE_URL": "https://VOTRE_PROJET.supabase.co",
-  "SUPABASE_ANON_KEY": "eyJ..."
+  "SUPABASE_ANON_KEY": "eyJ...",
+  "SUPABASE_REDIRECT_URL": "http://localhost:PORT"
 }
