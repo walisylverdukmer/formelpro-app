@@ -30,6 +30,9 @@ class _AccueilClientState extends State<AccueilClient>
   List<Map<String, dynamic>> _techniciens = [];
   List<Map<String, dynamic>> _topCategories = [];
   bool _isFetching = true;
+  bool _isLoadingMore = false;
+  bool _hasMore = false;
+  int _offset = 0;
   FiltresTechniciens _filtres = const FiltresTechniciens();
   final TextEditingController _searchController = TextEditingController();
   late AnimationController _shimmerController;
@@ -65,22 +68,49 @@ class _AccueilClientState extends State<AccueilClient>
   }
 
   Future<void> _fetchTechniciens() async {
-    setState(() => _isFetching = true);
+    setState(() { _isFetching = true; _offset = 0; });
     try {
       final techs = await TechnicienService.fetchTechniciens(
         pays: widget.userData['pays'] ?? 'CIV',
         filtres: _filtres,
         search: _searchController.text.trim(),
+        offset: 0,
       );
       if (mounted) {
         setState(() {
           _techniciens = techs;
           _isFetching = false;
+          _hasMore = techs.length == TechnicienService.pageSize;
+          _offset = techs.length;
         });
       }
     } catch (e) {
       debugPrint('Erreur fetch techniciens: $e');
       if (mounted) setState(() => _isFetching = false);
+    }
+  }
+
+  Future<void> _loadMore() async {
+    if (_isLoadingMore || !_hasMore) return;
+    setState(() => _isLoadingMore = true);
+    try {
+      final more = await TechnicienService.fetchTechniciens(
+        pays: widget.userData['pays'] ?? 'CIV',
+        filtres: _filtres,
+        search: _searchController.text.trim(),
+        offset: _offset,
+      );
+      if (mounted) {
+        setState(() {
+          _techniciens = [..._techniciens, ...more];
+          _hasMore = more.length == TechnicienService.pageSize;
+          _offset += more.length;
+          _isLoadingMore = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Erreur load more: $e');
+      if (mounted) setState(() => _isLoadingMore = false);
     }
   }
 
@@ -306,17 +336,50 @@ class _AccueilClientState extends State<AccueilClient>
         onReset: _resetFilters,
       );
     }
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: EdgeInsets.zero,
-      itemCount: _techniciens.length,
-      itemBuilder: (context, i) => CarteTechnicien(
-        tech: _techniciens[i],
-        accentColor: primaryColor,
-        clientId: widget.userData['id']?.toString(),
-        onTap: () => _ouvrirFiche(_techniciens[i], primaryColor),
-      ),
+    return Column(
+      children: [
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: EdgeInsets.zero,
+          itemCount: _techniciens.length,
+          itemBuilder: (context, i) => CarteTechnicien(
+            tech: _techniciens[i],
+            accentColor: primaryColor,
+            clientId: widget.userData['id']?.toString(),
+            onTap: () => _ouvrirFiche(_techniciens[i], primaryColor),
+          ),
+        ),
+        if (_hasMore) ...[
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              onPressed: _isLoadingMore ? null : _loadMore,
+              style: OutlinedButton.styleFrom(
+                foregroundColor: primaryColor,
+                side: BorderSide(color: primaryColor.withValues(alpha: 0.4)),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14)),
+              ),
+              child: _isLoadingMore
+                  ? SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                          color: primaryColor, strokeWidth: 2),
+                    )
+                  : Text(
+                      'Charger plus de techniciens',
+                      style: GoogleFonts.inter(
+                          fontSize: 14, fontWeight: FontWeight.w600),
+                    ),
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
+      ],
     );
   }
 

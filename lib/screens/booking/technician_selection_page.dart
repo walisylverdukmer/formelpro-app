@@ -39,28 +39,35 @@ class _TechnicianSelectionPageState extends State<TechnicianSelectionPage> {
 
   Future<void> _fetchTechnicians() async {
     try {
-      final techCats = await supabase
-          .from('technicien_categories')
-          .select('technicien_id')
-          .eq('categorie_id', widget.categoryId);
-
-      final ids = techCats
-          .map<String>((t) => t['technicien_id'].toString())
-          .toList();
-
-      if (ids.isEmpty) {
-        if (mounted) setState(() => _isLoading = false);
-        return;
-      }
-
-      final response = await supabase
+      var query = supabase
           .from('utilisateurs')
           .select(
-            'id, nom_complet, metier_personnalise, savoir_faire, photo_profil_url, score_global, note_moyenne, ville, commune, quartier, disponible, is_premium, premium_level, est_en_ligne, telephone, is_identite_verifiee',
+            'id, nom_complet, metier_personnalise, savoir_faire, photo_profil_url, '
+            'score_global, note_moyenne, ville, commune, quartier, disponible, '
+            'is_premium, premium_level, est_en_ligne, telephone, is_identite_verifiee',
           )
           .eq('role', 'technicien')
-          .eq('pays', widget.pays)
-          .inFilter('id', ids)
+          .eq('pays', widget.pays);
+
+      if (widget.categoryId.isNotEmpty) {
+        final techCats = await supabase
+            .from('technicien_categories')
+            .select('technicien_id')
+            .eq('categorie_id', widget.categoryId);
+        final ids = techCats
+            .map<String>((t) => t['technicien_id'].toString())
+            .toList();
+        if (ids.isEmpty) {
+          if (mounted) setState(() => _isLoading = false);
+          return;
+        }
+        query = query.inFilter('id', ids);
+      } else {
+        // Cas "Disponibles maintenant" — pas de filtre catégorie
+        query = query.or('est_en_ligne.eq.true,disponible.eq.true');
+      }
+
+      final response = await query
           .order('is_premium', ascending: false)
           .order('est_en_ligne', ascending: false)
           .order('score_global', ascending: false)

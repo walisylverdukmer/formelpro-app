@@ -47,6 +47,7 @@ class _ChatScreenState extends State<ChatScreen> {
         .stream(primaryKey: ['id'])
         .eq('conversation_id', widget.conversationId)
         .order('cree_le', ascending: false)
+        .limit(100)
         .listen((msgs) {
       if (mounted) setState(() => _messages = msgs);
     });

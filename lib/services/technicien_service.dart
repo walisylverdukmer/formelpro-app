@@ -9,10 +9,13 @@ class TechnicienService {
       'score_global, note_moyenne, ville, commune, quartier, disponible, '
       'is_premium, premium_level, est_en_ligne, telephone, is_identite_verifiee';
 
+  static const int pageSize = 20;
+
   static Future<List<Map<String, dynamic>>> fetchTechniciens({
     required String pays,
     required FiltresTechniciens filtres,
     String search = '',
+    int offset = 0,
   }) async {
     List<String>? techIds;
 
@@ -57,7 +60,7 @@ class TechnicienService {
         .order('is_premium', ascending: false)
         .order('est_en_ligne', ascending: false)
         .order('score_global', ascending: false)
-        .limit(50);
+        .range(offset, offset + pageSize - 1);
 
     return List<Map<String, dynamic>>.from(response);
   }
