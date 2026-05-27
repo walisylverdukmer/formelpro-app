@@ -7,6 +7,7 @@ import 'package:formelpro/screens/tabs/demandes_tab.dart';
 import 'package:formelpro/screens/dashboard/profil_tab.dart';
 import 'package:formelpro/screens/dashboard/accueil_technicien.dart';
 import 'package:formelpro/screens/dashboard/accueil_client.dart';
+import 'package:formelpro/screens/admin/accueil_admin.dart';
 import 'package:formelpro/screens/chat/conversations_tab.dart';
 
 import 'package:formelpro/services/notification_service.dart';
@@ -119,10 +120,14 @@ class _MainDashboardPageState extends State<MainDashboardPage> {
         _userData!['role']?.toString().toLowerCase() ?? 'client';
     final String uid = _userData!['id']?.toString() ?? '';
 
+    final bool isAdmin = _userData!['is_admin'] == true;
+
     final List<Widget> pages = [
-      role == 'technicien'
-          ? AccueilTechnicien(userData: _userData!)
-          : AccueilClient(userData: _userData!),
+      isAdmin
+          ? AccueilAdmin(userData: _userData!, accentColor: accentColor)
+          : role == 'technicien'
+              ? AccueilTechnicien(userData: _userData!)
+              : AccueilClient(userData: _userData!),
       ConversationsTab(
         accentColor: accentColor,
         uid: uid,
@@ -157,7 +162,11 @@ class _MainDashboardPageState extends State<MainDashboardPage> {
             ),
             const SizedBox(width: 8),
             Text(
-              role == 'technicien' ? "Espace Technicien" : "FormelPro",
+              isAdmin
+                  ? "Admin"
+                  : role == 'technicien'
+                      ? "Espace Technicien"
+                      : "FormelPro",
               style: GoogleFonts.poppins(
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
