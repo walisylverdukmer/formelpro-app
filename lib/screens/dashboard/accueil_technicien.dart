@@ -5,6 +5,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:formelpro/widgets/stats_dashboard_tech.dart';
 import 'package:formelpro/screens/dashboard/verification_documents_page.dart';
+import 'package:formelpro/widgets/technicien/mission_card.dart';
+import 'package:formelpro/widgets/technicien/verification_banner.dart';
 
 class AccueilTechnicien extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -103,9 +105,17 @@ class _AccueilTechnicienState extends State<AccueilTechnicien> {
                   ),
 
                   const SizedBox(height: 25),
-                  _buildVerificationBanner(
-                      widget.userData['is_identite_verifiee'] ?? false,
-                      accentColor),
+                  VerificationBanner(
+                    isVerifie: widget.userData['is_identite_verifiee'] ?? false,
+                    accentColor: accentColor,
+                    onVerify: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            VerificationDocumentsPage(accentColor: accentColor),
+                      ),
+                    ),
+                  ),
 
                   const SizedBox(height: 35),
                   _buildSectionLabel('Demandes en attente'),
@@ -206,158 +216,13 @@ class _AccueilTechnicienState extends State<AccueilTechnicien> {
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: missions.length,
-          itemBuilder: (_, i) => _buildMissionItem(missions[i], color),
+          itemBuilder: (_, i) => MissionCard(
+            mission: missions[i],
+            accentColor: color,
+            onAccept: () => _accepterMission(missions[i]['id'].toString()),
+          ),
         );
       },
-    );
-  }
-
-  Widget _buildMissionItem(Map<String, dynamic> m, Color color) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.04),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Text(
-                (m['titre_service'] ?? 'SERVICE').toString().toUpperCase(),
-                style: GoogleFonts.inter(
-                  fontWeight: FontWeight.bold,
-                  color: color,
-                  fontSize: 10,
-                  letterSpacing: 1,
-                ),
-              ),
-              const Spacer(),
-              const Icon(Icons.location_on, size: 12, color: Colors.white38),
-              const SizedBox(width: 4),
-              Text(
-                m['commune'] ?? m['ville'] ?? '—',
-                style: const TextStyle(fontSize: 11, color: Colors.white38),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(
-            m['description'] ?? '',
-            style: GoogleFonts.inter(
-              fontSize: 13,
-              color: Colors.white.withValues(alpha: 0.85),
-              height: 1.4,
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 14),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () => _accepterMission(m['id'].toString()),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: color,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-                padding: const EdgeInsets.symmetric(vertical: 12),
-              ),
-              child: const Text(
-                'ACCEPTER',
-                style: TextStyle(
-                    fontWeight: FontWeight.bold, color: Colors.white),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildVerificationBanner(bool isVerifie, Color accentColor) {
-    if (isVerifie) {
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: Colors.greenAccent.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(14),
-          border:
-              Border.all(color: Colors.greenAccent.withValues(alpha: 0.25)),
-        ),
-        child: Row(
-          children: [
-            const Icon(Icons.verified_rounded,
-                color: Colors.greenAccent, size: 18),
-            const SizedBox(width: 10),
-            Text(
-              "Identité validée — badge actif",
-              style: GoogleFonts.inter(
-                  fontSize: 12,
-                  color: Colors.greenAccent,
-                  fontWeight: FontWeight.w500),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) =>
-              VerificationDocumentsPage(accentColor: accentColor),
-        ),
-      ),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: accentColor.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: accentColor.withValues(alpha: 0.3)),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: accentColor.withValues(alpha: 0.15),
-                shape: BoxShape.circle,
-              ),
-              child:
-                  Icon(Icons.shield_outlined, color: accentColor, size: 20),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Vérifiez votre identité",
-                    style: GoogleFonts.poppins(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    "Gagnez en visibilité et accédez aux missions premium",
-                    style: GoogleFonts.inter(
-                        fontSize: 11, color: Colors.white54),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            Icon(Icons.arrow_forward_ios_rounded,
-                size: 14, color: accentColor),
-          ],
-        ),
-      ),
     );
   }
 

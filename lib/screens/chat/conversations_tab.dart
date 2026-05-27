@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'chat_screen.dart';
+import '../../widgets/chat/conversation_item.dart';
 
 class ConversationsTab extends StatefulWidget {
   final Color accentColor;
@@ -212,8 +213,13 @@ class _ConversationsTabState extends State<ConversationsTab> {
     final bool unread = _hasUnread(conv);
     final String convId = conv['id'] as String;
 
-    return InkWell(
-      borderRadius: BorderRadius.circular(14),
+    return ConversationItem(
+      name: name,
+      photoUrl: photoUrl,
+      lastMsg: lastMsg,
+      unread: unread,
+      formattedTime: _formatTime(conv['mis_a_jour_le'] as String?),
+      accentColor: widget.accentColor,
       onTap: () {
         _markOpened(convId);
         Navigator.push(
@@ -228,95 +234,6 @@ class _ConversationsTabState extends State<ConversationsTab> {
           ),
         ).then((_) => _markOpened(convId));
       },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-        child: Row(
-          children: [
-            Stack(clipBehavior: Clip.none, children: [
-              CircleAvatar(
-                radius: 26,
-                backgroundColor: widget.accentColor.withValues(alpha: 0.15),
-                backgroundImage: photoUrl?.isNotEmpty == true
-                    ? NetworkImage(photoUrl!)
-                    : null,
-                child: photoUrl?.isNotEmpty != true
-                    ? Text(
-                        name.isNotEmpty ? name[0].toUpperCase() : '?',
-                        style: GoogleFonts.poppins(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: widget.accentColor,
-                        ),
-                      )
-                    : null,
-              ),
-              if (unread)
-                Positioned(
-                  top: -2,
-                  right: -2,
-                  child: Container(
-                    width: 13,
-                    height: 13,
-                    decoration: BoxDecoration(
-                      color: widget.accentColor,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                          color: const Color(0xFF0F172A), width: 2),
-                    ),
-                  ),
-                ),
-            ]),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          name,
-                          style: GoogleFonts.poppins(
-                            fontSize: 15,
-                            fontWeight:
-                                unread ? FontWeight.bold : FontWeight.w500,
-                            color: Colors.white,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      Text(
-                        _formatTime(conv['mis_a_jour_le'] as String?),
-                        style: GoogleFonts.inter(
-                          fontSize: 11,
-                          color: unread
-                              ? widget.accentColor
-                              : Colors.white38,
-                          fontWeight: unread
-                              ? FontWeight.w600
-                              : FontWeight.normal,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    lastMsg,
-                    style: GoogleFonts.inter(
-                      fontSize: 13,
-                      color: unread ? Colors.white60 : Colors.white30,
-                      fontWeight:
-                          unread ? FontWeight.w500 : FontWeight.normal,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
