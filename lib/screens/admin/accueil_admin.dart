@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'admin_documents_page.dart';
 import 'admin_signalements_page.dart';
 import 'admin_users_page.dart';
+import 'contacts_admin_page.dart';
 import '../../widgets/admin/admin_widgets.dart';
 
 class AccueilAdmin extends StatefulWidget {
@@ -244,6 +245,13 @@ class _AccueilAdminState extends State<AccueilAdmin> {
           accentColor: Colors.redAccent,
           badge: _pendingSignals > 0 ? _pendingSignals : null,
           onTap: () => _navigate(AdminSignalementsPage(accentColor: accent)),
+        ),
+        AdminModuleCard(
+          title: 'Contacts & Inscriptions',
+          subtitle: 'Emails, téléphones, localisations, statuts',
+          icon: Icons.contacts_rounded,
+          accentColor: const Color(0xFF10B981),
+          onTap: () => _navigate(ContactsAdminPage(accentColor: accent)),
         ),
       ],
     );
