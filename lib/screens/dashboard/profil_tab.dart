@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -159,11 +158,23 @@ class _ProfilTabState extends State<ProfilTab> {
     );
     if (confirmed != true || !mounted) return;
 
+    // Premier passage en mode technicien : demander la spécialité si absente
+    String? metier = _localUserData['metier_personnalise'] as String?;
+    if (nouveauRole == 'technicien' && (metier == null || metier.trim().isEmpty)) {
+      metier = await _demanderSpecialite();
+      if (metier == null || metier.trim().isEmpty) return; // annulé
+    }
+
     setState(() => _isLoading = true);
     try {
+      final Map<String, dynamic> updates = {'role': nouveauRole};
+      if (metier != null && metier.trim().isNotEmpty) {
+        updates['metier_personnalise'] = metier.trim();
+      }
       await supabase
           .from('utilisateurs')
-          .update({'role': nouveauRole}).eq('id', _localUserData['id']);
+          .update(updates)
+          .eq('id', _localUserData['id']);
       if (mounted) {
         Navigator.pushAndRemoveUntil(
           context,
@@ -176,6 +187,77 @@ class _ProfilTabState extends State<ProfilTab> {
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  Future<String?> _demanderSpecialite() async {
+    final ctrl = TextEditingController();
+    final result = await showDialog<String>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF1E293B),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          "Votre spécialité",
+          style: GoogleFonts.poppins(
+              color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Indiquez votre métier principal pour que les clients puissent vous trouver.",
+              style: GoogleFonts.inter(
+                  color: Colors.white60, fontSize: 13, height: 1.5),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: ctrl,
+              autofocus: true,
+              textCapitalization: TextCapitalization.sentences,
+              style: GoogleFonts.inter(color: Colors.white, fontSize: 14),
+              decoration: InputDecoration(
+                hintText: "Ex: Plombier, Électricien, Peintre...",
+                hintStyle: GoogleFonts.inter(
+                    color: Colors.white38, fontSize: 13),
+                filled: true,
+                fillColor: Colors.white.withValues(alpha: 0.07),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 14, vertical: 12),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text("Annuler",
+                style: GoogleFonts.inter(color: Colors.white38)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final val = ctrl.text.trim();
+              if (val.isNotEmpty) Navigator.pop(ctx, val);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: widget.accentColor,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
+            ),
+            child: Text("Continuer",
+                style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+    ctrl.dispose();
+    return result;
   }
 
   void _ouvrirCompetences() async {
@@ -231,10 +313,14 @@ class _ProfilTabState extends State<ProfilTab> {
         children: [
           Positioned.fill(child: Image.asset(bgImage, fit: BoxFit.cover)),
           Positioned.fill(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
-              child: Container(
-                  color: const Color(0xFF0F172A).withValues(alpha: 0.85)),
+            child: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Color(0xEA0F172A), Color(0xF50F172A)],
+                ),
+              ),
             ),
           ),
           _isLoading

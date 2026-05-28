@@ -38,6 +38,7 @@ class ProfilHeader extends StatelessWidget {
                           color: accentColor, strokeWidth: 2),
                     )
                   : CircleAvatar(
+                      key: ValueKey(avatarUrl), // force re-render quand URL change
                       radius: 55,
                       backgroundColor: Colors.white.withValues(alpha: 0.1),
                       backgroundImage: (avatarUrl != null && avatarUrl.isNotEmpty)
