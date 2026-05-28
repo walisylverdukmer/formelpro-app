@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -39,6 +40,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Timer? _typingTimer;
   bool _receiverTyping = false;
   bool _showBanner = true;
+  bool _uploadingImage = false;
 
   bool get _hasProforma =>
       _messages.any((m) => m['est_proposition_intervention'] == true);
@@ -55,6 +57,11 @@ class _ChatScreenState extends State<ChatScreen> {
         .limit(100)
         .listen((msgs) {
       if (mounted) setState(() => _messages = msgs);
+      final uid = _supabase.auth.currentUser?.id;
+      if (uid != null &&
+          msgs.any((m) => m['expediteur_id'] != uid && m['est_lu'] == false)) {
+        _markMessagesRead();
+      }
     });
     _initTypingChannel();
   }
@@ -125,6 +132,52 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  Future<void> _sendImage() async {
+    final file = await ImagePicker()
+        .pickImage(source: ImageSource.gallery, imageQuality: 70, maxWidth: 1080);
+    if (file == null || !mounted) return;
+    setState(() => _uploadingImage = true);
+    try {
+      final uid = _supabase.auth.currentUser!.id;
+      final bytes = await file.readAsBytes();
+      final ext = file.name.split('.').last.toLowerCase();
+      final path = 'chat/$uid/${DateTime.now().millisecondsSinceEpoch}.$ext';
+      await _supabase.storage.from('chat-images').uploadBinary(
+          path, bytes,
+          fileOptions: FileOptions(contentType: 'image/$ext'));
+      final url =
+          _supabase.storage.from('chat-images').getPublicUrl(path);
+      await _supabase.from('messages').insert({
+        'conversation_id': widget.conversationId,
+        'expediteur_id': uid,
+        'contenu': '📷 Photo',
+        'image_url': url,
+        'est_proposition_intervention': false,
+      });
+      await _supabase.from('conversations').update({
+        'dernier_message': '📷 Photo',
+        'mis_a_jour_le': DateTime.now().toIso8601String(),
+      }).eq('id', widget.conversationId);
+    } catch (e) {
+      if (mounted) _showSnackBar('Impossible d\'envoyer la photo');
+    } finally {
+      if (mounted) setState(() => _uploadingImage = false);
+    }
+  }
+
+  Future<void> _markMessagesRead() async {
+    final uid = _supabase.auth.currentUser?.id;
+    if (uid == null) return;
+    try {
+      await _supabase
+          .from('messages')
+          .update({'est_lu': true})
+          .eq('conversation_id', widget.conversationId)
+          .neq('expediteur_id', uid)
+          .eq('est_lu', false);
+    } catch (_) {}
+  }
+
   Future<void> _sendProforma({
     required String service,
     required String prix,
@@ -177,45 +230,27 @@ class _ChatScreenState extends State<ChatScreen> {
         'contenu': "✅ OFFRE ACCEPTÉE. L'intervention est enregistrée.",
         'est_proposition_intervention': false,
       });
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content:
-              Text('Intervention confirmée !', style: GoogleFonts.inter()),
-          backgroundColor: const Color(0xFF1E293B),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14)),
-        ));
-      }
+      if (mounted) _showSnackBar('Intervention confirmée !');
     } on PostgrestException catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content:
-              Text('Erreur : ${e.message}', style: GoogleFonts.inter()),
-          backgroundColor: const Color(0xFF1E293B),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14)),
-        ));
-      }
+      if (mounted) _showSnackBar('Erreur : ${e.message}');
     } catch (e) {
       debugPrint('Erreur confirmation: $e');
     }
   }
 
-  void _showCallLocked() {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(
-        'Échangez d\'abord quelques messages pour débloquer l\'appel.',
-        style: GoogleFonts.inter(),
-      ),
-      backgroundColor: const Color(0xFF1E293B),
-      behavior: SnackBarBehavior.floating,
-      shape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      duration: const Duration(seconds: 4),
-    ));
-  }
+  void _showSnackBar(String msg, {int seconds = 3}) =>
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(msg, style: GoogleFonts.inter()),
+        backgroundColor: const Color(0xFF1E293B),
+        behavior: SnackBarBehavior.floating,
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        duration: Duration(seconds: seconds),
+      ));
+
+  void _showCallLocked() => _showSnackBar(
+      'Échangez d\'abord quelques messages pour débloquer l\'appel.',
+      seconds: 4);
 
   void _showProformaDialog() {
     showModalBottomSheet(
@@ -295,10 +330,11 @@ class _ChatScreenState extends State<ChatScreen> {
                       ? const Color(0xFF22C55E)
                       : const Color(0xFF94A3B8),
                 ),
-                onPressed: _callUnlocked
-                    ? () => launchUrl(Uri(
-                        scheme: 'tel', path: widget.receiverPhone!))
-                    : _showCallLocked,
+                onPressed:
+                    _callUnlocked
+                        ? () => launchUrl(
+                            Uri(scheme: 'tel', path: widget.receiverPhone!))
+                        : _showCallLocked,
               ),
             ),
         ],
@@ -320,6 +356,8 @@ class _ChatScreenState extends State<ChatScreen> {
           accentColor: widget.accentColor,
           onSend: _sendMessage,
           onProforma: _showProformaDialog,
+          onImage: _sendImage,
+          uploadingImage: _uploadingImage,
           onChanged: _onTypingChanged,
         ),
       ]),

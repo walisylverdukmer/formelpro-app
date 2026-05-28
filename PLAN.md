@@ -167,7 +167,7 @@ Supervision totale plateforme.
 | 0.4 | Vérifier buckets Supabase Storage         | 🔴 Critique  | 🔲 Action manuelle Supabase Dashboard |
 | 0.5 | Vérifier structure DB réelle              | 🔴 Critique  | 🔲 Action manuelle Supabase SQL Editor |
 | 0.6 | Corriger PWA install flow                 | 🟡 Important | ✅ beforeinstallprompt + standalone OK |
-| 0.7 | Vérifier logout global                    | 🟡 Important | 🔲     |
+| 0.7 | Vérifier logout global                    | 🟡 Important | ✅ FCM unsubscribeFromTopic('user_$uid') avant signOut |
 | 0.8 | flutter analyze = 0 issues                | 🔴 Critique  | ✅     |
 
 ---
@@ -248,8 +248,8 @@ Le chat devient :
 | 3.3 | Messages sécurité automatiques     | ✅ ChatSecurityBanner dismissible en haut   |
 | 3.4 | Cartes proforma conversationnelles | ✅ ProformaCard + ProformaSheet + confirmation |
 | 3.5 | Messages système élégants          | ✅ SystemMessageBubble centré vert/rouge    |
-| 3.6 | Photos dans chat                   | 🔲 (Phase suivante — Storage upload)       |
-| 3.7 | Messages lus/non lus               | 🔲 (nécessite migration DB est_lu)         |
+| 3.6 | Photos dans chat                   | ✅ Bouton Photo + ImagePicker + Storage `chat-images` + `image_url` dans messages |
+| 3.7 | Messages lus/non lus               | ✅ `est_lu` DB, `_markMessagesRead()` auto, accusés ✓/✓✓ dans ChatBubble |
 | 3.8 | Typing indicator                   | ✅ Supabase Realtime broadcast + AnimatedSwitcher |
 
 ---
@@ -442,7 +442,7 @@ Les démarches marchandes doivent commencer tôt.
 | 8.4 | Compression WebP          | 🔲     |
 | 8.5 | Cache offline minimal     | 🔲     |
 | 8.6 | Splash screen premium     | ✅ SplashScreen — logo + tagline fade-in + scale + auto-navigate vers AuthGate |
-| 8.7 | Onboarding slides         | 🔲     |
+| 8.7 | Onboarding slides         | ✅ OnboardingScreen 3 slides dark, PageView + dots + SharedPreferences flag |
 
 ---
 

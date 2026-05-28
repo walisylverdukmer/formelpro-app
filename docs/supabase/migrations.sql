@@ -830,3 +830,31 @@ ON public.utilisateurs USING GIN (competences);
 INSERT INTO public.categories_services (nom, slug, groupe_parent, est_valide, ordre_affichage)
 VALUES ('Homme à tout faire', 'homme-a-tout-faire', 'general', true, 0)
 ON CONFLICT (slug) DO NOTHING;
+
+
+-- =============================================================================
+-- 18. MESSAGES LIRE + PHOTOS [À EXÉCUTER]
+-- =============================================================================
+-- Suivi de lecture des messages + support photos dans le chat
+-- Prérequis : bucket Supabase Storage "chat-images" à créer (public)
+
+ALTER TABLE public.messages
+  ADD COLUMN IF NOT EXISTS est_lu    BOOLEAN NOT NULL DEFAULT false,
+  ADD COLUMN IF NOT EXISTS image_url TEXT;
+
+-- Index pour comptage messages non lus (performant)
+CREATE INDEX IF NOT EXISTS idx_messages_unread
+  ON public.messages(conversation_id, est_lu)
+  WHERE est_lu = false;
+
+-- RLS : le destinataire (non-expéditeur, participant à la conv) peut marquer comme lu
+CREATE POLICY "messages_mark_read"
+  ON public.messages FOR UPDATE
+  USING (
+    expediteur_id != auth.uid()
+    AND EXISTS (
+      SELECT 1 FROM public.conversations c
+      WHERE c.id = conversation_id
+      AND (c.client_id = auth.uid() OR c.tech_id = auth.uid())
+    )
+  );

@@ -179,6 +179,8 @@ lib/
 | **Portail recrutement web** | `web/devenir-prestataire.html` — page HTML standalone, zéro Flutter, mobile-first, Supabase JS CDN — URL: `https://formelpro-app.vercel.app/devenir-prestataire` |
 | **Flutter Web + Vercel routing** | Build web fonctionnel — `vercel.json` corrigé (`outputDirectory: build/web`, SPA catch-all → `index.html`) |
 | **Migrations SQL idempotentes** | 5 triggers avec `DROP TRIGGER IF EXISTS` avant création — plus d'erreur "already exists" |
+| **Messages lus/non lus** | `est_lu BOOLEAN` + accusés de lecture ✓/✓✓ dans les bulles, `_markMessagesRead()` automatique à l'ouverture du chat — SQL §18 à exécuter |
+| **Photos dans le chat** | Bouton "Photo" dans ChatInputBar → ImagePicker → Storage bucket `chat-images` → `image_url` dans messages — bucket à créer dans Supabase Dashboard |
 
 ### ⚠️ PROBLÈMES CONNUS / DETTE TECHNIQUE
 
@@ -189,7 +191,7 @@ lib/
 | `request_form_page.dart` dans `services/` (mauvais dossier) | 🟡 MOYENNE | `lib/services/` | ✅ Supprimé (code mort) |
 | `sub_categories_page.dart` dans `services/` (mauvais dossier) | 🟡 MOYENNE | `lib/services/` | ✅ Déplacé → `screens/booking/` |
 | `withOpacity` déprécié → utiliser `.withValues(alpha:)` | 🟢 BASSE | Tous les fichiers | ✅ 100% migré |
-| WhatsApp.zip dans les assets | 🟢 BASSE | `assets/images/` | 🔲 |
+| ~~WhatsApp.zip + assets orphelins~~ | 🟢 BASSE | `assets/images/` | ✅ 11 fichiers supprimés (zip, jpeg WhatsApp, fond_*old*, choix_drapeau*, fond_.jpeg) |
 | Colonnes `utilisateurs` à confirmer en DB (`quartier`, `disponible`) | 🔴 HAUTE | Supabase console | 🔲 |
 | Bucket Storage `documents` à créer (privé) | 🔴 HAUTE | Supabase Dashboard | 🔲 |
 | `<SERVICE_ROLE_KEY>` placeholder dans migrations.sql ligne ~307 | 🔴 HAUTE | `docs/supabase/migrations.sql` | 🔲 |
@@ -321,6 +323,10 @@ Lancement app
 - **Pattern Stream :** `.stream(primaryKey: ['id']).eq('user_id', uid)` pour temps réel
 
 ---
+
+*Dernière mise à jour : 2026-05-28 — Session 16 : Option B polissage — Onboarding 3 slides (`OnboardingScreen` dark, PageView, dot indicator, SharedPreferences `onboarding_done`, skip/suivant/commencer), `SplashScreen._navigate()` async + check flag, Logout FCM (`unsubscribeFromTopic('user_$uid')` avant `signOut()` dans `ProfilLogoutButton`), nettoyage 11 assets orphelins (`WhatsApp.zip`, anciens fonds, `choix_drapeau*`). flutter analyze 0 issues.*
+
+*Dernière mise à jour : 2026-05-28 — Session 15 : Option A chat — Messages lus/non lus (`est_lu BOOLEAN` + index + RLS UPDATE §18, `_markMessagesRead()` auto dans stream listener, accusés ✓/✓✓ dans `ChatBubble`) + Photos dans chat (bouton Photo dans `ChatInputBar`, ImagePicker galerie, upload Storage bucket `chat-images`, `image_url` dans messages, rendu `Image.network` avec loading/error states). SQL §18 à exécuter dans Supabase SQL Editor. Bucket `chat-images` (public) à créer dans Supabase Dashboard > Storage. flutter analyze 0 issues.*
 
 *Dernière mise à jour : 2026-05-27 — Session 13 : Phase 5.7 Homme à tout faire + Phase 4.3 Admin demandes domestiques — SQL §17 colonne `competences TEXT[]` + index GIN + catégorie DB, `TechnicienService` filtre `ov` overlap, `FiltresTechniciens` champ `competences`, `FiltresSheet` section multi-select 12 compétences, `CarteTechnicien` badges chips max 3, `CompetencesEditorSheet` modal édition tech, `ProfilTab` section "Mes Compétences" + lien admin, `AdminDemandesDomestiquesPage` gestion workflow (prendre en charge/enquête/affecter/annuler), flutter analyze 0 issues. SQL §17 à exécuter dans Supabase SQL Editor.*
 

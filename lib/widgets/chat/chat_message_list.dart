@@ -40,6 +40,8 @@ class ChatMessageList extends StatelessWidget {
         final timestamp = rawDate != null
             ? DateTime.tryParse(rawDate.toString())
             : null;
+        final imageUrl = msg['image_url'] as String?;
+        final isRead = msg['est_lu'] == true;
 
         if (isSystemMessage(content)) {
           return SystemMessageBubble(text: content);
@@ -57,6 +59,8 @@ class ChatMessageList extends StatelessWidget {
           isMe: isMe,
           accentColor: accentColor,
           timestamp: timestamp,
+          isRead: isRead,
+          imageUrl: imageUrl,
         );
       },
     );

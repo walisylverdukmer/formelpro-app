@@ -6,7 +6,9 @@ class ChatInputBar extends StatelessWidget {
   final Color accentColor;
   final VoidCallback onSend;
   final VoidCallback onProforma;
+  final VoidCallback onImage;
   final ValueChanged<String>? onChanged;
+  final bool uploadingImage;
 
   const ChatInputBar({
     super.key,
@@ -14,7 +16,9 @@ class ChatInputBar extends StatelessWidget {
     required this.accentColor,
     required this.onSend,
     required this.onProforma,
+    required this.onImage,
     this.onChanged,
+    this.uploadingImage = false,
   });
 
   @override
@@ -27,22 +31,15 @@ class ChatInputBar extends StatelessWidget {
       ),
       child: SafeArea(
         child: Row(children: [
-          Column(mainAxisSize: MainAxisSize.min, children: [
-            IconButton(
-              icon: Icon(Icons.add_circle_rounded,
-                  color: accentColor, size: 32),
-              onPressed: onProforma,
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
-            ),
-            Text(
-              'Proforma',
-              style: GoogleFonts.inter(
-                  fontSize: 9,
-                  fontWeight: FontWeight.bold,
-                  color: accentColor),
-            ),
-          ]),
+          _buildActionButton(
+              icon: Icons.add_circle_rounded,
+              label: 'Proforma',
+              onTap: onProforma),
+          const SizedBox(width: 6),
+          _buildActionButton(
+              icon: Icons.image_rounded,
+              label: 'Photo',
+              onTap: uploadingImage ? null : onImage),
           const SizedBox(width: 10),
           Expanded(
             child: Container(
@@ -64,17 +61,46 @@ class ChatInputBar extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          CircleAvatar(
-            backgroundColor: accentColor,
-            radius: 22,
-            child: IconButton(
-              icon: const Icon(Icons.send_rounded,
-                  color: Colors.white, size: 20),
-              onPressed: onSend,
-            ),
-          ),
+          uploadingImage
+              ? const SizedBox(
+                  width: 44,
+                  height: 44,
+                  child: Center(
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                )
+              : CircleAvatar(
+                  backgroundColor: accentColor,
+                  radius: 22,
+                  child: IconButton(
+                    icon: const Icon(Icons.send_rounded,
+                        color: Colors.white, size: 20),
+                    onPressed: onSend,
+                  ),
+                ),
         ]),
       ),
     );
+  }
+
+  Widget _buildActionButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback? onTap,
+  }) {
+    final color = onTap != null
+        ? accentColor
+        : accentColor.withValues(alpha: 0.4);
+    return Column(mainAxisSize: MainAxisSize.min, children: [
+      IconButton(
+        icon: Icon(icon, color: color, size: 32),
+        onPressed: onTap,
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints(),
+      ),
+      Text(label,
+          style: GoogleFonts.inter(
+              fontSize: 9, fontWeight: FontWeight.bold, color: color)),
+    ]);
   }
 }

@@ -1,3 +1,5 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -184,6 +186,13 @@ class ProfilLogoutButton extends StatelessWidget {
       width: double.infinity,
       child: TextButton.icon(
         onPressed: () async {
+          final uid = Supabase.instance.client.auth.currentUser?.id;
+          if (uid != null && !kIsWeb) {
+            try {
+              await FirebaseMessaging.instance
+                  .unsubscribeFromTopic('user_$uid');
+            } catch (_) {}
+          }
           await Supabase.instance.client.auth.signOut();
           if (context.mounted) {
             Navigator.of(context).pushAndRemoveUntil(
