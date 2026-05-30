@@ -1,10 +1,14 @@
 import 'dart:async';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../services/chat_actions.dart';
+import '../../widgets/chat/audio_recording_bar.dart';
 import '../../widgets/chat/chat_input_bar.dart';
 import '../../widgets/chat/chat_message_list.dart';
 import '../../widgets/chat/chat_security_banner.dart';
@@ -37,10 +41,12 @@ class _ChatScreenState extends State<ChatScreen> {
   List<Map<String, dynamic>> _messages = [];
   late StreamSubscription<List<Map<String, dynamic>>> _msgSub;
   late final RealtimeChannel _typingChannel;
+  late final ChatActions _actions;
   Timer? _typingTimer;
   bool _receiverTyping = false;
   bool _showBanner = true;
   bool _uploadingImage = false;
+  bool _isRecording = false;
 
   bool get _hasProforma =>
       _messages.any((m) => m['est_proposition_intervention'] == true);
@@ -49,6 +55,10 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
+    _actions = ChatActions(
+      conversationId: widget.conversationId,
+      receiverId: widget.receiverId,
+    );
     _msgSub = _supabase
         .from('messages')
         .stream(primaryKey: ['id'])
@@ -60,7 +70,7 @@ class _ChatScreenState extends State<ChatScreen> {
       final uid = _supabase.auth.currentUser?.id;
       if (uid != null &&
           msgs.any((m) => m['expediteur_id'] != uid && m['est_lu'] == false)) {
-        _markMessagesRead();
+        _actions.markMessagesRead();
       }
     });
     _initTypingChannel();
@@ -68,8 +78,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _initTypingChannel() {
     final uid = _supabase.auth.currentUser?.id ?? '';
-    _typingChannel = _supabase
-        .channel('chat_typing:${widget.conversationId}')
+    _typingChannel = _supabase.channel('chat_typing:${widget.conversationId}')
       ..onBroadcast(
           event: 'typing',
           callback: (payload) {
@@ -105,8 +114,7 @@ class _ChatScreenState extends State<ChatScreen> {
     if (text.isNotEmpty) {
       _typingTimer = Timer(const Duration(seconds: 2), () {
         _typingChannel.sendBroadcastMessage(
-            event: 'typing',
-            payload: {'user_id': uid, 'typing': false});
+            event: 'typing', payload: {'user_id': uid, 'typing': false});
       });
     }
   }
@@ -133,49 +141,32 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _sendImage() async {
-    final file = await ImagePicker()
-        .pickImage(source: ImageSource.gallery, imageQuality: 70, maxWidth: 1080);
+    final file = await ImagePicker().pickImage(
+        source: ImageSource.gallery, imageQuality: 70, maxWidth: 1080);
     if (file == null || !mounted) return;
     setState(() => _uploadingImage = true);
     try {
-      final uid = _supabase.auth.currentUser!.id;
       final bytes = await file.readAsBytes();
       final ext = file.name.split('.').last.toLowerCase();
-      final path = 'chat/$uid/${DateTime.now().millisecondsSinceEpoch}.$ext';
-      await _supabase.storage.from('chat-images').uploadBinary(
-          path, bytes,
-          fileOptions: FileOptions(contentType: 'image/$ext'));
-      final url =
-          _supabase.storage.from('chat-images').getPublicUrl(path);
-      await _supabase.from('messages').insert({
-        'conversation_id': widget.conversationId,
-        'expediteur_id': uid,
-        'contenu': '📷 Photo',
-        'image_url': url,
-        'est_proposition_intervention': false,
-      });
-      await _supabase.from('conversations').update({
-        'dernier_message': '📷 Photo',
-        'mis_a_jour_le': DateTime.now().toIso8601String(),
-      }).eq('id', widget.conversationId);
-    } catch (e) {
+      await _actions.uploadAndSendImage(bytes, ext);
+    } catch (_) {
       if (mounted) _showSnackBar('Impossible d\'envoyer la photo');
     } finally {
       if (mounted) setState(() => _uploadingImage = false);
     }
   }
 
-  Future<void> _markMessagesRead() async {
-    final uid = _supabase.auth.currentUser?.id;
-    if (uid == null) return;
+  void _startRecording() => setState(() => _isRecording = true);
+  void _cancelRecording() => setState(() => _isRecording = false);
+
+  Future<void> _onAudioReady(
+      Uint8List bytes, int seconds, String ext) async {
+    setState(() => _isRecording = false);
     try {
-      await _supabase
-          .from('messages')
-          .update({'est_lu': true})
-          .eq('conversation_id', widget.conversationId)
-          .neq('expediteur_id', uid)
-          .eq('est_lu', false);
-    } catch (_) {}
+      await _actions.sendAudio(bytes, seconds, ext);
+    } catch (_) {
+      if (mounted) _showSnackBar('Impossible d\'envoyer le vocal');
+    }
   }
 
   Future<void> _sendProforma({
@@ -185,51 +176,25 @@ class _ChatScreenState extends State<ChatScreen> {
     required String date,
   }) async {
     if (prix.isEmpty || service.isEmpty) return;
-    final text = '📋 PROPOSITION DE PRESTATION\n'
-        '🔧 Service : $service\n'
-        '💰 Montant : $prix FCFA\n'
-        '📍 Lieu : ${lieu.isEmpty ? 'À confirmer' : lieu}\n'
-        '📅 Date : ${date.isEmpty ? 'À convenir' : date}';
     try {
-      await _supabase.from('messages').insert({
-        'conversation_id': widget.conversationId,
-        'expediteur_id': _supabase.auth.currentUser!.id,
-        'contenu': text,
-        'est_proposition_intervention': true,
-      });
+      await _actions.sendProforma(
+          service: service, prix: prix, lieu: lieu, date: date);
       if (mounted) Navigator.pop(context);
     } catch (e) {
       debugPrint('Erreur proforma: $e');
     }
   }
 
-  void _showSecurityDialog(String msgId, String content) {
-    showSecurityConfirmDialog(
-      context,
-      content: content,
-      onConfirm: () => _confirmIntervention(content),
-    );
-  }
+  void _showSecurityDialog(String msgId, String content) =>
+      showSecurityConfirmDialog(
+        context,
+        content: content,
+        onConfirm: () => _confirmIntervention(content),
+      );
 
   Future<void> _confirmIntervention(String content) async {
-    final uid = _supabase.auth.currentUser?.id;
-    if (uid == null) return;
     try {
-      await _supabase.from('interventions').insert({
-        'client_id': uid,
-        'tech_id': widget.receiverId,
-        'titre_service': 'Accord via messagerie',
-        'statut': 'en_attente',
-        'description': content,
-        'date_prevue':
-            DateTime.now().add(const Duration(days: 1)).toIso8601String(),
-      });
-      await _supabase.from('messages').insert({
-        'conversation_id': widget.conversationId,
-        'expediteur_id': uid,
-        'contenu': "✅ OFFRE ACCEPTÉE. L'intervention est enregistrée.",
-        'est_proposition_intervention': false,
-      });
+      await _actions.confirmIntervention(content);
       if (mounted) _showSnackBar('Intervention confirmée !');
     } on PostgrestException catch (e) {
       if (mounted) _showSnackBar('Erreur : ${e.message}');
@@ -252,15 +217,13 @@ class _ChatScreenState extends State<ChatScreen> {
       'Échangez d\'abord quelques messages pour débloquer l\'appel.',
       seconds: 4);
 
-  void _showProformaDialog() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => ProformaSheet(
-          accentColor: widget.accentColor, onSend: _sendProforma),
-    );
-  }
+  void _showProformaDialog() => showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (_) => ProformaSheet(
+            accentColor: widget.accentColor, onSend: _sendProforma),
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -330,11 +293,10 @@ class _ChatScreenState extends State<ChatScreen> {
                       ? const Color(0xFF22C55E)
                       : const Color(0xFF94A3B8),
                 ),
-                onPressed:
-                    _callUnlocked
-                        ? () => launchUrl(
-                            Uri(scheme: 'tel', path: widget.receiverPhone!))
-                        : _showCallLocked,
+                onPressed: _callUnlocked
+                    ? () =>
+                        launchUrl(Uri(scheme: 'tel', path: widget.receiverPhone!))
+                    : _showCallLocked,
               ),
             ),
         ],
@@ -351,15 +313,23 @@ class _ChatScreenState extends State<ChatScreen> {
             onProformaAccept: _showSecurityDialog,
           ),
         ),
-        ChatInputBar(
-          controller: _msgCtrl,
-          accentColor: widget.accentColor,
-          onSend: _sendMessage,
-          onProforma: _showProformaDialog,
-          onImage: _sendImage,
-          uploadingImage: _uploadingImage,
-          onChanged: _onTypingChanged,
-        ),
+        if (_isRecording)
+          AudioRecordingBar(
+            accentColor: widget.accentColor,
+            onSend: _onAudioReady,
+            onCancel: _cancelRecording,
+          )
+        else
+          ChatInputBar(
+            controller: _msgCtrl,
+            accentColor: widget.accentColor,
+            onSend: _sendMessage,
+            onProforma: _showProformaDialog,
+            onImage: _sendImage,
+            onMic: _startRecording,
+            uploadingImage: _uploadingImage,
+            onChanged: _onTypingChanged,
+          ),
       ]),
     );
   }

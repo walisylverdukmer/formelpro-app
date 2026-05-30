@@ -12,6 +12,7 @@ import 'package:formelpro/screens/complete_profil_page.dart';
 import 'package:formelpro/screens/dashboard/main_dashboard.dart';
 import 'package:formelpro/screens/public/landing_page.dart';
 import 'package:formelpro/screens/splash_screen.dart';
+import 'package:formelpro/services/fcm_service.dart';
 import 'package:formelpro/services/notification_router.dart';
 
 // Handler des messages reçus quand l'app est en arrière-plan / fermée
@@ -146,44 +147,9 @@ class AuthGate extends StatelessWidget {
   Future<Map<String, dynamic>?> _getUserProfile(String userId) {
     return Supabase.instance.client
         .from('utilisateurs')
-        .select('role, pays, a_complete_profil')
+        .select('role, pays, a_complete_profil, is_premium')
         .eq('id', userId)
         .maybeSingle();
-  }
-
-  // Demande la permission et abonne l'appareil au topic FCM de l'utilisateur
-  Future<void> _initFCM(String userId) async {
-    if (kIsWeb) return; // FCM non disponible sur Web
-    try {
-      final messaging = FirebaseMessaging.instance;
-
-      // Demande permission (iOS + Android 13+)
-      final settings = await messaging.requestPermission(
-        alert: true,
-        badge: true,
-        sound: true,
-      );
-
-      if (settings.authorizationStatus == AuthorizationStatus.authorized ||
-          settings.authorizationStatus == AuthorizationStatus.provisional) {
-        // Abonnement au topic personnel de l'utilisateur
-        await messaging.subscribeToTopic('user_$userId');
-        debugPrint("FCM: abonné au topic user_$userId");
-      }
-
-      // Gérer les messages reçus quand l'app est au premier plan
-      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-        final notification = message.notification;
-        if (notification != null) {
-          debugPrint("FCM foreground: ${notification.title} — ${notification.body}");
-          // Le NotificationService Supabase gère déjà l'affichage via SnackBar.
-          // FCM foreground est donc silencieux ici pour éviter les doublons.
-        }
-      });
-
-    } catch (e) {
-      debugPrint("Erreur init FCM: $e");
-    }
   }
 
   @override
@@ -230,8 +196,12 @@ class AuthGate extends StatelessWidget {
 
             final bool aCompleteProfil = data['a_complete_profil'] ?? false;
 
-            // Abonnement FCM dès que l'utilisateur est authentifié
-            _initFCM(session.user.id);
+            // Initialisation FCM avec rôle et statut premium
+            FcmService.instance.init(
+              uid: session.user.id,
+              role: data['role'] as String? ?? 'client',
+              isPremium: data['is_premium'] as bool? ?? false,
+            );
 
             if (aCompleteProfil) {
               return const MainDashboardPage();

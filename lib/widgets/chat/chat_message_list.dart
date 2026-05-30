@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'audio_message_bubble.dart';
 import 'chat_bubble.dart';
 import 'proforma_card.dart';
 import 'system_message_bubble.dart';
@@ -42,6 +43,9 @@ class ChatMessageList extends StatelessWidget {
             : null;
         final imageUrl = msg['image_url'] as String?;
         final isRead = msg['est_lu'] == true;
+        final messageType = msg['message_type'] as String? ?? 'text';
+        final audioUrl = msg['audio_url'] as String?;
+        final audioDuration = msg['audio_duration'] as int?;
 
         if (isSystemMessage(content)) {
           return SystemMessageBubble(text: content);
@@ -52,6 +56,15 @@ class ChatMessageList extends StatelessWidget {
             isMe: isMe,
             accentColor: accentColor,
             onAccept: onProformaAccept,
+          );
+        }
+        if (messageType == 'audio' && audioUrl != null) {
+          return AudioMessageBubble(
+            audioUrl: audioUrl,
+            durationSeconds: audioDuration,
+            isMe: isMe,
+            accentColor: accentColor,
+            timestamp: timestamp,
           );
         }
         return ChatBubble(

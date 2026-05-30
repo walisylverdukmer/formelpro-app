@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>FormelPro a besoin du microphone pour enregistrer des messages vocaux.</string>
     <key>NSPhotoLibraryUsageDescription</key>
     <string>FormelPro a besoin d'accéder à votre galerie pour mettre à jour votre photo de profil.</string>
     <key>NSLocationWhenInUseUsageDescription</key>

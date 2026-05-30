@@ -7,6 +7,7 @@ class ChatInputBar extends StatelessWidget {
   final VoidCallback onSend;
   final VoidCallback onProforma;
   final VoidCallback onImage;
+  final VoidCallback onMic;
   final ValueChanged<String>? onChanged;
   final bool uploadingImage;
 
@@ -17,6 +18,7 @@ class ChatInputBar extends StatelessWidget {
     required this.onSend,
     required this.onProforma,
     required this.onImage,
+    required this.onMic,
     this.onChanged,
     this.uploadingImage = false,
   });
@@ -53,31 +55,42 @@ class ChatInputBar extends StatelessWidget {
                 onChanged: onChanged,
                 decoration: InputDecoration(
                   hintText: 'Écrivez votre message...',
-                  hintStyle: GoogleFonts.inter(
-                      color: const Color(0xFF94A3B8)),
+                  hintStyle:
+                      GoogleFonts.inter(color: const Color(0xFF94A3B8)),
                   border: InputBorder.none,
                 ),
               ),
             ),
           ),
           const SizedBox(width: 8),
-          uploadingImage
-              ? const SizedBox(
+          ValueListenableBuilder<TextEditingValue>(
+            valueListenable: controller,
+            builder: (_, value, __) {
+              if (uploadingImage) {
+                return const SizedBox(
                   width: 44,
                   height: 44,
                   child: Center(
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                      child: CircularProgressIndicator(strokeWidth: 2)),
+                );
+              }
+              final hasText = value.text.trim().isNotEmpty;
+              return CircleAvatar(
+                backgroundColor: accentColor,
+                radius: 22,
+                child: IconButton(
+                  icon: Icon(
+                    hasText
+                        ? Icons.send_rounded
+                        : Icons.mic_rounded,
+                    color: Colors.white,
+                    size: 20,
                   ),
-                )
-              : CircleAvatar(
-                  backgroundColor: accentColor,
-                  radius: 22,
-                  child: IconButton(
-                    icon: const Icon(Icons.send_rounded,
-                        color: Colors.white, size: 20),
-                    onPressed: onSend,
-                  ),
+                  onPressed: hasText ? onSend : onMic,
                 ),
+              );
+            },
+          ),
         ]),
       ),
     );
@@ -88,9 +101,8 @@ class ChatInputBar extends StatelessWidget {
     required String label,
     required VoidCallback? onTap,
   }) {
-    final color = onTap != null
-        ? accentColor
-        : accentColor.withValues(alpha: 0.4);
+    final color =
+        onTap != null ? accentColor : accentColor.withValues(alpha: 0.4);
     return Column(mainAxisSize: MainAxisSize.min, children: [
       IconButton(
         icon: Icon(icon, color: color, size: 32),

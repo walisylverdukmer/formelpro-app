@@ -251,6 +251,7 @@ Le chat devient :
 | 3.6 | Photos dans chat                   | ✅ Bouton Photo + ImagePicker + Storage `chat-images` + `image_url` dans messages |
 | 3.7 | Messages lus/non lus               | ✅ `est_lu` DB, `_markMessagesRead()` auto, accusés ✓/✓✓ dans ChatBubble |
 | 3.8 | Typing indicator                   | ✅ Supabase Realtime broadcast + AnimatedSwitcher |
+| 3.9 | Messages vocaux                    | ✅ AudioRecordingBar + AudioMessageBubble + ChatActions service + Storage `chat-audio` — Format m4a (mobile) / webm (web) — SQL §19 |
 
 ---
 
@@ -397,13 +398,17 @@ Créer :
 
 | #   | Tâche                | Statut |
 | --- | -------------------- | ------ |
-| 6.1 | KPIs admin           | ✅ AccueilAdmin — users, techniciens, docs, signalements |
-| 6.2 | Gestion prestataires | ✅ AdminUsersPage — suspension/réactivation               |
+| 6.1 | KPIs admin — 8 indicateurs | ✅ AccueilAdmin — 8 KPIs (users, clients, techs, premium, vérifiés, en ligne, inscrits aujourd'hui, conversations) + bannière urgence |
+| 6.2 | Gestion prestataires avancée | ✅ AdminPrestatairesPage — premium, prolonger+30j, badge vérifié, référencement ⭐ FormelPro, suspension |
 | 6.3 | Validation documents | ✅ AdminDocumentsPage — approuver/rejeter + signed URLs   |
-| 6.4 | Gestion litiges      | ✅ AdminSignalementsPage + RLS policy signalements_admin_all (accès admin complet) |
-| 6.5 | Support utilisateurs | ✅ câblé via is_admin → AccueilAdmin                     |
-| 6.6 | Analytics business   | 🔲 Phase future                                          |
-| 6.7 | Heatmap activité     | 🔲 Phase future                                          |
+| 6.4 | Gestion litiges / signalements | ✅ AdminSignalementsPage + RLS policy signalements_admin_all |
+| 6.5 | Présence temps réel  | ✅ AdminPresencePage — en ligne, disponibles, activité récente |
+| 6.6 | Analytics business   | ✅ AdminAnalyticsPage — top métiers, top communes, stats pays, qualité |
+| 6.7 | Contacts & inscriptions | ✅ ContactsAdminPage — filtres, export CSV, appel/WhatsApp |
+| 6.8 | Services sensibles   | ✅ AdminDemandesDomestiquesPage — workflow validation humaine |
+| 6.9 | Notifications Push (architecture) | ✅ AdminNotificationsPage — audiences, prévisualisation, guide FCM Edge Function |
+| 6.10 | Badge Référencé FormelPro | ✅ SQL §20 is_reference_formelpro + gestion dans AdminPrestatairesPage |
+| 6.11 | Push Notifications V1 — FCM complet | ✅ FcmService (singleton, token, topics, foreground SnackBar), NotificationPrefsPage (5 catégories JSONB), SQL §21 (fcm_token + push_enabled + notifications_push + 2 triggers), notification_router 5 routes, firebase-messaging-sw.js |
 
 ---
 

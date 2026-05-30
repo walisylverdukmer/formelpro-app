@@ -858,3 +858,176 @@ CREATE POLICY "messages_mark_read"
       AND (c.client_id = auth.uid() OR c.tech_id = auth.uid())
     )
   );
+
+
+-- =============================================================================
+-- §19. MESSAGES VOCAUX [À EXÉCUTER]
+-- =============================================================================
+-- Messages audio dans le chat (format m4a mobile, webm web)
+-- Prérequis : bucket Supabase Storage "chat-audio" à créer (public)
+-- Chemin fichiers : chat-audio/{conversation_id}/{timestamp}.{ext}
+
+ALTER TABLE public.messages
+  ADD COLUMN IF NOT EXISTS message_type   TEXT NOT NULL DEFAULT 'text',
+  ADD COLUMN IF NOT EXISTS audio_url      TEXT,
+  ADD COLUMN IF NOT EXISTS audio_duration INTEGER;
+
+-- Contrainte : types valides (idempotente via DO block)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.table_constraints
+    WHERE constraint_name = 'messages_type_check'
+      AND table_name = 'messages'
+  ) THEN
+    ALTER TABLE public.messages
+      ADD CONSTRAINT messages_type_check
+      CHECK (message_type IN ('text', 'image', 'audio'));
+  END IF;
+END $$;
+
+-- Index pour accès aux messages audio par conversation
+CREATE INDEX IF NOT EXISTS idx_messages_audio
+  ON public.messages(conversation_id, message_type)
+  WHERE message_type = 'audio';
+
+-- RLS Storage : lecture audio réservée aux participants de la conversation
+-- (Exécuter APRÈS création du bucket "chat-audio" dans le Dashboard)
+CREATE POLICY IF NOT EXISTS "chat_audio_select"
+  ON storage.objects FOR SELECT
+  USING (
+    bucket_id = 'chat-audio'
+    AND EXISTS (
+      SELECT 1 FROM public.conversations c
+      WHERE c.id = (storage.foldername(name))[1]::uuid
+        AND (c.client_id = auth.uid() OR c.tech_id = auth.uid())
+    )
+  );
+
+CREATE POLICY IF NOT EXISTS "chat_audio_insert"
+  ON storage.objects FOR INSERT
+  WITH CHECK (
+    bucket_id = 'chat-audio'
+    AND auth.uid() IS NOT NULL
+  );
+
+
+-- =============================================================================
+-- §20. BADGE RÉFÉRENCÉ FORMELPRO [À EXÉCUTER]
+-- =============================================================================
+-- Badge manuel distinct du badge Vérifié (is_identite_verifiee).
+-- Accordé par l'admin pour les prestataires de confiance référencés.
+-- Affiché comme ⭐ Référencé FormelPro dans l'app.
+
+ALTER TABLE public.utilisateurs
+  ADD COLUMN IF NOT EXISTS is_reference_formelpro BOOLEAN NOT NULL DEFAULT false;
+
+CREATE INDEX IF NOT EXISTS idx_utilisateurs_reference_formelpro
+  ON public.utilisateurs(is_reference_formelpro)
+  WHERE is_reference_formelpro = true;
+
+-- RLS : un admin peut mettre à jour is_reference_formelpro (géré par RLS admin existante)
+-- Les utilisateurs ne peuvent PAS modifier leur propre statut de référencement.
+
+
+-- =============================================================================
+-- §21. PUSH NOTIFICATIONS FCM [À EXÉCUTER]
+-- =============================================================================
+-- Token FCM par device + préférences utilisateur + table campagnes futures.
+-- Prérequis : §20 exécuté. Triggers idempotents (DROP … IF EXISTS).
+
+-- 21.1 Colonnes FCM dans utilisateurs
+ALTER TABLE public.utilisateurs
+  ADD COLUMN IF NOT EXISTS fcm_token TEXT;
+
+ALTER TABLE public.utilisateurs
+  ADD COLUMN IF NOT EXISTS push_enabled BOOLEAN NOT NULL DEFAULT true;
+
+ALTER TABLE public.utilisateurs
+  ADD COLUMN IF NOT EXISTS notification_preferences JSONB NOT NULL DEFAULT '{}';
+
+-- 21.2 Table notifications_push (architecture campagnes futures)
+CREATE TABLE IF NOT EXISTS public.notifications_push (
+  id              UUID        NOT NULL DEFAULT gen_random_uuid(),
+  titre           TEXT        NOT NULL,
+  message         TEXT        NOT NULL,
+  type            TEXT        NOT NULL,
+  cible           TEXT        NOT NULL DEFAULT 'broadcast',
+  user_id         UUID        REFERENCES public.utilisateurs(id) ON DELETE CASCADE,
+  envoye_par      UUID        REFERENCES public.utilisateurs(id),
+  statut          TEXT        NOT NULL DEFAULT 'brouillon',
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+  sent_at         TIMESTAMPTZ,
+  nb_destinataires INTEGER    DEFAULT 0,
+  CONSTRAINT notifications_push_pkey PRIMARY KEY (id),
+  CONSTRAINT notifications_push_cible_check
+    CHECK (cible IN ('broadcast','clients','prestataires','premium','user')),
+  CONSTRAINT notifications_push_statut_check
+    CHECK (statut IN ('brouillon','envoye','echec'))
+);
+
+ALTER TABLE public.notifications_push ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY IF NOT EXISTS "notif_push_admin_all"
+  ON public.notifications_push FOR ALL
+  USING (public.is_admin());
+
+-- 21.3 Trigger : nouveau prestataire complète son profil → notifier admins
+CREATE OR REPLACE FUNCTION public.notifier_admins_nouveau_prestataire()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF NEW.role = 'technicien'
+     AND NEW.a_complete_profil = true
+     AND (OLD.a_complete_profil IS NULL OR OLD.a_complete_profil = false)
+  THEN
+    INSERT INTO public.notifications (user_id, titre, message, type)
+    SELECT
+      id,
+      'Nouveau prestataire inscrit',
+      COALESCE(NEW.nom_complet, 'Un prestataire')
+        || ' a complété son profil (' || COALESCE(NEW.pays, '') || ').',
+      'nouveau_prestataire'
+    FROM public.utilisateurs
+    WHERE is_admin = true;
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trigger_notifier_admins_nouveau_prestataire ON public.utilisateurs;
+CREATE TRIGGER trigger_notifier_admins_nouveau_prestataire
+  AFTER UPDATE OF a_complete_profil ON public.utilisateurs
+  FOR EACH ROW EXECUTE FUNCTION public.notifier_admins_nouveau_prestataire();
+
+
+-- 21.4 Trigger : demande service sensible → notifier admins
+CREATE OR REPLACE FUNCTION public.notifier_admins_demande_sensible()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  INSERT INTO public.notifications (user_id, titre, message, type)
+  SELECT
+    id,
+    'Demande service sensible',
+    'Nouvelle demande "' || COALESCE(NEW.type_service, NEW.type_service_demande, 'service') || '"'
+      || ' de ' || COALESCE(NEW.nom_demandeur, 'un client')
+      || CASE WHEN NEW.pays IS NOT NULL THEN ' (' || NEW.pays || ')' ELSE '' END || '.',
+    'demande_sensible'
+  FROM public.utilisateurs
+  WHERE is_admin = true;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trigger_notifier_admins_demande_sensible ON public.demandes_service_domestique;
+CREATE TRIGGER trigger_notifier_admins_demande_sensible
+  AFTER INSERT ON public.demandes_service_domestique
+  FOR EACH ROW EXECUTE FUNCTION public.notifier_admins_demande_sensible();
+

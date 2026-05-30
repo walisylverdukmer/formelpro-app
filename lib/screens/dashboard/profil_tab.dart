@@ -15,6 +15,7 @@ import 'package:formelpro/widgets/profil/edit_profile_sheet.dart';
 import 'package:formelpro/widgets/profil/profil_widgets.dart';
 import 'package:formelpro/widgets/competences_editor_sheet.dart';
 import 'package:formelpro/screens/dashboard/main_dashboard.dart';
+import 'package:formelpro/screens/settings/notification_prefs_page.dart';
 
 class ProfilTab extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -477,6 +478,25 @@ class _ProfilTabState extends State<ProfilTab> {
                                     .toList(),
                           ),
                         ],
+                        const SizedBox(height: 25),
+                        const ProfilSectionTitle(title: "Paramètres"),
+                        ProfilGlassCard(children: [
+                          ProfilActionTile(
+                            icon: Icons.notifications_rounded,
+                            title: "Notifications",
+                            subtitle: "Gérer vos alertes et préférences push",
+                            accentColor: widget.accentColor,
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => NotificationPrefsPage(
+                                  uid: _localUserData['id'] as String,
+                                  accentColor: widget.accentColor,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ]),
                         if (_localUserData['is_admin'] == true) ...[
                           const SizedBox(height: 25),
                           const ProfilSectionTitle(title: "Administration"),

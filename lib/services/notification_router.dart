@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:formelpro/screens/admin/admin_demandes_domestiques_page.dart';
 import 'package:formelpro/screens/admin/admin_documents_page.dart';
+import 'package:formelpro/screens/admin/admin_prestataires_page.dart';
 import 'package:formelpro/screens/chat/chat_screen.dart';
 import 'package:formelpro/screens/dashboard/verification_documents_page.dart';
 import 'package:formelpro/screens/interventions/intervention_detail_page.dart';
@@ -29,6 +31,11 @@ Future<void> routeFromNotification(Map<String, dynamic> data) async {
     case 'doc_approuve':
     case 'doc_rejete':
       await _routeToVerificationDocs();
+    case 'nouveau_prestataire':
+      await _routeToAdminPrestataires();
+    case 'demande_service':
+    case 'demande_sensible':
+      await _routeToAdminDemandesSensibles();
     default:
       debugPrint('FCM router: type non géré — $type');
   }
@@ -119,6 +126,50 @@ Future<void> _routeToAdminDocs() async {
     ));
   } catch (e) {
     debugPrint('FCM router (admin docs): $e');
+  }
+}
+
+Future<void> _routeToAdminPrestataires() async {
+  final nav = navigatorKey.currentState;
+  if (nav == null) return;
+  try {
+    final currentUser = Supabase.instance.client.auth.currentUser;
+    if (currentUser == null) return;
+    final user = await Supabase.instance.client
+        .from('utilisateurs')
+        .select('pays')
+        .eq('id', currentUser.id)
+        .single();
+    final pays = user['pays'] as String? ?? 'CIV';
+    final accentColor =
+        pays == 'CIV' ? const Color(0xFFE67E22) : const Color(0xFFCE1126);
+    nav.push(MaterialPageRoute(
+      builder: (_) => AdminPrestatairesPage(accentColor: accentColor),
+    ));
+  } catch (e) {
+    debugPrint('FCM router (admin prestataires): $e');
+  }
+}
+
+Future<void> _routeToAdminDemandesSensibles() async {
+  final nav = navigatorKey.currentState;
+  if (nav == null) return;
+  try {
+    final currentUser = Supabase.instance.client.auth.currentUser;
+    if (currentUser == null) return;
+    final user = await Supabase.instance.client
+        .from('utilisateurs')
+        .select('pays')
+        .eq('id', currentUser.id)
+        .single();
+    final pays = user['pays'] as String? ?? 'CIV';
+    final accentColor =
+        pays == 'CIV' ? const Color(0xFFE67E22) : const Color(0xFFCE1126);
+    nav.push(MaterialPageRoute(
+      builder: (_) => AdminDemandesDomestiquesPage(accentColor: accentColor),
+    ));
+  } catch (e) {
+    debugPrint('FCM router (admin demandes sensibles): $e');
   }
 }
 

@@ -64,7 +64,8 @@ lib/
 ├── services/
 │   ├── auth_service.dart            → signUp, signIn, profil, signOut
 │   ├── notification_service.dart    → Stream table notifications, SnackBar temps réel
-│   └── notification_router.dart     → navigatorKey + routeFromNotification() + pendingNotificationData
+│   ├── notification_router.dart     → navigatorKey + routeFromNotification() + pendingNotificationData (5 types de route)
+│   └── fcm_service.dart             → Singleton FCM : token, topics, foreground SnackBar (kIsWeb guard)
 ├── screens/
 │   ├── auth/
 │   │   ├── choix_profil.dart        → ÉTAPE 1 : choix pays + glassmorphism
@@ -79,9 +80,15 @@ lib/
 │   │   └── verification_documents_page.dart → Upload docs identité, statut par document
 │   ├── splash_screen.dart              → Animation logo + tagline → AuthGate (mobile uniquement)
 │   ├── admin/
+│   │   ├── accueil_admin.dart          → Cockpit : 8 KPIs + 9 modules + bannière urgence
+│   │   ├── admin_prestataires_page.dart → Gestion avancée : premium, +30j, badge, référencement ⭐, suspension
+│   │   ├── admin_presence_page.dart    → Présence temps réel : en ligne, disponibles, récents
+│   │   ├── admin_analytics_page.dart   → Analytics : top métiers, communes, répartition pays
+│   │   ├── admin_notifications_page.dart → Architecture push (audiences, preview, guide FCM)
 │   │   ├── admin_documents_page.dart   → Validation/rejet docs (accès is_admin=true)
 │   │   ├── admin_signalements_page.dart → Gestion signalements utilisateurs
-│   │   ├── admin_users_page.dart       → Suspension/réactivation comptes
+│   │   ├── admin_users_page.dart       → Vue globale suspension/réactivation comptes
+│   │   ├── contacts_admin_page.dart    → Contacts, filtres, export CSV
 │   │   └── admin_demandes_domestiques_page.dart → Workflow demandes ménagère/servante/serveuse
 │   ├── interventions/
 │   │   ├── demande_intervention_page.dart   → Créer intervention (client)
@@ -181,6 +188,7 @@ lib/
 | **Migrations SQL idempotentes** | 5 triggers avec `DROP TRIGGER IF EXISTS` avant création — plus d'erreur "already exists" |
 | **Messages lus/non lus** | `est_lu BOOLEAN` + accusés de lecture ✓/✓✓ dans les bulles, `_markMessagesRead()` automatique à l'ouverture du chat — SQL §18 à exécuter |
 | **Photos dans le chat** | Bouton "Photo" dans ChatInputBar → ImagePicker → Storage bucket `chat-images` → `image_url` dans messages — bucket à créer dans Supabase Dashboard |
+| **Messages vocaux** | `AudioRecordingBar` (enregistrement avec timer + annuler/envoyer) + `AudioMessageBubble` (play/pause/slider WhatsApp-style) + `ChatActions` service (upload + insert) — Format m4a (mobile) / webm (web) — SQL §19 + bucket `chat-audio` à créer — Mic button quand champ vide, send button quand texte présent |
 
 ### ⚠️ PROBLÈMES CONNUS / DETTE TECHNIQUE
 
@@ -323,6 +331,12 @@ Lancement app
 - **Pattern Stream :** `.stream(primaryKey: ['id']).eq('user_id', uid)` pour temps réel
 
 ---
+
+*Dernière mise à jour : 2026-05-30 — Session 19 : Push Notifications V1 — `fcm_service.dart` (singleton FCM : token, 5 topics, foreground SnackBar, kIsWeb guard), `notification_prefs_page.dart` (5 toggles JSONB : messages/demandes/documents/marketing/système, master switch push_enabled), `main.dart` refactorisé (FcmService.instance.init() avec role+isPremium, is_premium dans query profil), `notification_router.dart` (3 nouvelles routes : nouveau_prestataire→AdminPrestatairesPage, demande_service/demande_sensible→AdminDemandesDomestiquesPage), `profil_tab.dart` (section Paramètres + lien NotificationPrefsPage), `web/firebase-messaging-sw.js` (service worker FCM complet avec importScripts, onBackgroundMessage, notificationclick). SQL §21 (fcm_token, push_enabled, notification_preferences, table notifications_push, 2 triggers SECURITY DEFINER). flutter analyze 0 issues. Buckets chat-images, chat-audio, documents + SQL §18–§21 + is_reference_formelpro à exécuter en DB.*
+
+*Dernière mise à jour : 2026-05-30 — Session 18 : Dashboard Admin professionnel — `AccueilAdmin` refait (8 KPIs + 9 modules + bannière urgence), `AdminPrestatairesPage` (premium/prolonger/badge vérifié/référencement ⭐ FormelPro/suspension via bottom sheet), `AdminPresencePage` (StreamBuilder en ligne + stats), `AdminAnalyticsPage` (top métiers/communes, répartition pays, qualité), `AdminNotificationsPage` (audiences/prévisualisation/guide FCM, envoi désactivé en attente Edge Function). SQL §20 `is_reference_formelpro` ajouté à migrations.sql. flutter analyze 0 issues.*
+
+*Session 17 précédente : Messages vocaux — `AudioRecordingBar` (timer pulsant, cancel/send, cross-platform bytes), `AudioMessageBubble` (play/pause/slider/duration WhatsApp-style, `audioplayers` UrlSource streaming), `ChatActions` service (uploadAndSendImage, sendAudio, sendProforma, confirmIntervention, markMessagesRead — extrait de chat_screen), `ChatInputBar` mic↔send toggle via `ValueListenableBuilder`, `ChatMessageList` route `message_type=='audio'` → `AudioMessageBubble`, `chat_screen.dart` refactorisé (367→257L). Permissions RECORD_AUDIO (Android) + NSMicrophoneUsageDescription (iOS). Dépendances : record ^5.1.3, audioplayers ^6.1.0, path_provider ^2.1.4. SQL §19 + Storage `chat-audio` à créer + RLS Storage dans Supabase.*
 
 *Dernière mise à jour : 2026-05-28 — Session 16 : Option B polissage — Onboarding 3 slides (`OnboardingScreen` dark, PageView, dot indicator, SharedPreferences `onboarding_done`, skip/suivant/commencer), `SplashScreen._navigate()` async + check flag, Logout FCM (`unsubscribeFromTopic('user_$uid')` avant `signOut()` dans `ProfilLogoutButton`), nettoyage 11 assets orphelins (`WhatsApp.zip`, anciens fonds, `choix_drapeau*`). flutter analyze 0 issues.*
 

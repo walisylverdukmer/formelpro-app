@@ -52,7 +52,9 @@
       "Bash(Write-Output \"Anciens fichiers supprimés\")",
       "Bash(Select-String -Path \"c:\\\\Users\\\\HP\\\\Documents\\\\FormelPro\\\\lib\\\\screens\\\\complete_profil_page.dart\" -Pattern \"^\\\\s*\\\\}\")",
       "Bash(Select-Object -Last 5)",
-      "Bash(Format-Table LineNumber, Line)"
+      "Bash(Format-Table LineNumber, Line)",
+      "Bash(Select-String -Path \"c:\\\\Users\\\\HP\\\\Documents\\\\FormelPro\\\\docs\\\\supabase\\\\migrations.sql\" -Pattern \"^-- §\")",
+      "Bash(echo \"EXIT: $?\")"
     ]
   }
 }
