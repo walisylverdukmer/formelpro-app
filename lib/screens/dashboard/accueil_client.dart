@@ -1,6 +1,10 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:formelpro/screens/auth/page_connexion_principale.dart';
 import 'package:formelpro/services/technicien_service.dart';
 import 'package:formelpro/utils/distance_utils.dart';
 import 'package:formelpro/widgets/carte_technicien.dart';
@@ -134,6 +138,22 @@ class _AccueilClientState extends State<AccueilClient>
     }
   }
 
+  Future<void> _logout() async {
+    final uid = Supabase.instance.client.auth.currentUser?.id;
+    if (uid != null && !kIsWeb) {
+      try {
+        await FirebaseMessaging.instance.unsubscribeFromTopic('user_$uid');
+      } catch (_) {}
+    }
+    await Supabase.instance.client.auth.signOut();
+    if (mounted) {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const PageConnexionPrincipale()),
+        (route) => false,
+      );
+    }
+  }
+
   void _resetFilters() {
     setState(() {
       _filtres = const FiltresTechniciens();
@@ -179,6 +199,8 @@ class _AccueilClientState extends State<AccueilClient>
                     searchController: _searchController,
                     onSearch: _fetchTechniciens,
                     onOpenFiltres: () => _openFiltres(primaryColor),
+                    photoProfilUrl: widget.userData['photo_profil_url'] as String?,
+                    onLogout: _logout,
                     onLocationPicked: (result) {
                       if (!mounted) return;
                       setState(() {

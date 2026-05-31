@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'location_picker_widget.dart';
+import 'notification_badge.dart';
 
 class AccueilHeader extends StatelessWidget {
   final String prenom;
@@ -14,6 +15,8 @@ class AccueilHeader extends StatelessWidget {
   final VoidCallback onSearch;
   final VoidCallback onOpenFiltres;
   final void Function(Map<String, dynamic>)? onLocationPicked;
+  final String? photoProfilUrl;
+  final VoidCallback? onLogout;
 
   const AccueilHeader({
     super.key,
@@ -27,50 +30,95 @@ class AccueilHeader extends StatelessWidget {
     this.commune,
     this.filtresCount = 0,
     this.onLocationPicked,
+    this.photoProfilUrl,
+    this.onLogout,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       color: Colors.white,
-      padding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
+      padding: const EdgeInsets.fromLTRB(20, 16, 16, 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Text(
-                "Bonjour $prenom 👋",
-                style: GoogleFonts.inter(
-                    fontSize: 15, color: const Color(0xFF64748B)),
-              ),
-              const Spacer(),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: Image.asset(
-                  flagPath,
-                  width: 28,
-                  height: 18,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
+          _buildProfileRow(context),
+          const SizedBox(height: 10),
           Text(
-            "Besoin d'un pro ?",
+            "Besoin d'un technicien ?",
             style: GoogleFonts.poppins(
-              fontSize: 26,
+              fontSize: 24,
               fontWeight: FontWeight.bold,
               color: const Color(0xFF0F172A),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
           _buildSearchBar(),
           const SizedBox(height: 10),
           _buildLocationRow(context),
         ],
       ),
+    );
+  }
+
+  Widget _buildProfileRow(BuildContext context) {
+    return Row(
+      children: [
+        // Photo de profil
+        CircleAvatar(
+          radius: 20,
+          backgroundColor: primaryColor.withValues(alpha: 0.12),
+          backgroundImage: (photoProfilUrl != null && photoProfilUrl!.isNotEmpty)
+              ? NetworkImage(photoProfilUrl!)
+              : null,
+          onBackgroundImageError: (photoProfilUrl != null && photoProfilUrl!.isNotEmpty)
+              ? (_, __) {}
+              : null,
+          child: (photoProfilUrl == null || photoProfilUrl!.isEmpty)
+              ? Icon(Icons.person_rounded, color: primaryColor, size: 22)
+              : null,
+        ),
+        const SizedBox(width: 10),
+        // Salutation
+        Expanded(
+          child: Text(
+            'Bonjour $prenom 👋',
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              color: const Color(0xFF475569),
+              fontWeight: FontWeight.w500,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        // Bouton notifications
+        const NotificationBadge(
+          iconColor: Color(0xFF1E293B),
+          badgeBorderColor: Colors.white,
+        ),
+        // Bouton déconnexion
+        if (onLogout != null)
+          IconButton(
+            icon: const Icon(Icons.logout_rounded,
+                color: Color(0xFF94A3B8), size: 20),
+            onPressed: onLogout,
+            tooltip: 'Déconnexion',
+            padding: const EdgeInsets.all(6),
+            constraints: const BoxConstraints(),
+          ),
+        const SizedBox(width: 6),
+        // Drapeau pays
+        ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: Image.asset(
+            flagPath,
+            width: 28,
+            height: 18,
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => const SizedBox(width: 28, height: 18),
+          ),
+        ),
+      ],
     );
   }
 

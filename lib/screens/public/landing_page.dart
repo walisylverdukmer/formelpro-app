@@ -1045,7 +1045,7 @@ class _LandingPageState extends State<LandingPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('© 2025 FormelPro. Tous droits réservés.',
+              Text('© 2026 FormelPro by Walisylver. Tous droits réservés.',
                   style: GoogleFonts.inter(
                       fontSize: 11, color: Colors.white24)),
               Row(

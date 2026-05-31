@@ -3,7 +3,14 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class NotificationBadge extends StatelessWidget {
-  const NotificationBadge({super.key});
+  final Color iconColor;
+  final Color badgeBorderColor;
+
+  const NotificationBadge({
+    super.key,
+    this.iconColor = Colors.white,
+    this.badgeBorderColor = const Color(0xFF1E293B),
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +34,7 @@ class NotificationBadge extends StatelessWidget {
           alignment: Alignment.center,
           children: [
             IconButton(
-              icon: const Icon(Icons.notifications_none_rounded, size: 28, color: Colors.white),
+              icon: Icon(Icons.notifications_none_rounded, size: 24, color: iconColor),
               onPressed: () => _showNotificationSheet(context, userId, userNotifs),
             ),
             if (count > 0)
@@ -39,7 +46,7 @@ class NotificationBadge extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: const Color(0xFFE67E22),
                     shape: BoxShape.circle,
-                    border: Border.all(color: const Color(0xFF1E293B), width: 1.5),
+                    border: Border.all(color: badgeBorderColor, width: 1.5),
                   ),
                   constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
                   child: Text(
