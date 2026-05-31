@@ -2,6 +2,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:formelpro/screens/dashboard/details_technicien.dart';
 import 'package:formelpro/screens/auth/page_connexion_principale.dart';
@@ -215,6 +216,123 @@ class ProfilLogoutButton extends StatelessWidget {
             side: BorderSide(color: Colors.redAccent.withValues(alpha: 0.2)),
           ),
         ),
+      ),
+    );
+  }
+}
+
+// ─── WhatsApp contact sheet ───────────────────────────────────────────────────
+
+void showWhatsAppContactSheet(BuildContext context, Color accentColor) {
+  showModalBottomSheet(
+    context: context,
+    backgroundColor: Colors.transparent,
+    builder: (_) => Container(
+      decoration: const BoxDecoration(
+        color: Color(0xFF0F172A),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      padding: const EdgeInsets.fromLTRB(24, 20, 24, 40),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Container(
+              width: 36, height: 4,
+              decoration: BoxDecoration(
+                color: Colors.white24,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'Contacter FormelPro',
+            style: GoogleFonts.poppins(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Choisissez un numéro WhatsApp',
+            style: GoogleFonts.inter(color: Colors.white38, fontSize: 13),
+          ),
+          const SizedBox(height: 20),
+          const WhatsAppContactTile(
+            label: 'Support client',
+            number: '+225 07 13 53 66 02',
+            waNumber: '2250713536602',
+          ),
+          const SizedBox(height: 12),
+          const WhatsAppContactTile(
+            label: 'Support prestataire',
+            number: '+225 07 10 75 00 88',
+            waNumber: '2250710750088',
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+class WhatsAppContactTile extends StatelessWidget {
+  final String label;
+  final String number;
+  final String waNumber;
+
+  const WhatsAppContactTile({
+    super.key,
+    required this.label,
+    required this.number,
+    required this.waNumber,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => launchUrl(
+        Uri.parse('https://wa.me/$waNumber'),
+        mode: LaunchMode.externalApplication,
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.04),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        ),
+        child: Row(children: [
+          Container(
+            padding: const EdgeInsets.all(9),
+            decoration: BoxDecoration(
+              color: const Color(0xFF25D366).withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(Icons.chat_rounded,
+                color: Color(0xFF25D366), size: 20),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label,
+                    style: GoogleFonts.inter(
+                        fontSize: 14,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w500)),
+                Text(number,
+                    style: GoogleFonts.inter(
+                        fontSize: 12, color: Colors.white38)),
+              ],
+            ),
+          ),
+          const Icon(Icons.open_in_new_rounded,
+              color: Color(0xFF25D366), size: 16),
+        ]),
       ),
     );
   }

@@ -15,12 +15,14 @@ class AudioRecordingBar extends StatefulWidget {
   final Color accentColor;
   final OnAudioReady onSend;
   final VoidCallback onCancel;
+  final VoidCallback? onPermissionDenied;
 
   const AudioRecordingBar({
     super.key,
     required this.accentColor,
     required this.onSend,
     required this.onCancel,
+    this.onPermissionDenied,
   });
 
   @override
@@ -41,6 +43,7 @@ class _AudioRecordingBarState extends State<AudioRecordingBar> {
 
   Future<void> _startRecording() async {
     if (!await _recorder.hasPermission()) {
+      widget.onPermissionDenied?.call();
       widget.onCancel();
       return;
     }

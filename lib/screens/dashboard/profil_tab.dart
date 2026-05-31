@@ -496,6 +496,15 @@ class _ProfilTabState extends State<ProfilTab> {
                               ),
                             ),
                           ),
+                          const ProfilDivider(),
+                          ProfilActionTile(
+                            icon: Icons.chat_rounded,
+                            title: "Nous contacter",
+                            subtitle: "Support via WhatsApp",
+                            accentColor: const Color(0xFF25D366),
+                            onTap: () => showWhatsAppContactSheet(
+                                context, widget.accentColor),
+                          ),
                         ]),
                         if (_localUserData['is_admin'] == true) ...[
                           const SizedBox(height: 25),
@@ -550,3 +559,4 @@ class _ProfilTabState extends State<ProfilTab> {
     );
   }
 }
+

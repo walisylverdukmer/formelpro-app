@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
@@ -156,7 +158,14 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  void _startRecording() => setState(() => _isRecording = true);
+  void _startRecording() {
+    if (kIsWeb) {
+      _showSnackBar('Messages vocaux disponibles sur l\'application mobile uniquement');
+      return;
+    }
+    setState(() => _isRecording = true);
+  }
+
   void _cancelRecording() => setState(() => _isRecording = false);
 
   Future<void> _onAudioReady(
@@ -318,6 +327,10 @@ class _ChatScreenState extends State<ChatScreen> {
             accentColor: widget.accentColor,
             onSend: _onAudioReady,
             onCancel: _cancelRecording,
+            onPermissionDenied: () => _showSnackBar(
+              'Accès au microphone refusé. Vérifiez les permissions dans les réglages.',
+              seconds: 4,
+            ),
           )
         else
           ChatInputBar(

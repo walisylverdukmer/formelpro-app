@@ -54,7 +54,12 @@
       "Bash(Select-Object -Last 5)",
       "Bash(Format-Table LineNumber, Line)",
       "Bash(Select-String -Path \"c:\\\\Users\\\\HP\\\\Documents\\\\FormelPro\\\\docs\\\\supabase\\\\migrations.sql\" -Pattern \"^-- §\")",
-      "Bash(echo \"EXIT: $?\")"
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(Get-Content \"c:\\\\Users\\\\HP\\\\Documents\\\\FormelPro\\\\lib\\\\screens\\\\dashboard\\\\profil_tab.dart\")",
+      "Bash(Measure-Object -Line)",
+      "Bash(powershell -Command \"\\(Get-Content 'c:\\\\Users\\\\HP\\\\Documents\\\\FormelPro\\\\lib\\\\screens\\\\dashboard\\\\profil_tab.dart'\\).Count\")",
+      "Bash(powershell -Command \"\\(Get-Content 'c:\\\\Users\\\\HP\\\\Documents\\\\FormelPro\\\\lib\\\\widgets\\\\profil\\\\profil_widgets.dart'\\).Count\")",
+      "PowerShell(\\(Get-Content 'c:\\\\Users\\\\HP\\\\Documents\\\\FormelPro\\\\lib\\\\screens\\\\dashboard\\\\profil_tab.dart'\\).Count; \\(Get-Content 'c:\\\\Users\\\\HP\\\\Documents\\\\FormelPro\\\\lib\\\\widgets\\\\profil\\\\profil_widgets.dart'\\).Count)"
     ]
   }
 }

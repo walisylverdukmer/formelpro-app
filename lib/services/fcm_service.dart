@@ -25,7 +25,7 @@ class FcmService {
     required String role,
     required bool isPremium,
   }) async {
-    if (kIsWeb) return;
+    if (kIsWeb || _initialized) return;
     try {
       final settings = await _fm.requestPermission(
         alert: true, badge: true, sound: true,
