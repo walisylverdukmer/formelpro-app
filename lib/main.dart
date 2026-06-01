@@ -91,7 +91,9 @@ class _FormelProAppState extends State<FormelProApp> with WidgetsBindingObserver
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) setState(() {});
+    // Aucun setState ici — rebuilder l'arbre entier sur resume provoquerait un écran noir.
+    // Supabase reconnecte automatiquement. PresenceService gère est_en_ligne.
+    debugPrint('[AppLifecycle] $state');
   }
 
   Future<void> _setupFCMRouting() async {
@@ -138,18 +140,33 @@ class _FormelProAppState extends State<FormelProApp> with WidgetsBindingObserver
 
 // =============================================================================
 // AUTHGATE — Gère la persistance de connexion et l'abonnement FCM
+// StatefulWidget obligatoire pour mémoriser la future du profil et éviter
+// un re-fetch Supabase (+ flash LoadingScreen) à chaque rebuild parent.
 // =============================================================================
-class AuthGate extends StatelessWidget {
+class AuthGate extends StatefulWidget {
   const AuthGate({super.key});
 
-  // Pas de try-catch : les erreurs remontent dans FutureBuilder.hasError
-  // maybeSingle() retourne null si aucune ligne (nouveau user Google)
-  Future<Map<String, dynamic>?> _getUserProfile(String userId) {
-    return Supabase.instance.client
+  @override
+  State<AuthGate> createState() => _AuthGateState();
+}
+
+class _AuthGateState extends State<AuthGate> {
+  Future<Map<String, dynamic>?>? _profileFuture;
+  String? _cachedUserId;
+
+  // Retourne la future mémorisée si l'userId n'a pas changé.
+  // Crée une nouvelle requête uniquement au premier appel ou après logout/re-login.
+  Future<Map<String, dynamic>?> _getOrFetchProfile(String userId) {
+    if (_profileFuture != null && _cachedUserId == userId) {
+      return _profileFuture!;
+    }
+    _cachedUserId = userId;
+    _profileFuture = Supabase.instance.client
         .from('utilisateurs')
         .select('role, pays, a_complete_profil, is_premium')
         .eq('id', userId)
         .maybeSingle();
+    return _profileFuture!;
   }
 
   @override
@@ -165,17 +182,19 @@ class AuthGate extends StatelessWidget {
             Supabase.instance.client.auth.currentSession;
 
         if (session == null) {
+          // Reset cache pour forcer un re-fetch au prochain login
+          _profileFuture = null;
+          _cachedUserId = null;
           return const PageConnexionPrincipale();
         }
 
         return FutureBuilder<Map<String, dynamic>?>(
-          future: _getUserProfile(session.user.id),
+          future: _getOrFetchProfile(session.user.id),
           builder: (context, profileSnapshot) {
             if (profileSnapshot.connectionState == ConnectionState.waiting) {
               return const _LoadingScreen();
             }
 
-            // Erreur réseau / DB : retour à la page de connexion
             if (profileSnapshot.hasError) {
               debugPrint("AuthGate erreur profil: ${profileSnapshot.error}");
               return const PageConnexionPrincipale();
@@ -183,20 +202,17 @@ class AuthGate extends StatelessWidget {
 
             final data = profileSnapshot.data;
 
-            // Pas de ligne dans utilisateurs → nouvel utilisateur Google
             if (data == null) {
               final provider =
                   session.user.appMetadata['provider'] as String? ?? '';
               if (provider == 'google') {
                 return const GoogleOnboardingPage();
               }
-              // Cas anormal (email sans profil) → retour login
               return const PageConnexionPrincipale();
             }
 
             final bool aCompleteProfil = data['a_complete_profil'] ?? false;
 
-            // Initialisation FCM avec rôle et statut premium
             FcmService.instance.init(
               uid: session.user.id,
               role: data['role'] as String? ?? 'client',

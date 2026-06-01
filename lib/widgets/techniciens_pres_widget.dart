@@ -56,7 +56,7 @@ class _TechniciensPresWidgetState extends State<TechniciensPresWidget> {
           .from('utilisateurs')
           .select(
             'id, nom_complet, metier_personnalise, photo_profil_url, score_global, '
-            'commune, ville, disponible, est_en_ligne, is_premium, is_identite_verifiee, '
+            'commune, ville, disponible, est_en_ligne, is_premium, premium_level, is_identite_verifiee, '
             'latitude, longitude',
           )
           .eq('role', 'technicien')

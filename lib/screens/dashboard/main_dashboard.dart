@@ -24,7 +24,8 @@ class MainDashboardPage extends StatefulWidget {
   State<MainDashboardPage> createState() => _MainDashboardPageState();
 }
 
-class _MainDashboardPageState extends State<MainDashboardPage> {
+class _MainDashboardPageState extends State<MainDashboardPage>
+    with WidgetsBindingObserver {
   int _currentIndex = 0;
   Map<String, dynamic>? _userData;
   bool _isLoading = true;
@@ -34,14 +35,27 @@ class _MainDashboardPageState extends State<MainDashboardPage> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _unreadCount.dispose();
     _presenceService.stop();
+    _notificationService.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    debugPrint('[Dashboard] AppLifecycle: $state');
+    if (state == AppLifecycleState.resumed) {
+      // Relancer le heartbeat de présence sans rebuild de l'UI
+      final uid = _userData?['id'] as String?;
+      if (uid != null) _presenceService.start(uid);
+    }
   }
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _fetchUserData();
     _checkPendingNotification();
   }
@@ -62,7 +76,7 @@ class _MainDashboardPageState extends State<MainDashboardPage> {
         final response = await supabase
             .from('utilisateurs')
             .select(
-              'id, role, pays, prenom, nom_complet, photo_profil_url, ville, commune, quartier, score_global, note_moyenne, total_transactions, is_premium, metier_personnalise, disponible, is_identite_verifiee, a_complete_profil, telephone, savoir_faire, is_admin',
+              'id, role, pays, prenom, nom_complet, photo_profil_url, ville, commune, quartier, score_global, note_moyenne, total_transactions, is_premium, premium_until, metier_personnalise, disponible, is_identite_verifiee, a_complete_profil, telephone, savoir_faire, is_admin',
             )
             .eq('id', user.id)
             .single();

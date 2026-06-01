@@ -43,6 +43,12 @@
                 android:name="io.flutter.embedding.android.NormalTheme"
                 android:resource="@style/NormalTheme" />
 
+            <!-- TextureView au lieu de SurfaceView : évite l'écran noir -->
+            <!-- quand Android détruit la surface GPU lors du passage en arrière-plan -->
+            <meta-data
+                android:name="io.flutter.embedding.android.EnableSurfaceProducerSurface"
+                android:value="false" />
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

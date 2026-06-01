@@ -307,6 +307,13 @@ class _ProfilTabState extends State<ProfilTab> {
         : 'assets/images/tech_cmr.jpg';
     final String role = _localUserData['role'] ?? 'client';
     final bool isPremium = _localUserData['is_premium'] ?? false;
+    final String premiumUntilLabel = () {
+      final raw = _localUserData['premium_until'] as String?;
+      if (raw == null) return '';
+      final dt = DateTime.tryParse(raw);
+      if (dt == null) return '';
+      return "jusqu'au ${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year}";
+    }();
 
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A),
@@ -360,7 +367,7 @@ class _ProfilTabState extends State<ProfilTab> {
                               icon: Icons.rocket_launch_rounded,
                               label: "Statut Visibilité",
                               value: isPremium
-                                  ? "Boost Prioritaire Actif"
+                                  ? "Boost Prioritaire Actif${premiumUntilLabel.isNotEmpty ? ' · $premiumUntilLabel' : ''}"
                                   : "Visibilité Standard",
                               trailing: isPremium
                                   ? const Icon(Icons.verified,

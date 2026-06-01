@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:formelpro/utils/distance_utils.dart';
+import 'package:formelpro/widgets/carte_technicien_badges.dart';
 
 class TechnicienCard extends StatelessWidget {
   final Map<String, dynamic> tech;
@@ -79,6 +80,14 @@ class TechnicienCard extends StatelessWidget {
                     right: 8,
                     child: Icon(Icons.verified_rounded,
                         color: Color(0xFF3B82F6), size: 16),
+                  ),
+                if (isPremium)
+                  Positioned(
+                    bottom: 8,
+                    right: 8,
+                    child: TechnicianPremiumBadge(
+                      level: (tech['premium_level'] as num?)?.toInt() ?? 1,
+                    ),
                   ),
               ],
             ),
