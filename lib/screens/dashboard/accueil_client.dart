@@ -1,7 +1,11 @@
+import 'dart:async';
+import 'dart:convert';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:formelpro/screens/auth/page_connexion_principale.dart';
@@ -54,6 +58,11 @@ class _AccueilClientState extends State<AccueilClient>
       showCountryWelcomeModal(context, widget.userData);
       _loadTopCategories();
       _fetchTechniciens();
+      // Détecter la commune via GPS si non renseignée
+      final commune = widget.userData['commune'] as String?;
+      if (commune == null || commune.isEmpty) {
+        _autoDetectCommune();
+      }
     });
   }
 
@@ -138,7 +147,91 @@ class _AccueilClientState extends State<AccueilClient>
     }
   }
 
+  Future<void> _autoDetectCommune() async {
+    if (kIsWeb) return;
+    try {
+      var perm = await Geolocator.checkPermission();
+      if (perm == LocationPermission.denied) {
+        perm = await Geolocator.requestPermission();
+      }
+      if (perm != LocationPermission.whileInUse &&
+          perm != LocationPermission.always) {
+        return;
+      }
+      final pos = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.medium,
+        timeLimit: const Duration(seconds: 10),
+      );
+      final uri = Uri.parse(
+        'https://nominatim.openstreetmap.org/reverse?format=json'
+        '&lat=${pos.latitude}&lon=${pos.longitude}&accept-language=fr',
+      );
+      final resp = await http
+          .get(uri, headers: {'User-Agent': 'FormelPro/1.0'})
+          .timeout(const Duration(seconds: 8));
+      if (resp.statusCode != 200) return;
+      final data = jsonDecode(resp.body) as Map<String, dynamic>;
+      final address = data['address'] as Map<String, dynamic>? ?? {};
+      final commune = address['suburb'] as String? ??
+          address['district'] as String? ??
+          address['town'] as String? ??
+          '';
+      if (commune.isNotEmpty && mounted) {
+        setState(() {
+          _filtres = _filtres.copyWith(commune: commune);
+        });
+        _fetchTechniciens();
+      }
+    } catch (e) {
+      debugPrint('AutoDetect commune error: $e');
+    }
+  }
+
   Future<void> _logout() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF1E293B),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          'Déconnexion',
+          style: GoogleFonts.poppins(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 17,
+          ),
+        ),
+        content: Text(
+          'Êtes-vous sûr de vouloir vous déconnecter ?',
+          style: GoogleFonts.inter(
+            color: Colors.white60,
+            fontSize: 14,
+            height: 1.5,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text('Annuler',
+                style: GoogleFonts.inter(color: Colors.white54)),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+              elevation: 0,
+            ),
+            child: Text('Déconnexion',
+                style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
     final uid = Supabase.instance.client.auth.currentUser?.id;
     if (uid != null && !kIsWeb) {
       try {
@@ -282,10 +375,19 @@ class _AccueilClientState extends State<AccueilClient>
                   TechniciensPresWidget(
                     pays: pays,
                     accentColor: primaryColor,
-                    commune: widget.userData['commune'] as String?,
+                    commune: _filtres.commune ??
+                        widget.userData['commune'] as String?,
                     clientId: widget.userData['id']?.toString(),
                     clientLat: (widget.userData['latitude'] as num?)?.toDouble(),
                     clientLng: (widget.userData['longitude'] as num?)?.toDouble(),
+                    onElargi: _filtres.commune != null
+                        ? () {
+                            setState(() {
+                              _filtres = _filtres.copyWith(commune: null);
+                            });
+                            _fetchTechniciens();
+                          }
+                        : null,
                   ),
                   const SizedBox(height: 28),
                   Padding(

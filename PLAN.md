@@ -220,6 +220,7 @@ Landing
 | 2.4 | États vides premium                       | ✅ TechnicienEmptyState contextuel (filtres, catégorie, zone) |
 | 2.5 | Filtres métiers/localisation              | ✅ Section Commune/Zone + Type mission (Ponctuel/Journalier/Résidentiel) + badge numéroté filtres actifs |
 | 2.6 | Fiches techniciens premium                | ✅ Favori cœur, statut 3e stat, bannière premium, avis clients |
+| 2.7 | En-tête dashboard client enrichi          | ✅ `AccueilHeader` — CircleAvatar photo profil, `NotificationBadge` paramétrable, bouton déconnexion (FCM unsubscribe + signOut) |
 
 ---
 

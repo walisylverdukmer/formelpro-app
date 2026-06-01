@@ -1031,3 +1031,96 @@ CREATE TRIGGER trigger_notifier_admins_demande_sensible
   AFTER INSERT ON public.demandes_service_domestique
   FOR EACH ROW EXECUTE FUNCTION public.notifier_admins_demande_sensible();
 
+
+-- =============================================================================
+-- §22. CAMPAGNE LANCEMENT + LIMITES TRANSACTIONS [À EXÉCUTER]
+-- =============================================================================
+-- Campagne 01/06/2026 – 31/07/2026 : Premium automatique à l'inscription.
+-- Post-campagne : client bloqué après 5 demandes, tech après 3 prestations.
+-- Déblocage : code promo admin (table promo_codes) ou paiement futur.
+
+-- 22.1 Colonne premium_until (durée du premium) + is_compte_bloque
+ALTER TABLE public.utilisateurs
+  ADD COLUMN IF NOT EXISTS premium_until TIMESTAMPTZ;
+
+ALTER TABLE public.utilisateurs
+  ADD COLUMN IF NOT EXISTS is_compte_bloque BOOLEAN NOT NULL DEFAULT false;
+
+-- 22.2 Table codes promo admin (architecture déblocage)
+CREATE TABLE IF NOT EXISTS public.promo_codes (
+  id            UUID        NOT NULL DEFAULT gen_random_uuid(),
+  code          TEXT        NOT NULL,
+  description   TEXT,
+  is_active     BOOLEAN     NOT NULL DEFAULT true,
+  max_uses      INTEGER     NOT NULL DEFAULT 0,  -- 0 = illimité
+  uses_count    INTEGER     NOT NULL DEFAULT 0,
+  created_by    UUID        REFERENCES public.utilisateurs(id),
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+  expires_at    TIMESTAMPTZ,
+  CONSTRAINT promo_codes_pkey PRIMARY KEY (id),
+  CONSTRAINT promo_codes_code_key UNIQUE (code)
+);
+
+ALTER TABLE public.promo_codes ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY IF NOT EXISTS "promo_codes_admin_all"
+  ON public.promo_codes FOR ALL
+  USING (public.is_admin());
+
+-- Lecture seule pour les utilisateurs (vérification code promo)
+CREATE POLICY IF NOT EXISTS "promo_codes_users_select"
+  ON public.promo_codes FOR SELECT
+  USING (is_active = true);
+
+-- 22.3 Index pour recherche rapide par code
+CREATE INDEX IF NOT EXISTS idx_promo_codes_code ON public.promo_codes (code);
+
+-- 22.4 Trigger : auto-premium campagne à l'inscription si dans la période
+CREATE OR REPLACE FUNCTION public.auto_premium_campagne_lancement()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_campagne_start TIMESTAMPTZ := '2026-06-01 00:00:00+00';
+  v_campagne_end   TIMESTAMPTZ := '2026-07-31 23:59:59+00';
+BEGIN
+  IF now() >= v_campagne_start AND now() <= v_campagne_end THEN
+    NEW.is_premium     := true;
+    NEW.premium_until  := v_campagne_end;
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trigger_auto_premium_campagne ON public.utilisateurs;
+CREATE TRIGGER trigger_auto_premium_campagne
+  BEFORE INSERT ON public.utilisateurs
+  FOR EACH ROW EXECUTE FUNCTION public.auto_premium_campagne_lancement();
+
+-- 22.5 Vue utilitaire : compter les interventions actives par utilisateur
+CREATE OR REPLACE VIEW public.v_usage_utilisateurs AS
+SELECT
+  u.id,
+  u.role,
+  u.pays,
+  u.is_premium,
+  u.premium_until,
+  u.is_compte_bloque,
+  COALESCE((
+    SELECT COUNT(*) FROM public.interventions i
+    WHERE i.client_id = u.id
+      AND i.statut IN ('termine', 'valide', 'en_cours')
+  ), 0) AS nb_demandes_client,
+  COALESCE((
+    SELECT COUNT(*) FROM public.interventions i
+    WHERE i.tech_id = u.id
+      AND i.statut IN ('termine', 'valide', 'en_cours')
+  ), 0) AS nb_prestations_tech
+FROM public.utilisateurs u;
+
+-- NOTE : Insérer des codes promo depuis le Dashboard Admin :
+-- INSERT INTO public.promo_codes (code, description, max_uses)
+-- VALUES ('FORMELPRO2026', 'Code déblocage lancement', 0);
+

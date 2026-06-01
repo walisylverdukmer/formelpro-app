@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'package:formelpro/screens/complete_profil_page.dart';
 import 'package:formelpro/screens/auth/page_connexion_principale.dart';
+import 'package:formelpro/services/campaign_service.dart';
 
 final supabase = Supabase.instance.client;
 
@@ -71,11 +72,15 @@ class _AuthEmailMdpPageState extends State<AuthEmailMdpPage> {
       );
 
       if (res.user != null) {
+        final isPremiumCampaign = CampaignService.isActiveCampaign();
         await supabase.from('utilisateurs').upsert({
           'id': res.user!.id,
           'role': widget.role,
           'pays': widget.paysCode,
           'email': res.user!.email,
+          if (isPremiumCampaign) 'is_premium': true,
+          if (isPremiumCampaign)
+            'premium_until': CampaignService.campaignEnd.toIso8601String(),
         }, onConflict: 'id');
 
         if (mounted) {

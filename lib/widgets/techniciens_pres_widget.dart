@@ -13,6 +13,7 @@ class TechniciensPresWidget extends StatefulWidget {
   final String? clientId;
   final double? clientLat;
   final double? clientLng;
+  final VoidCallback? onElargi;
 
   const TechniciensPresWidget({
     super.key,
@@ -22,6 +23,7 @@ class TechniciensPresWidget extends StatefulWidget {
     this.clientId,
     this.clientLat,
     this.clientLng,
+    this.onElargi,
   });
 
   @override
@@ -109,60 +111,101 @@ class _TechniciensPresWidgetState extends State<TechniciensPresWidget> {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Techniciens près de vous',
-                    style: GoogleFonts.poppins(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFF0F172A),
-                    ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Techniciens près de vous',
+                        style: GoogleFonts.poppins(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF0F172A),
+                        ),
+                      ),
+                      if (widget.commune != null && widget.commune!.isNotEmpty)
+                        Row(
+                          children: [
+                            Icon(Icons.location_on_rounded,
+                                size: 11, color: widget.accentColor),
+                            const SizedBox(width: 3),
+                            Text(
+                              widget.commune!,
+                              style: GoogleFonts.inter(
+                                fontSize: 11,
+                                color: widget.accentColor,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                    ],
                   ),
-                  if (widget.commune != null && widget.commune!.isNotEmpty)
-                    Text(
-                      widget.commune!,
-                      style: GoogleFonts.inter(
-                        fontSize: 11,
-                        color: widget.accentColor,
-                        fontWeight: FontWeight.w600,
+                  if (!_loading && _techniciens.isNotEmpty)
+                    TextButton(
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => TechnicianSelectionPage(
+                            categoryName: 'Disponibles maintenant',
+                            categoryId: '',
+                            pays: widget.pays,
+                            accentColor: widget.accentColor,
+                            clientId: widget.clientId,
+                            clientLat: widget.clientLat,
+                            clientLng: widget.clientLng,
+                          ),
+                        ),
+                      ),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                        minimumSize: Size.zero,
+                      ),
+                      child: Text(
+                        'Voir plus',
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          color: widget.accentColor,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                 ],
               ),
-              if (!_loading && _techniciens.isNotEmpty)
-                TextButton(
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => TechnicianSelectionPage(
-                        categoryName: 'Disponibles maintenant',
-                        categoryId: '',
-                        pays: widget.pays,
-                        accentColor: widget.accentColor,
-                        clientId: widget.clientId,
-                        clientLat: widget.clientLat,
-                        clientLng: widget.clientLng,
+              if (widget.commune != null &&
+                  widget.commune!.isNotEmpty &&
+                  widget.onElargi != null) ...[
+                const SizedBox(height: 4),
+                GestureDetector(
+                  onTap: widget.onElargi,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.open_in_full_rounded,
+                          size: 12,
+                          color: widget.accentColor.withValues(alpha: 0.65)),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Élargir ma recherche',
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: widget.accentColor.withValues(alpha: 0.65),
+                          fontWeight: FontWeight.w500,
+                          decoration: TextDecoration.underline,
+                          decorationColor:
+                              widget.accentColor.withValues(alpha: 0.4),
+                        ),
                       ),
-                    ),
-                  ),
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    minimumSize: Size.zero,
-                  ),
-                  child: Text(
-                    'Voir plus',
-                    style: GoogleFonts.inter(
-                      fontSize: 13,
-                      color: widget.accentColor,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    ],
                   ),
                 ),
+              ],
             ],
           ),
         ),

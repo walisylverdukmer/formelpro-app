@@ -181,28 +181,83 @@ class FavoriTile extends StatelessWidget {
 class ProfilLogoutButton extends StatelessWidget {
   const ProfilLogoutButton({super.key});
 
+  Future<void> _doLogout(BuildContext context) async {
+    final uid = Supabase.instance.client.auth.currentUser?.id;
+    if (uid != null && !kIsWeb) {
+      try {
+        await FirebaseMessaging.instance.unsubscribeFromTopic('user_$uid');
+      } catch (_) {}
+    }
+    await Supabase.instance.client.auth.signOut();
+    if (context.mounted) {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const PageConnexionPrincipale()),
+        (route) => false,
+      );
+    }
+  }
+
+  Future<void> _confirmLogout(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF1E293B),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          'Déconnexion',
+          style: GoogleFonts.poppins(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 17,
+          ),
+        ),
+        content: Text(
+          'Êtes-vous sûr de vouloir vous déconnecter ?',
+          style: GoogleFonts.inter(
+            color: Colors.white60,
+            fontSize: 14,
+            height: 1.5,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(
+              'Annuler',
+              style: GoogleFonts.inter(
+                color: Colors.white54,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+              elevation: 0,
+            ),
+            child: Text(
+              'Déconnexion',
+              style: GoogleFonts.inter(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && context.mounted) {
+      await _doLogout(context);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
       child: TextButton.icon(
-        onPressed: () async {
-          final uid = Supabase.instance.client.auth.currentUser?.id;
-          if (uid != null && !kIsWeb) {
-            try {
-              await FirebaseMessaging.instance
-                  .unsubscribeFromTopic('user_$uid');
-            } catch (_) {}
-          }
-          await Supabase.instance.client.auth.signOut();
-          if (context.mounted) {
-            Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(
-                  builder: (_) => const PageConnexionPrincipale()),
-              (route) => false,
-            );
-          }
-        },
+        onPressed: () => _confirmLogout(context),
         icon: const Icon(Icons.power_settings_new_rounded,
             color: Colors.redAccent),
         label: const Text("Déconnexion du compte",

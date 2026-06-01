@@ -158,7 +158,7 @@ lib/
 
 ---
 
-## 5. ÉTAT ACTUEL DU PROJET (au 2026-05-27, mis à jour session 14)
+## 5. ÉTAT ACTUEL DU PROJET (au 2026-06-01, mis à jour session 20)
 
 ### ✅ FONCTIONNEL ET COMPLET
 
@@ -187,8 +187,16 @@ lib/
 | **Flutter Web + Vercel routing** | Build web fonctionnel — `vercel.json` corrigé (`outputDirectory: build/web`, SPA catch-all → `index.html`) |
 | **Migrations SQL idempotentes** | 5 triggers avec `DROP TRIGGER IF EXISTS` avant création — plus d'erreur "already exists" |
 | **Messages lus/non lus** | `est_lu BOOLEAN` + accusés de lecture ✓/✓✓ dans les bulles, `_markMessagesRead()` automatique à l'ouverture du chat — SQL §18 à exécuter |
+| **GPS prioritaire inscription** | `GpsLocationButton` — bouton premium pulsant + badge "Recommandé" dans `complete_profil_page.dart` — détection directe GPS + Nominatim → remplit ville/commune/quartier sans ouvrir la carte |
+| **Auto-détect commune accueil** | `AccueilClient._autoDetectCommune()` — détecte la commune GPS au démarrage si non renseignée → applique aux filtres + rechargement techniciens |
+| **Techniciens près de vous GPS** | `TechniciensPresWidget.onElargi` — bouton "Élargir ma recherche" quand filtré par commune — par défaut commune GPS |
+| **Confirmation déconnexion** | Dialog "Êtes-vous sûr ?" avant déconnexion — dans `ProfilLogoutButton` (`profil_widgets.dart`) ET `AccueilClient._logout()` |
+| **Campagne lancement** | `CampaignService` — 01/06/2026–31/07/2026 : Premium automatique à l'inscription — limites post-campagne : client 5 demandes / tech 3 prestations — déblocage code promo ou paiement |
 | **Photos dans le chat** | Bouton "Photo" dans ChatInputBar → ImagePicker → Storage bucket `chat-images` → `image_url` dans messages — bucket à créer dans Supabase Dashboard |
 | **Messages vocaux** | `AudioRecordingBar` (enregistrement avec timer + annuler/envoyer) + `AudioMessageBubble` (play/pause/slider WhatsApp-style) + `ChatActions` service (upload + insert) — Format m4a (mobile) / webm (web) — SQL §19 + bucket `chat-audio` à créer — Mic button quand champ vide, send button quand texte présent |
+| **En-tête dashboard client enrichi** | `AccueilHeader` — `CircleAvatar` photo profil + `NotificationBadge` paramétrable (iconColor/badgeBorderColor) + bouton déconnexion (FCM unsubscribe + signOut + redirect) — `accueil_client.dart` passe `photoProfilUrl` + `onLogout` |
+| **Contact WhatsApp FormelPro** | `showWhatsAppContactSheet` dans profil — 2 numéros : Support client +225 07 13 53 66 02 / Support prestataire +225 07 10 75 00 88 — extrait dans `profil_widgets.dart` |
+| **Copyright landing page** | `landing_page.dart` — footer mis à jour : `© 2026 FormelPro by Walisylver. Tous droits réservés.` |
 
 ### ⚠️ PROBLÈMES CONNUS / DETTE TECHNIQUE
 
@@ -331,6 +339,10 @@ Lancement app
 - **Pattern Stream :** `.stream(primaryKey: ['id']).eq('user_id', uid)` pour temps réel
 
 ---
+
+*Dernière mise à jour : 2026-06-01 — Session 21 : Phase UX géolocalisation + campagne lancement — `GpsLocationButton` (pulsation + badge "Recommandé", détection GPS directe + Nominatim, option carte), `complete_profil_page.dart` intègre GPS bouton premium, `AccueilClient._autoDetectCommune()` (GPS auto au démarrage, filtre commune), `_logout()` dialog confirmation "Êtes-vous sûr de vouloir vous déconnecter ?", `ProfilLogoutButton` idem, `TechniciensPresWidget.onElargi` bouton "Élargir ma recherche" + icône localisation commune, `CampaignService` (isActiveCampaign, applyLaunchPremium, isClientBlocked/isTechBlocked limites 5/3, unlockWithCode promo), `auth_email_mdp.dart` applique is_premium+premium_until si campagne active à l'upsert, SQL §22 (premium_until, is_compte_bloque, table promo_codes RLS, trigger auto_premium_campagne_lancement, vue v_usage_utilisateurs). flutter analyze 0 issues.*
+
+*Dernière mise à jour : 2026-06-01 — Session 20 : Polissage UI — `AccueilHeader` enrichi (CircleAvatar photo profil + NotificationBadge paramétrable iconColor/badgeBorderColor + bouton déconnexion), `accueil_client.dart` ajoute `_logout()` (FCM unsubscribe + signOut + redirect) + passe `photoProfilUrl`/`onLogout`, `profil_widgets.dart` + `showWhatsAppContactSheet` (Support client +225 07 13 53 66 02 / Support prestataire +225 07 10 75 00 88), `landing_page.dart` copyright → `© 2026 FormelPro by Walisylver`, texte "Besoin d'un pro ?" → "Besoin d'un technicien ?", micro-fix voice recording (kIsWeb guard + `onPermissionDenied` callback). flutter analyze 0 issues.*
 
 *Dernière mise à jour : 2026-05-30 — Session 19 : Push Notifications V1 — `fcm_service.dart` (singleton FCM : token, 5 topics, foreground SnackBar, kIsWeb guard), `notification_prefs_page.dart` (5 toggles JSONB : messages/demandes/documents/marketing/système, master switch push_enabled), `main.dart` refactorisé (FcmService.instance.init() avec role+isPremium, is_premium dans query profil), `notification_router.dart` (3 nouvelles routes : nouveau_prestataire→AdminPrestatairesPage, demande_service/demande_sensible→AdminDemandesDomestiquesPage), `profil_tab.dart` (section Paramètres + lien NotificationPrefsPage), `web/firebase-messaging-sw.js` (service worker FCM complet avec importScripts, onBackgroundMessage, notificationclick). SQL §21 (fcm_token, push_enabled, notification_preferences, table notifications_push, 2 triggers SECURITY DEFINER). flutter analyze 0 issues. Buckets chat-images, chat-audio, documents + SQL §18–§21 + is_reference_formelpro à exécuter en DB.*
 

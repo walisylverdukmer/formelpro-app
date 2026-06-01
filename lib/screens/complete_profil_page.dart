@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 
 import 'package:formelpro/screens/dashboard/main_dashboard.dart';
 import 'package:formelpro/widgets/category_picker.dart';
+import 'package:formelpro/widgets/gps_location_button.dart';
 import 'package:formelpro/widgets/location_picker_widget.dart';
 
 final supabase = Supabase.instance.client;
@@ -312,53 +313,28 @@ class _CompleteProfilPageState extends State<CompleteProfilPage> {
               _buildSectionHeader(
                 isCI
                     ? "Localisation (Commune + Quartier)"
-                    : "Localisation (Quartier)",
+                    : "Localisation (Ville + Quartier)",
                 Icons.location_on_outlined,
                 accent,
               ),
-              const SizedBox(height: 12),
-              GestureDetector(
-                onTap: _openLocationPicker,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: accent.withValues(alpha: 0.06),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: accent.withValues(alpha: 0.25),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.my_location_rounded,
-                        color: accent,
-                        size: 18,
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          'Détecter automatiquement ma position',
-                          style: GoogleFonts.inter(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: accent,
-                          ),
-                        ),
-                      ),
-                      Icon(
-                        Icons.arrow_forward_ios_rounded,
-                        color: accent,
-                        size: 14,
-                      ),
-                    ],
-                  ),
-                ),
+              const SizedBox(height: 18),
+              GpsLocationButton(
+                accentColor: accent,
+                paysCode: widget.paysCode,
+                onLocationDetected: (result) {
+                  if (!mounted) return;
+                  setState(() {
+                    final ville = result['ville'] as String? ?? '';
+                    final commune = result['commune'] as String? ?? '';
+                    final quartier = result['quartier'] as String? ?? '';
+                    if (ville.isNotEmpty) _villeController.text = ville;
+                    if (commune.isNotEmpty) _communeController.text = commune;
+                    if (quartier.isNotEmpty) _quartierController.text = quartier;
+                  });
+                },
+                onOpenMap: _openLocationPicker,
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 18),
               _buildField(_villeController, 'Ville', Icons.location_city),
               if (isCI) ...[
                 const SizedBox(height: 12),
