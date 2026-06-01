@@ -8,6 +8,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="description" content="FormelPro — Mise en relation géolocalisée entre clients et techniciens certifiés. Côte d'Ivoire & Cameroun.">
 
+  <!-- Cache invalidation — force no-cache sur les ressources critiques -->
+  <meta http-equiv="Cache-Control" content="no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+
   <!-- PWA / Mobile meta -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -71,6 +76,56 @@
       border-top-color: #E67E22;
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
+    }
+
+    /* ── Bannière mise à jour disponible ── */
+    #fp-update-banner {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 999999;
+      background: #1E293B;
+      border-bottom: 2px solid #E67E22;
+      padding: 12px 20px;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+    #fp-update-banner .upd-msg {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 13px;
+      color: #ffffff;
+      font-weight: 600;
+    }
+    #fp-update-banner .upd-msg span {
+      color: #E67E22;
+    }
+    #fp-update-refresh {
+      background: #E67E22;
+      color: white;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    #fp-update-refresh:active { opacity: 0.85; }
+    #fp-update-dismiss {
+      background: transparent;
+      color: #64748b;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 2px 6px;
+      line-height: 1;
+      flex-shrink: 0;
     }
 
     /* PWA Install Banner */
@@ -137,6 +192,13 @@
 </head>
 <body>
 
+  <!-- ── Bannière mise à jour automatique ── -->
+  <div id="fp-update-banner">
+    <div class="upd-msg">🔄 <span>Nouvelle version FormelPro</span> disponible</div>
+    <button id="fp-update-refresh" onclick="window.location.reload()">Actualiser</button>
+    <button id="fp-update-dismiss">✕</button>
+  </div>
+
   <!-- Splash screen (visible avant le chargement Flutter) -->
   <div id="splash-screen">
     <img src="logo.png" alt="FormelPro">
@@ -157,7 +219,124 @@
   </div>
 
   <script>
-    // ── Splash screen : masquer après le premier rendu Flutter ──
+    // ══════════════════════════════════════════════════════════════
+    //  DÉTECTION AUTOMATIQUE DE MISE À JOUR
+    //  Stratégie : polling de flutter_bootstrap.js (no-store) + SW
+    // ══════════════════════════════════════════════════════════════
+    (function () {
+      var _capturedVersion = null;
+      var _updateShown     = false;
+      var _pollInterval    = null;
+
+      // Extraire serviceWorkerVersion depuis le texte du script bootstrap
+      function _extractVersion(text) {
+        var m = text.match(/serviceWorkerVersion:\s*"(\d+)"/);
+        return m ? m[1] : null;
+      }
+
+      // Afficher la bannière de mise à jour
+      function _showUpdateBanner() {
+        if (_updateShown) return;
+        _updateShown = true;
+        var el = document.getElementById('fp-update-banner');
+        if (el) {
+          el.style.display = 'flex';
+          // Auto-rechargement après 10s si l'onglet est actif
+          setTimeout(function () {
+            if (!document.hidden && !_wasDismissed()) {
+              window.location.reload();
+            }
+          }, 10000);
+        }
+      }
+
+      function _wasDismissed() {
+        return sessionStorage.getItem('fp-upd-dismissed') === '1';
+      }
+
+      // Bouton fermer : masquer pour cette session seulement
+      document.addEventListener('DOMContentLoaded', function () {
+        var dismissBtn = document.getElementById('fp-update-dismiss');
+        if (dismissBtn) {
+          dismissBtn.addEventListener('click', function () {
+            var el = document.getElementById('fp-update-banner');
+            if (el) el.style.display = 'none';
+            sessionStorage.setItem('fp-upd-dismissed', '1');
+          });
+        }
+      });
+
+      // Vérifier la version côté serveur (bypass total du cache)
+      function _checkForUpdate() {
+        if (_updateShown) {
+          clearInterval(_pollInterval);
+          return;
+        }
+        fetch('/flutter_bootstrap.js?' + Date.now(), {
+          cache: 'no-store',
+          headers: { 'Accept': 'application/javascript' }
+        })
+        .then(function (resp) {
+          if (!resp.ok) return null;
+          return resp.text();
+        })
+        .then(function (text) {
+          if (!text) return;
+          var serverVersion = _extractVersion(text);
+          if (!serverVersion) return;
+
+          if (_capturedVersion === null) {
+            // Premier appel : on enregistre la version actuelle
+            _capturedVersion = serverVersion;
+            return;
+          }
+
+          if (serverVersion !== _capturedVersion) {
+            _showUpdateBanner();
+          }
+        })
+        .catch(function () { /* connexion instable — ignorer */ });
+      }
+
+      // Démarrer la surveillance après le premier rendu Flutter
+      window.addEventListener('flutter-first-frame', function () {
+        setTimeout(function () {
+          _checkForUpdate(); // Capture la version actuelle
+          _pollInterval = setInterval(_checkForUpdate, 3 * 60 * 1000); // Toutes les 3 min
+        }, 4000);
+      });
+
+      // Fallback si flutter-first-frame ne se déclenche pas dans les 12s
+      setTimeout(function () {
+        if (_capturedVersion === null) {
+          _checkForUpdate();
+          if (!_pollInterval) {
+            _pollInterval = setInterval(_checkForUpdate, 3 * 60 * 1000);
+          }
+        }
+      }, 12000);
+
+      // Recharger instantanément quand un nouveau Service Worker prend le contrôle
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.addEventListener('controllerchange', function () {
+          if (!_updateShown && !_wasDismissed()) {
+            window.location.reload();
+          }
+        });
+      }
+
+      // Recharger au retour en avant-plan (onglet re-sélectionné) si mise à jour détectée
+      document.addEventListener('visibilitychange', function () {
+        if (!document.hidden && _updateShown && !_wasDismissed()) {
+          window.location.reload();
+        }
+      });
+    })();
+
+
+    // ══════════════════════════════════════════════════════════════
+    //  SPLASH SCREEN
+    // ══════════════════════════════════════════════════════════════
     window.addEventListener('flutter-first-frame', function () {
       var splash = document.getElementById('splash-screen');
       if (splash) {
@@ -166,15 +345,16 @@
       }
     });
 
-    // ── PWA install prompt ──
+
+    // ══════════════════════════════════════════════════════════════
+    //  PWA INSTALL BANNER
+    // ══════════════════════════════════════════════════════════════
     var deferredPrompt = null;
 
-    // Détection : app déjà installée en mode standalone (PWA / TWA)
     var isStandalone = window.matchMedia('(display-mode: standalone)').matches
         || window.navigator.standalone === true
         || document.referrer.startsWith('android-app://');
 
-    // Persistance du refus : ne pas re-proposer si l'utilisateur a déjà fermé
     var wasDismissed = localStorage.getItem('fp-pwa-dismissed') === '1';
 
     function _shouldShowBanner() {
@@ -190,7 +370,6 @@
       }
     });
 
-    // Après installation réussie : masquer définitivement
     window.addEventListener('appinstalled', function () {
       var banner = document.getElementById('pwa-banner');
       if (banner) banner.style.display = 'none';
@@ -198,7 +377,6 @@
       localStorage.setItem('fp-pwa-dismissed', '1');
     });
 
-    // Masquer si passage en standalone après chargement
     window.matchMedia('(display-mode: standalone)').addEventListener('change', function (e) {
       if (e.matches) {
         var banner = document.getElementById('pwa-banner');
@@ -207,14 +385,13 @@
     });
 
     document.addEventListener('DOMContentLoaded', function () {
-      // Si déjà en standalone au chargement : s'assurer que la bannière est cachée
       if (isStandalone) {
         var banner = document.getElementById('pwa-banner');
         if (banner) banner.style.display = 'none';
       }
 
       var installBtn = document.getElementById('pwa-install-btn');
-      var closeBtn = document.getElementById('pwa-close-btn');
+      var closeBtn   = document.getElementById('pwa-close-btn');
 
       if (installBtn) {
         installBtn.addEventListener('click', function () {
@@ -235,7 +412,6 @@
         closeBtn.addEventListener('click', function () {
           var banner = document.getElementById('pwa-banner');
           if (banner) banner.style.display = 'none';
-          // Mémoriser le refus pendant 7 jours
           localStorage.setItem('fp-pwa-dismissed', '1');
           setTimeout(function () {
             localStorage.removeItem('fp-pwa-dismissed');

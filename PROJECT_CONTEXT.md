@@ -185,6 +185,7 @@ lib/
 | **Espace admin validation docs** | `admin_documents_page.dart` : liste docs en attente, visionneuse, valider/refuser avec motif, trigger DB auto `is_identite_verifiee` ✅ SQL §14 exécuté — activer admin via UPDATE |
 | **Portail recrutement web** | `web/devenir-prestataire.html` — page HTML standalone, zéro Flutter, mobile-first, Supabase JS CDN — URL: `https://formelpro-app.vercel.app/devenir-prestataire` |
 | **Flutter Web + Vercel routing** | Build web fonctionnel — `vercel.json` corrigé (`outputDirectory: build/web`, SPA catch-all → `index.html`) |
+| **PWA auto-update / cache** | `vercel.json` headers Cache-Control par type — `index.html`/`flutter_bootstrap.js` → `no-store`, `main.dart.js` → `no-cache`, assets → `immutable`. `web/index.html` polling version toutes les 3 min + bannière "Nouvelle version" + auto-reload 10s + listener `controllerchange` SW + `visibilitychange` |
 | **Migrations SQL idempotentes** | 5 triggers avec `DROP TRIGGER IF EXISTS` avant création — plus d'erreur "already exists" |
 | **Messages lus/non lus** | `est_lu BOOLEAN` + accusés de lecture ✓/✓✓ dans les bulles, `_markMessagesRead()` automatique à l'ouverture du chat — SQL §18 à exécuter |
 | **GPS prioritaire inscription** | `GpsLocationButton` — bouton premium pulsant + badge "Recommandé" dans `complete_profil_page.dart` — détection directe GPS + Nominatim → remplit ville/commune/quartier sans ouvrir la carte |
@@ -339,6 +340,8 @@ Lancement app
 - **Pattern Stream :** `.stream(primaryKey: ['id']).eq('user_id', uid)` pour temps réel
 
 ---
+
+*Dernière mise à jour : 2026-06-01 — Session 22 : PWA cache fix + auto-update — `vercel.json` : headers Cache-Control par type (`/index.html` + `/flutter_bootstrap.js` + `/flutter_service_worker.js` → `no-store, must-revalidate`, `/main.dart.js` → `public, no-cache`, `/flutter.js` + `/canvaskit/*` → `immutable`). `web/index.html` : 3 meta anti-cache + bannière `#fp-update-banner` + IIFE de surveillance version (polling `/flutter_bootstrap.js?{timestamp}` toutes les 3 min, compare `serviceWorkerVersion`, affiche bannière + auto-reload 10s si non fermé) + listener `controllerchange` SW (reload immédiat) + listener `visibilitychange` (reload au retour en avant-plan). Aucun Flutter modifié. Actions restantes : `flutter build web` + push Vercel pour appliquer les nouveaux headers.*
 
 *Dernière mise à jour : 2026-06-01 — Session 21 : Phase UX géolocalisation + campagne lancement — `GpsLocationButton` (pulsation + badge "Recommandé", détection GPS directe + Nominatim, option carte), `complete_profil_page.dart` intègre GPS bouton premium, `AccueilClient._autoDetectCommune()` (GPS auto au démarrage, filtre commune), `_logout()` dialog confirmation "Êtes-vous sûr de vouloir vous déconnecter ?", `ProfilLogoutButton` idem, `TechniciensPresWidget.onElargi` bouton "Élargir ma recherche" + icône localisation commune, `CampaignService` (isActiveCampaign, applyLaunchPremium, isClientBlocked/isTechBlocked limites 5/3, unlockWithCode promo), `auth_email_mdp.dart` applique is_premium+premium_until si campagne active à l'upsert, SQL §22 (premium_until, is_compte_bloque, table promo_codes RLS, trigger auto_premium_campagne_lancement, vue v_usage_utilisateurs). flutter analyze 0 issues.*
 
